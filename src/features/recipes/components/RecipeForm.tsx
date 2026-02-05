@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2 } from "lucide-react";
+import { Minus, Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import type { z } from "zod";

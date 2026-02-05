@@ -19,6 +19,7 @@ interface SupplierFormProps {
   initialData: Supplier | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // biome-ignore lint/suspicious/noExplicitAny: Form data
   onSubmit: (data: any) => Promise<void>;
   isLoading?: boolean;
 }

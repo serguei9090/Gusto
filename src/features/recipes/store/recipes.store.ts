@@ -32,7 +32,7 @@ interface RecipeStore {
   setCategoryFilter: (category: RecipeCategory | "all") => void;
 }
 
-export const useRecipeStore = create<RecipeStore>((set, get) => ({
+export const useRecipeStore = create<RecipeStore>((set, _get) => ({
   // Initial State
   recipes: [],
   selectedRecipe: null,
@@ -75,10 +75,12 @@ export const useRecipeStore = create<RecipeStore>((set, get) => ({
   createRecipe: async (data) => {
     set({ isLoading: true, error: null });
     try {
+      // biome-ignore lint/suspicious/noImplicitAnyLet: Legacy type
       let newRecipe;
       if (data.ingredients && data.ingredients.length > 0) {
         // Remove ingredients from data passed to createFull if necessary, but our types align well enough here?
         // Actually repository createFull expects separated args, let's fix type alignment
+        // biome-ignore lint/suspicious/noExplicitAny: Legacy cast
         newRecipe = await recipesRepository.createFull(data as any);
       } else {
         newRecipe = await recipesRepository.create(data);

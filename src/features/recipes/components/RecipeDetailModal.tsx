@@ -169,12 +169,13 @@ export const RecipeDetailModal = ({
                   </CardHeader>
                   <CardContent>
                     <div
-                      className={`text-2xl font-bold ${(selectedRecipe.profitMargin || 0) < 20
+                      className={`text-2xl font-bold ${
+                        (selectedRecipe.profitMargin || 0) < 20
                           ? "text-destructive"
                           : (selectedRecipe.profitMargin || 0) < 30
                             ? "text-yellow-700 dark:text-yellow-500"
                             : "text-green-700 dark:text-green-500"
-                        }`}
+                      }`}
                     >
                       {selectedRecipe.profitMargin?.toFixed(1)}%
                     </div>

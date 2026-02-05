@@ -36,6 +36,7 @@ export const SuppliersPage = () => {
       s.contactPerson?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
+  // biome-ignore lint/suspicious/noExplicitAny: Form data
   const handleCreateOrUpdate = async (data: any) => {
     try {
       if (selectedSupplier) {

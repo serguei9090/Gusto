@@ -1,5 +1,4 @@
 import { Edit2, Eye, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -37,7 +36,7 @@ export const RecipeTable = ({
     return `${val.toFixed(1)}%`;
   };
 
-  const getMarginBadgeVariant = (val: number | null) => {
+  const _getMarginBadgeVariant = (val: number | null) => {
     if (val === null || val === undefined) return "secondary";
     if (val < 20) return "destructive";
     if (val < 30) return "outline"; // Warning/Yellow not standard in shadcn badge, use outline or custom

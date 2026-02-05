@@ -13,7 +13,11 @@ import {
 
 export class RecipesRepository {
   async getAll(): Promise<Recipe[]> {
-    const rows = await db.selectFrom("recipes").selectAll().orderBy("name").execute();
+    const rows = await db
+      .selectFrom("recipes")
+      .selectAll()
+      .orderBy("name")
+      .execute();
     return rows.map(this.mapRowToRecipe);
   }
 
