@@ -1,0 +1,13 @@
+.label {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-neutral-700);
+    display: block;
+    margin-bottom: var(--space-xs);
+}
+
+.required {
+    color: var(--color-error);
+    margin-left: var(--space-xs);
+}
