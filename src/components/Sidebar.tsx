@@ -50,22 +50,20 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className="bg-card border-r flex flex-col h-full shadow-sm overflow-hidden"
     >
-      <div className="h-16 flex items-center justify-between px-4 border-b text-primary font-bold text-lg">
-        <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
-          <ShoppingBasket size={24} className="shrink-0" />
-          <AnimatePresence>
-            {!isCollapsed && (
-              <motion.span
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                className="text-sm ml-2"
-              >
-                RestHelper
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </div>
+      <div className={`h-16 flex items-center border-b text-primary font-bold text-lg transition-all duration-300 ${isCollapsed ? "justify-center px-0" : "justify-between px-4"}`}>
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0, width: 0 }}
+              animate={{ opacity: 1, width: "auto" }}
+              exit={{ opacity: 0, width: 0 }}
+              className="flex items-center gap-2 overflow-hidden whitespace-nowrap"
+            >
+              <ShoppingBasket size={24} className="shrink-0" />
+              <span className="text-sm ml-2">RestHelper</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <Button
           variant="ghost"
           size="icon"
