@@ -13,6 +13,7 @@ import { useRecipeStore } from "../store/recipes.store";
 import { RecipeDetailModal } from "./RecipeDetailModal";
 import { RecipeForm } from "./RecipeForm";
 import { RecipeTable } from "./RecipeTable";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export const RecipesPage = () => {
   const {
@@ -26,6 +27,7 @@ export const RecipesPage = () => {
     searchQuery,
     setSearchQuery,
   } = useRecipeStore();
+  const { t } = useTranslation();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [viewingRecipeId, setViewingRecipeId] = useState<number | null>(null);
@@ -70,26 +72,24 @@ export const RecipesPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6 max-w-7xl">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="h-full flex flex-col space-y-6 p-8">
+      <div className="flex items-center justify-between space-y-2">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Recipes
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your menu items and calculate costs.
+          <h2 className="text-3xl font-bold tracking-tight">{t("recipes.title")}</h2>
+          <p className="text-muted-foreground">
+            {t("recipes.subtitle")}
           </p>
         </div>
-        <div className="flex w-full md:w-auto items-center gap-2">
+        <div className="flex items-center gap-2">
           <Input
-            className="w-full md:w-[300px]"
-            placeholder="Search recipes..."
+            className="w-[300px]"
+            placeholder={t("recipes.placeholders.searchRecipes")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <Button onClick={() => setIsFormOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Recipe
+            {t("recipes.addRecipe")}
           </Button>
         </div>
       </div>
@@ -100,7 +100,7 @@ export const RecipesPage = () => {
         </div>
       )}
 
-      <div className="bg-card rounded-lg border shadow-sm">
+      <div className="flex-1 overflow-auto bg-card rounded-md border shadow-sm">
         <RecipeTable
           recipes={filteredRecipes}
           onEdit={handleEdit}
@@ -114,7 +114,7 @@ export const RecipesPage = () => {
           <div className="w-full max-w-4xl bg-background border rounded-lg shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
             <div className="p-6 border-b">
               <h2 className="text-lg font-semibold">
-                {editingRecipe ? "Edit Recipe" : "New Recipe"}
+                {editingRecipe ? t("recipes.editRecipe") : t("recipes.addRecipe")}
               </h2>
             </div>
             <div className="p-6 overflow-y-auto flex-1">

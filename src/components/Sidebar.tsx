@@ -2,13 +2,17 @@ import {
   ChefHat,
   ClipboardList,
   LayoutDashboard,
+  Menu,
   Package,
   Settings,
   ShoppingBasket,
   Users,
 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
-import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useSettingsStore } from "@/features/settings/store/settings.store";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 export type View =
   | "dashboard"
@@ -26,45 +30,84 @@ interface SidebarProps {
 
 export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
   const { t } = useTranslation();
+  const { modules } = useSettingsStore();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const navItems = [
     { id: "dashboard", label: t("navigation.dashboard"), icon: LayoutDashboard },
     { id: "ingredients", label: t("navigation.ingredients"), icon: ShoppingBasket },
     { id: "recipes", label: t("navigation.recipes"), icon: ChefHat },
     { id: "inventory", label: t("navigation.inventory"), icon: Package },
-    { id: "suppliers", label: t("navigation.suppliers"), icon: Users },
-    { id: "prepsheets", label: t("navigation.prepSheets"), icon: ClipboardList },
+    ...(modules.suppliers ? [{ id: "suppliers", label: t("navigation.suppliers"), icon: Users }] : []),
+    ...(modules.prepSheets ? [{ id: "prepsheets", label: t("navigation.prepSheets"), icon: ClipboardList }] : []),
     { id: "settings", label: t("navigation.settings"), icon: Settings },
   ];
 
   return (
-    <aside className="w-64 bg-card border-r flex flex-col h-full shadow-sm">
+    <motion.aside
+      initial={{ width: 256 }}
+      animate={{ width: isCollapsed ? 80 : 256 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="bg-card border-r flex flex-col h-full shadow-sm overflow-hidden"
+    >
       <div className="h-16 flex items-center justify-between px-4 border-b text-primary font-bold text-lg">
-        <div className="flex items-center gap-2">
-          <ShoppingBasket size={24} />
-          <span className="hidden md:inline text-sm">RestHelper</span>
+        <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
+          <ShoppingBasket size={24} className="shrink-0" />
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                className="text-sm ml-2"
+              >
+                RestHelper
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
-        <LanguageSwitcher />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="shrink-0"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
       </div>
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+
+      <nav className="flex-1 p-2 space-y-1 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => (
           <button
             key={item.id}
             onClick={() => onChangeView(item.id as View)}
             type="button"
             className={`
-              w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors
+              w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors relative
               ${currentView === item.id
-                ? "bg-green-100 text-green-900 shadow-sm"
+                ? "bg-primary/10 text-primary shadow-sm"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }
+              ${isCollapsed ? "justify-center" : ""}
             `}
+            title={isCollapsed ? item.label : undefined}
           >
-            <item.icon size={20} />
-            {item.label}
+            <item.icon size={20} className="shrink-0" />
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="whitespace-nowrap overflow-hidden"
+                >
+                  {item.label}
+                </motion.span>
+              )}
+            </AnimatePresence>
           </button>
         ))}
       </nav>
-    </aside>
+    </motion.aside>
   );
 };

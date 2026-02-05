@@ -3,7 +3,7 @@
  * Supports USD and EUR with automatic conversion
  */
 
-export const SUPPORTED_CURRENCIES = ['USD', 'EUR'] as const;
+export const SUPPORTED_CURRENCIES = ['USD', 'EUR', 'CUP'] as const;
 export type Currency = typeof SUPPORTED_CURRENCIES[number];
 
 /**
@@ -13,6 +13,7 @@ export type Currency = typeof SUPPORTED_CURRENCIES[number];
 export const CURRENCIES: Record<Currency, { symbol: string; rate: number; name: string }> = {
     USD: { symbol: '$', rate: 1.0, name: 'US Dollar' },
     EUR: { symbol: '€', rate: 0.92, name: 'Euro' },
+    CUP: { symbol: '₱', rate: 24.0, name: 'Cuban Peso' },
 };
 
 /**

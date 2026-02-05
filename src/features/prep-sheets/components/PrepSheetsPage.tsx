@@ -15,6 +15,7 @@ import { usePrepSheetsStore } from "@/features/prep-sheets/store/prep-sheets.sto
 import type { PrepSheet } from "@/features/prep-sheets/types";
 import { PrepSheetBuilder } from "./PrepSheetBuilder";
 import { PrepSheetView } from "./PrepSheetView";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export const PrepSheetsPage = () => {
   const {
@@ -26,6 +27,7 @@ export const PrepSheetsPage = () => {
     clearBuilder,
     isLoading,
   } = usePrepSheetsStore();
+  const { t } = useTranslation();
 
   const [viewingSheet, setViewingSheet] = useState<PrepSheet | null>(null);
 
@@ -57,22 +59,21 @@ export const PrepSheetsPage = () => {
     <div className="h-full flex flex-col p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <ClipboardList className="h-8 w-8" />
-            Prep Sheets
+          <h2 className="text-3xl font-bold tracking-tight">
+            {t("prepSheets.title")}
           </h2>
           <p className="text-muted-foreground">
-            Plan production and generate combined prep lists.
+            {t("prepSheets.subtitle")}
           </p>
         </div>
       </div>
 
       <Tabs defaultValue="create" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="create">Create New</TabsTrigger>
+          <TabsTrigger value="create">{t("prepSheets.createNew")}</TabsTrigger>
           <TabsTrigger value="saved">
             <History className="mr-2 h-4 w-4" />
-            Saved Sheets ({prepSheets.length})
+            {t("prepSheets.savedSheets")} ({prepSheets.length})
           </TabsTrigger>
         </TabsList>
 
@@ -84,9 +85,9 @@ export const PrepSheetsPage = () => {
           {prepSheets.length === 0 ? (
             <div className="text-center py-12 border rounded-md bg-muted/10">
               <ClipboardList className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
-              <h3 className="text-lg font-medium">No saved prep sheets</h3>
+              <h3 className="text-lg font-medium">{t("prepSheets.noSavedSheets")}</h3>
               <p className="text-muted-foreground mb-4">
-                Generate and save a prep sheet to see it here.
+                {t("prepSheets.generatePrompt")}
               </p>
             </div>
           ) : (
@@ -94,11 +95,11 @@ export const PrepSheetsPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Shift</TableHead>
-                    <TableHead>Recipes</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t("common.labels.name")}</TableHead>
+                    <TableHead>{t("common.labels.date")}</TableHead>
+                    <TableHead>{t("prepSheets.shift")}</TableHead>
+                    <TableHead>{t("prepSheets.recipes")}</TableHead>
+                    <TableHead className="text-right">{t("prepSheets.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -129,7 +130,7 @@ export const PrepSheetsPage = () => {
                             size="sm"
                             onClick={() => setViewingSheet(sheet)}
                           >
-                            <Eye className="h-4 w-4 mr-1" /> View
+                            <Eye className="h-4 w-4 mr-1" /> {t("prepSheets.view")}
                           </Button>
                           <Button
                             variant="ghost"

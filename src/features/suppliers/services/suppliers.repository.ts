@@ -66,7 +66,14 @@ class SuppliersRepository {
     // SQLite doesn't return the inserted row by default in all drivers,
     // but Kysely's .returningAll() works if the dialect supports it (Postgres/SQLite usually)
     // For safer cross-driver support with Tauri SQL, fetch by ID
-    const id = Number(result.insertId);
+    let id = Number(result.insertId);
+
+    // Fallback: If insertId is missing but rows were affected, fetch the latest entry
+    if (!id && result.numInsertedOrUpdatedRows > BigInt(0)) {
+      const latest = await db.selectFrom("suppliers").select("id").orderBy("id", "desc").limit(1).executeTakeFirst();
+      if (latest) id = latest.id;
+    }
+
     const created = await this.getById(id);
     if (!created) throw new Error("Could not retrieve created supplier");
 

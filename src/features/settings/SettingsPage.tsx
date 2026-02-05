@@ -1,7 +1,4 @@
 import { useTranslation } from "@/hooks/useTranslation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
     Card,
     CardContent,
@@ -16,6 +13,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import {
     SUPPORTED_CURRENCIES,
     getCurrencyName,
@@ -29,25 +32,33 @@ export const SettingsPage = () => {
     const {
         baseCurrency,
         exchangeRates,
+        modules,
         setBaseCurrency,
         setExchangeRate,
+        toggleModule,
         resetDefaults,
     } = useSettingsStore();
 
     const handleRateChange = (currency: string, value: string) => {
-        const rate = Number.parseFloat(value);
-        if (!Number.isNaN(rate) && rate > 0) {
+        const rate = parseFloat(value);
+        if (!isNaN(rate)) {
             setExchangeRate(currency as any, rate);
         }
     };
 
     return (
-        <div className="container mx-auto p-6 space-y-8 max-w-4xl animate-in fade-in duration-500">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">{t("settings.title")}</h1>
-                <p className="text-muted-foreground mt-1">
-                    {t("settings.subtitle")}
-                </p>
+        <div className="h-full flex flex-col space-y-6 p-8">
+            <div className="flex justify-between items-center space-y-2">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight">{t("settings.title")}</h2>
+                    <p className="text-muted-foreground">
+                        {t("settings.subtitle")}
+                    </p>
+                </div>
+                <Button variant="outline" size="sm" onClick={resetDefaults}>
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    {t("settings.currency.resetDefaults")}
+                </Button>
             </div>
 
             <Card>
@@ -58,20 +69,20 @@ export const SettingsPage = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                        <Label>{t("settings.general.languageLabel")}</Label>
-                        <p className="text-sm text-muted-foreground mb-2">
-                            {t("settings.general.languageHelp")}
-                        </p>
+                    <div className="flex items-center justify-between space-x-2">
+                        <div className="flex flex-col space-y-1">
+                            <Label htmlFor="language">{t("settings.general.languageLabel")}</Label>
+                            <span className="text-sm text-muted-foreground">{t("settings.general.languageHelp")}</span>
+                        </div>
                         <Select
                             value={currentLanguage}
                             onValueChange={(val) => changeLanguage(val as any)}
                         >
-                            <SelectTrigger className="w-[200px]">
+                            <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder={t("settings.general.selectLanguage")} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="en">English (US)</SelectItem>
                                 <SelectItem value="es">Español</SelectItem>
                             </SelectContent>
                         </Select>
@@ -81,82 +92,55 @@ export const SettingsPage = () => {
 
             <Card>
                 <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <CardTitle>{t("settings.currency.title")}</CardTitle>
-                            <CardDescription>
-                                {t("settings.currency.description")}
-                            </CardDescription>
-                        </div>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={resetDefaults}
-                            title={t("settings.currency.resetDefaults")}
-                        >
-                            <RotateCcw className="mr-2 h-4 w-4" />
-                            {t("settings.currency.resetDefaults")}
-                        </Button>
-                    </div>
+                    <CardTitle>{t("settings.currency.title")}</CardTitle>
+                    <CardDescription>
+                        {t("settings.currency.description")}
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                        <Label>{t("settings.currency.baseLabel")}</Label>
-                        <p className="text-sm text-muted-foreground mb-2">
-                            {t("settings.currency.baseHelp")}
-                        </p>
-                        <Select
-                            value={baseCurrency}
-                            onValueChange={(val) => setBaseCurrency(val as any)}
-                        >
-                            <SelectTrigger className="w-[200px]">
-                                <SelectValue placeholder={t("settings.currency.selectCurrency")} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {SUPPORTED_CURRENCIES.map((curr) => (
-                                    <SelectItem key={curr} value={curr}>
-                                        {getCurrencySymbol(curr)} - {getCurrencyName(curr)}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    <div className="grid gap-4">
+                        <div className="space-y-2">
+                            <Label>{t("settings.currency.baseLabel")}</Label>
+                            <p className="text-sm text-muted-foreground">
+                                {t("settings.currency.baseHelp")}
+                            </p>
+                            <Select
+                                value={baseCurrency}
+                                onValueChange={(val) => setBaseCurrency(val as any)}
+                            >
+                                <SelectTrigger className="w-[240px]">
+                                    <SelectValue placeholder={t("settings.currency.selectCurrency")} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Array.from(SUPPORTED_CURRENCIES).map((curr) => (
+                                        <SelectItem key={curr} value={curr}>
+                                            {curr} - {getCurrencyName(curr)} ({getCurrencySymbol(curr)})
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-                    <div className="space-y-4">
-                        <Label>{t("settings.currency.exchangeRatesLabel", { currency: baseCurrency })}</Label>
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            {SUPPORTED_CURRENCIES.map((curr) => {
-                                const isBase = curr === baseCurrency;
+                        <div className="space-y-4">
+                            <Label>{t("settings.currency.exchangeRatesLabel", { currency: baseCurrency })}</Label>
+                            {Array.from(SUPPORTED_CURRENCIES).map((curr) => {
+                                if (curr === baseCurrency) return null;
                                 return (
-                                    <div
-                                        key={curr}
-                                        className={`p-4 rounded-lg border ${isBase ? "bg-muted/50 border-primary/20" : "bg-card"
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-between mb-2">
-                                            <Label htmlFor={`rate-${curr}`} className="font-semibold">
-                                                {getCurrencyName(curr)} ({getCurrencySymbol(curr)})
-                                            </Label>
-                                            {isBase && (
-                                                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                                                    {t("settings.currency.baseBadge")}
-                                                </span>
-                                            )}
+                                    <div key={curr} className="flex items-center gap-4">
+                                        <div className="w-[100px] font-medium flex items-center gap-2">
+                                            {curr}
+                                            <Badge variant="outline">{getCurrencySymbol(curr)}</Badge>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm text-muted-foreground">1 {baseCurrency} =</span>
-                                            <Input
-                                                id={`rate-${curr}`}
-                                                type="number"
-                                                step="0.01"
-                                                min="0.0001"
-                                                disabled={isBase}
-                                                value={isBase ? "1.00" : exchangeRates[curr]}
-                                                onChange={(e) => handleRateChange(curr, e.target.value)}
-                                                className="font-mono"
-                                            />
-                                            <span className="text-sm font-medium">{curr}</span>
-                                        </div>
+                                        <Input
+                                            type="number"
+                                            step="0.0001"
+                                            value={exchangeRates[curr] || ""}
+                                            onChange={(e) => handleRateChange(curr, e.target.value)}
+                                            className="w-[150px]"
+                                        />
+                                        <span className="text-sm text-muted-foreground">
+                                            1 {baseCurrency} = {exchangeRates[curr]} {curr}
+                                        </span>
                                     </div>
                                 );
                             })}
@@ -164,6 +148,40 @@ export const SettingsPage = () => {
                     </div>
                 </CardContent>
             </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>{t("settings.modules.title")}</CardTitle>
+                    <CardDescription>
+                        {t("settings.modules.description")}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="flex items-center justify-between space-x-2">
+                        <div className="flex flex-col space-y-1">
+                            <Label htmlFor="module-suppliers">{t("navigation.suppliers")}</Label>
+                            <span className="text-sm text-muted-foreground">{t("settings.modules.suppliersHelp")}</span>
+                        </div>
+                        <Switch
+                            id="module-suppliers"
+                            checked={modules?.suppliers ?? true}
+                            onCheckedChange={(checked) => toggleModule('suppliers', checked)}
+                        />
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between space-x-2">
+                        <div className="flex flex-col space-y-1">
+                            <Label htmlFor="module-prepsheets">{t("navigation.prepSheets")}</Label>
+                            <span className="text-sm text-muted-foreground">{t("settings.modules.prepSheetsHelp")}</span>
+                        </div>
+                        <Switch
+                            id="module-prepsheets"
+                            checked={modules?.prepSheets ?? true}
+                            onCheckedChange={(checked) => toggleModule('prepSheets', checked)}
+                        />
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
-}
+};

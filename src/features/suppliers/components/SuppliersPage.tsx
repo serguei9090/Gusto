@@ -8,6 +8,7 @@ import { useSuppliersStore } from "@/features/suppliers/store/suppliers.store";
 import type { Supplier } from "@/features/suppliers/types";
 import { SupplierForm } from "./SupplierForm";
 import { SupplierTable } from "./SupplierTable";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export const SuppliersPage = () => {
   const {
@@ -19,6 +20,7 @@ export const SuppliersPage = () => {
     isLoading,
     error,
   } = useSuppliersStore();
+  const { t } = useTranslation();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
@@ -79,14 +81,14 @@ export const SuppliersPage = () => {
     <div className="h-full flex flex-col space-y-6 p-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Suppliers</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t("suppliers.title")}</h2>
           <p className="text-muted-foreground">
-            Manage your ingredient sources and contacts.
+            {t("suppliers.subtitle")}
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <Button onClick={() => setIsFormOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Add Supplier
+            <Plus className="mr-2 h-4 w-4" /> {t("suppliers.addSupplier")}
           </Button>
         </div>
       </div>
@@ -95,13 +97,13 @@ export const SuppliersPage = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Suppliers
+              {t("suppliers.totalSuppliers")}
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{suppliers.length}</div>
-            <p className="text-xs text-muted-foreground">Active partners</p>
+            <p className="text-xs text-muted-foreground">{t("suppliers.activePartners")}</p>
           </CardContent>
         </Card>
       </div>
@@ -112,7 +114,7 @@ export const SuppliersPage = () => {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search suppliers..."
+            placeholder={t("suppliers.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8"

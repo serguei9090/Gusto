@@ -42,6 +42,21 @@
             "minLength": "Minimum length is {{count}} characters",
             "maxLength": "Maximum length is {{count}} characters",
             "positive": "Must be a positive number"
+        },
+        "categories": {
+            "protein": "Protein",
+            "vegetable": "Vegetable",
+            "dairy": "Dairy",
+            "spice": "Spice",
+            "grain": "Grain",
+            "fruit": "Fruit",
+            "condiment": "Condiment",
+            "other": "Other",
+            "appetizer": "Appetizer",
+            "main": "Main Course",
+            "dessert": "Dessert",
+            "beverage": "Beverage",
+            "side": "Side Dish"
         }
     },
     "navigation": {
@@ -73,6 +88,12 @@
             "selectCurrency": "Select currency",
             "exchangeRatesLabel": "Exchange Rates (Relative to {{currency}})",
             "baseBadge": "Base"
+        },
+        "modules": {
+            "title": "Modules",
+            "description": "Enable or disable optional features.",
+            "suppliersHelp": "Manage external suppliers.",
+            "prepSheetsHelp": "Create production plans."
         }
     },
     "ingredients": {
@@ -119,15 +140,22 @@
             "basicInfo": "Basic Information",
             "financials": "Financials",
             "ingredients": "Ingredients"
-        }
+        },
+        "subtitle": "Manage your menu items and calculate costs."
     },
     "inventory": {
         "title": "Inventory",
         "stockLevel": "Stock Level",
         "lastUpdated": "Last Updated",
-        "lowStock": "Low Stock Alert",
+        "lowStock": "Low Stock",
+        "lowStockAlert": "Low Stock Alert",
         "outOfStock": "Out of Stock",
-        "inStock": "In Stock"
+        "inStock": "In Stock",
+        "subtitle": "Manage stock levels and track transactions.",
+        "searchPlaceholder": "Search inventory...",
+        "totalItems": "Total Items",
+        "activeIngredients": "Active ingredients",
+        "itemsNeedingAttention": "Items needing attention"
     },
     "suppliers": {
         "title": "Suppliers",
@@ -140,7 +168,11 @@
             "phone": "Phone",
             "address": "Address",
             "paymentTerms": "Payment Terms"
-        }
+        },
+        "subtitle": "Manage your ingredient sources and contacts.",
+        "searchPlaceholder": "Search suppliers...",
+        "totalSuppliers": "Total Suppliers",
+        "activePartners": "Active partners"
     },
     "prepSheets": {
         "title": "Prep Sheets",
@@ -148,7 +180,15 @@
         "prepDate": "Prep Date",
         "recipes": "Recipes",
         "totalIngredients": "Total Ingredients Needed",
-        "exportPDF": "Export to PDF"
+        "exportPDF": "Export to PDF",
+        "subtitle": "Plan production and generate combined prep lists.",
+        "createNew": "Create New",
+        "savedSheets": "Saved Sheets",
+        "noSavedSheets": "No saved prep sheets",
+        "generatePrompt": "Generate and save a prep sheet to see it here.",
+        "shift": "Shift",
+        "actions": "Actions",
+        "view": "View"
     },
     "dashboard": {
         "title": "Dashboard",
@@ -164,7 +204,11 @@
             "belowMinLevel": "Items below minimum level",
             "acrossAllRecipes": "Across all recipes",
             "activeRecipes": "Active recipes"
-        }
+        },
+        "urgentReorders": "Urgent Reorders",
+        "stockLevelsHealthy": "Stock levels healthy",
+        "highMarginRecipes": "High Margin Recipes",
+        "noRecipeData": "No recipe data available"
     },
     "currency": {
         "usd": "US Dollar",

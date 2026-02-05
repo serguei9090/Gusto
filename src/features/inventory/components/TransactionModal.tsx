@@ -89,7 +89,7 @@ export function TransactionModal({
           <div className="grid gap-4 py-2">
             {/* Transaction Type */}
             <div className="space-y-2">
-              <Label htmlFor="transactionType">Transaction Type</Label>
+              <Label htmlFor="transactionType">Transaction Type <span className="text-destructive">*</span></Label>
               <Select
                 onValueChange={(val) =>
                   setValue("transactionType", val as TransactionType)
@@ -118,7 +118,7 @@ export function TransactionModal({
             {/* Quantity */}
             <div className="space-y-2">
               <Label htmlFor="quantity">
-                Quantity ({ingredient.unitOfMeasure})
+                Quantity ({ingredient.unitOfMeasure}) <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="quantity"
@@ -135,7 +135,7 @@ export function TransactionModal({
 
             {/* Price Per Unit */}
             <div className="space-y-2">
-              <Label htmlFor="costPerUnit">Price per Unit ($)</Label>
+              <Label htmlFor="costPerUnit">Price per Unit ($) <span className="text-destructive">*</span></Label>
               <Input
                 id="costPerUnit"
                 type="number"

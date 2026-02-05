@@ -93,7 +93,7 @@ export function SupplierForm({
           <div className="grid gap-4 py-2">
             {/* Name */}
             <div className="space-y-2">
-              <Label htmlFor="name">Supplier Name</Label>
+              <Label htmlFor="name">Supplier Name <span className="text-destructive">*</span></Label>
               <Input
                 id="name"
                 placeholder="e.g. Acme Food Supplies"

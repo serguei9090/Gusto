@@ -42,6 +42,21 @@
             "minLength": "La longitud mínima es {{count}} caracteres",
             "maxLength": "La longitud máxima es {{count}} caracteres",
             "positive": "Debe ser un número positivo"
+        },
+        "categories": {
+            "protein": "Proteína",
+            "vegetable": "Vegetal",
+            "dairy": "Lácteo",
+            "spice": "Especias",
+            "grain": "Grano",
+            "fruit": "Fruta",
+            "condiment": "Condimento",
+            "other": "Otro",
+            "appetizer": "Entrante",
+            "main": "Plato Principal",
+            "dessert": "Postre",
+            "beverage": "Bebida",
+            "side": "Acompañamiento"
         }
     },
     "navigation": {
@@ -73,6 +88,12 @@
             "selectCurrency": "Seleccionar moneda",
             "exchangeRatesLabel": "Tasas de Cambio (Relativo a {{currency}})",
             "baseBadge": "Base"
+        },
+        "modules": {
+            "title": "Módulos",
+            "description": "Habilitar o deshabilitar funciones opcionales.",
+            "suppliersHelp": "Gestionar proveedores externos.",
+            "prepSheetsHelp": "Crear planes de producción."
         }
     },
     "ingredients": {
@@ -119,15 +140,22 @@
             "basicInfo": "Información Básica",
             "financials": "Finanzas",
             "ingredients": "Ingredientes"
-        }
+        },
+        "subtitle": "Gestione los elementos de su menú y calcule los costos."
     },
     "inventory": {
         "title": "Inventario",
         "stockLevel": "Nivel de Stock",
         "lastUpdated": "Última Actualización",
-        "lowStock": "Alerta de Stock Bajo",
+        "lowStock": "Stock Bajo",
+        "lowStockAlert": "Alerta de Stock Bajo",
         "outOfStock": "Sin Stock",
-        "inStock": "En Stock"
+        "inStock": "En Stock",
+        "subtitle": "Gestione los niveles de existencias y realice un seguimiento de las transacciones.",
+        "searchPlaceholder": "Buscar inventario...",
+        "totalItems": "Artículos Totales",
+        "activeIngredients": "Ingredientes activos",
+        "itemsNeedingAttention": "Artículos que requieren atención"
     },
     "suppliers": {
         "title": "Proveedores",
@@ -140,7 +168,11 @@
             "phone": "Teléfono",
             "address": "Dirección",
             "paymentTerms": "Términos de Pago"
-        }
+        },
+        "subtitle": "Gestione sus fuentes de ingredientes y contactos.",
+        "searchPlaceholder": "Buscar proveedores...",
+        "totalSuppliers": "Proveedores Totales",
+        "activePartners": "Socios activos"
     },
     "prepSheets": {
         "title": "Hojas de Preparación",
@@ -148,7 +180,15 @@
         "prepDate": "Fecha de Preparación",
         "recipes": "Recetas",
         "totalIngredients": "Ingredientes Totales Necesarios",
-        "exportPDF": "Exportar a PDF"
+        "exportPDF": "Exportar a PDF",
+        "subtitle": "Planifique la producción y genere listas de preparación combinadas.",
+        "createNew": "Crear Nuevo",
+        "savedSheets": "Hojas Guardadas",
+        "noSavedSheets": "No hay hojas de preparación guardadas",
+        "generatePrompt": "Genere y guarde una hoja de preparación para verla aquí.",
+        "shift": "Turno",
+        "actions": "Acciones",
+        "view": "Ver"
     },
     "dashboard": {
         "title": "Panel de Control",
@@ -164,7 +204,11 @@
             "belowMinLevel": "Artículos por debajo del nivel mínimo",
             "acrossAllRecipes": "En todas las recetas",
             "activeRecipes": "Recetas activas"
-        }
+        },
+        "urgentReorders": "Reordenes Urgentes",
+        "stockLevelsHealthy": "Niveles de stock saludables",
+        "highMarginRecipes": "Recetas de Alto Margen",
+        "noRecipeData": "No hay datos de recetas disponibles"
     },
     "currency": {
         "usd": "Dólar Estadounidense",

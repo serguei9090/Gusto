@@ -8,6 +8,7 @@ import { useInventoryStore } from "@/features/inventory/store/inventory.store";
 import type { Ingredient } from "@/types/ingredient.types";
 import { InventoryTable } from "./InventoryTable";
 import { TransactionModal } from "./TransactionModal";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export const InventoryPage = () => {
   const { ingredients, fetchIngredients } = useIngredientsStore();
@@ -18,6 +19,7 @@ export const InventoryPage = () => {
     isLoading: loadingInv,
     error,
   } = useInventoryStore();
+  const { t } = useTranslation();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIngredient, setSelectedIngredient] =
@@ -53,9 +55,9 @@ export const InventoryPage = () => {
     <div className="h-full flex flex-col space-y-6 p-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Inventory</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t("inventory.title")}</h2>
           <p className="text-muted-foreground">
-            Manage stock levels and track transactions.
+            {t("inventory.subtitle")}
           </p>
         </div>
       </div>
@@ -63,17 +65,17 @@ export const InventoryPage = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("inventory.totalItems")}</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{ingredients.length}</div>
-            <p className="text-xs text-muted-foreground">Active ingredients</p>
+            <p className="text-xs text-muted-foreground">{t("inventory.activeIngredients")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("inventory.lowStock")}</CardTitle>
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
@@ -81,7 +83,7 @@ export const InventoryPage = () => {
               {lowStockItems.length}
             </div>
             <p className="text-xs text-muted-foreground">
-              Items needing attention
+              {t("inventory.itemsNeedingAttention")}
             </p>
           </CardContent>
         </Card>
@@ -93,7 +95,7 @@ export const InventoryPage = () => {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search inventory..."
+            placeholder={t("inventory.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8"

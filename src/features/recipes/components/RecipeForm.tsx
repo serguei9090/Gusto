@@ -225,7 +225,7 @@ export const RecipeForm = ({
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="space-y-2">
-              <Label htmlFor="sellingPrice">{t("recipes.fields.sellingPrice")}</Label>
+              <Label htmlFor="sellingPrice">{t("recipes.fields.sellingPrice")} <span className="text-destructive">*</span></Label>
               <Input
                 type="number"
                 step="0.01"

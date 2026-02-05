@@ -2,24 +2,26 @@ import { DollarSign, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TopRecipeItem } from "../types";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TopRecipesCardProps {
   recipes: TopRecipeItem[];
 }
 
 export function TopRecipesCard({ recipes }: TopRecipesCardProps) {
+  const { t } = useTranslation();
   return (
     <Card className="col-span-1">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-green-600" />
-          High Margin Recipes
+          {t("dashboard.highMarginRecipes")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {recipes.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
-            <p>No recipe data available</p>
+            <p>{t("dashboard.noRecipeData")}</p>
           </div>
         ) : (
           <div className="space-y-4">

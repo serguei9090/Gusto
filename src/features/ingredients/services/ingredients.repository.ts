@@ -24,7 +24,14 @@ export class IngredientsRepository {
       .executeTakeFirstOrThrow();
 
     // Safe cast or fetch because insertId is BigInt/Number
-    const id = Number(result.insertId);
+    let id = Number(result.insertId);
+
+    // Fallback: If insertId is missing but rows were affected, fetch the latest entry
+    if (!id && result.numInsertedOrUpdatedRows > BigInt(0)) {
+      const latest = await db.selectFrom("ingredients").select("id").orderBy("id", "desc").limit(1).executeTakeFirst();
+      if (latest) id = latest.id;
+    }
+
     if (!id) throw new Error("Failed to insert ingredient");
 
     return this.getById(id) as Promise<Ingredient>;

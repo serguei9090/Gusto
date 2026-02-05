@@ -100,7 +100,7 @@ export function PrepSheetBuilder({
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="name">Sheet Name</Label>
+              <Label htmlFor="name">Sheet Name <span className="text-destructive">*</span></Label>
               <Input
                 id="name"
                 placeholder="e.g. Monday Morning Prep"
@@ -111,7 +111,7 @@ export function PrepSheetBuilder({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
+                <Label htmlFor="date">Date <span className="text-destructive">*</span></Label>
                 <Input
                   id="date"
                   type="date"
