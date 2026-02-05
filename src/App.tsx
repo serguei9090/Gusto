@@ -2,10 +2,11 @@ import { useState } from "react";
 import { MainLayout } from "@/components/templates/MainLayout";
 import { type View } from "@/components/organisms/Sidebar";
 import { IngredientsPage } from "@/components/pages/IngredientsPage";
-import { RecipesPage } from "@/components/pages/RecipesPage";
-import { InventoryPage } from "@/components/pages/InventoryPage";
-import { SuppliersPage } from "@/components/pages/SuppliersPage";
+import { RecipesPage } from "@/features/recipes";
+import { InventoryPage } from "@/features/inventory";
+import { SuppliersPage } from "@/features/suppliers";
 import { DashboardPage } from "@/components/pages/DashboardPage";
+import { PrepSheetsPage } from "@/components/pages/PrepSheetsPage";
 
 function App() {
     const [currentView, setCurrentView] = useState<View>("dashboard"); // Default to Dashboard in v1
@@ -22,6 +23,8 @@ function App() {
                 return <InventoryPage />;
             case "suppliers":
                 return <SuppliersPage />;
+            case "prepsheets":
+                return <PrepSheetsPage />;
             case "settings":
                 return <div style={{ padding: 20 }}>Settings</div>;
             default:
@@ -36,6 +39,7 @@ function App() {
             case "recipes": return "Recipe Manager";
             case "inventory": return "Inventory Tracker";
             case "suppliers": return "Supplier Directory";
+            case "prepsheets": return "Prep Sheets";
             case "settings": return "Settings";
             default: return "";
         }

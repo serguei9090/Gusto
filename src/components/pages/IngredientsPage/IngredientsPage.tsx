@@ -1,124 +1,122 @@
-import { useEffect, useState, useMemo } from "react";
-import { Plus } from "lucide-react";
-import { useIngredientStore } from "@/store/ingredientStore";
-import { IngredientTable } from "@/components/organisms/IngredientTable";
-import { IngredientForm } from "@/components/organisms/IngredientForm";
-import { DeleteConfirmDialog } from "@/components/organisms/DeleteConfirmDialog";
-import { SearchBar } from "@/components/molecules/SearchBar";
-import { Button } from "@/components/atoms/Button";
-import { StatCard } from "@/components/molecules/StatCard";
-import type { Ingredient, CreateIngredientInput } from "@/types/ingredient.types";
-import styles from "./IngredientsPage.module.css";
+import { useState, useEffect } from "react";
+import { Plus, Search } from "lucide-react";
+import { useIngredientsStore, IngredientTable, IngredientForm } from "@/features/ingredients";
+import { useSupplierStore } from "@/store/supplierStore";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import type { Ingredient, CreateIngredientInput } from "@/features/ingredients";
 
 export const IngredientsPage = () => {
-    const { ingredients, fetchIngredients, createIngredient, updateIngredient, deleteIngredient, isLoading, error } = useIngredientStore();
+    // New Store
+    const {
+        ingredients,
+        isLoading,
+        error,
+        fetchIngredients,
+        createIngredient,
+        updateIngredient,
+        deleteIngredient,
+        searchIngredients
+    } = useIngredientsStore();
 
-    const [isFormOpen, setIsFormOpen] = useState(false);
+    // Supplier store for dropdowns (still global for now)
+    const { fetchSuppliers } = useSupplierStore();
+
+    const [isCreating, setIsCreating] = useState(false);
     const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null);
-    const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         fetchIngredients();
-    }, [fetchIngredients]);
+        fetchSuppliers();
+    }, [fetchIngredients, fetchSuppliers]);
 
-    const filteredIngredients = useMemo(() => {
-        return ingredients.filter(i =>
-            i.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            i.category.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [ingredients, searchTerm]);
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+        searchIngredients(query);
+    };
 
     const handleCreate = async (data: CreateIngredientInput) => {
         await createIngredient(data);
-        setIsFormOpen(false);
+        setIsCreating(false);
     };
 
     const handleUpdate = async (data: CreateIngredientInput) => {
-        if (editingIngredient) {
-            await updateIngredient(editingIngredient.id, data);
-            setEditingIngredient(null);
-            setIsFormOpen(false);
-        }
-    };
-
-    const handleDelete = async () => {
-        if (deleteId) {
-            await deleteIngredient(deleteId);
-            setDeleteId(null);
-        }
-    };
-
-    const openCreate = () => {
+        if (!editingIngredient) return;
+        await updateIngredient(editingIngredient.id, data);
         setEditingIngredient(null);
-        setIsFormOpen(true);
     };
 
-    const openEdit = (ing: Ingredient) => {
-        // We pass the full ingredient to the form. Form should use defaultValues.
-        // Ensure types match or use casting.
-        setEditingIngredient(ing);
-        setIsFormOpen(true);
+    const handleDelete = async (id: number) => {
+        if (confirm("Are you sure you want to delete this ingredient?")) {
+            await deleteIngredient(id);
+        }
     };
+
+    if (error) {
+        return <div className="p-4 text-destructive">Error: {error}</div>;
+    }
 
     return (
-        <div>
-            <div className={styles.stats}>
-                <StatCard label="Total Ingredients" value={ingredients.length} />
-                {/* Simple count of low stock */}
-                <StatCard label="Low Stock Alert" value={ingredients.filter(i => (i.minStockLevel !== null && i.minStockLevel !== undefined && i.currentStock <= i.minStockLevel)).length} />
-            </div>
-
-            <div className={styles.toolbar}>
-                <div className={styles.searchArea}>
-                    <SearchBar
-                        placeholder="Search ingredients..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+        <div className="p-6 space-y-6 animate-in fade-in duration-500">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Ingredients</h1>
+                    <p className="text-muted-foreground">Manage your kitchen inventory and costs.</p>
                 </div>
-                <Button onClick={openCreate}>
-                    <Plus size={20} style={{ marginRight: 8 }} />
-                    Add Ingredient
-                </Button>
+                {!isCreating && !editingIngredient && (
+                    <Button onClick={() => setIsCreating(true)}>
+                        <Plus size={16} /> Add Ingredient
+                    </Button>
+                )}
             </div>
 
-            <IngredientTable
-                ingredients={filteredIngredients}
-                onEdit={openEdit}
-                onDelete={setDeleteId}
-            />
-
-            {/* Error Toast Placeholder */}
-            {error && (
-                <div style={{ color: 'red', marginTop: 10 }}>Error: {error}</div>
-            )}
-
-            {/* Form Modal */}
-            {isFormOpen && (
-                <div className={styles.modalOverlay} onClick={() => setIsFormOpen(false)}>
-                    <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-                        <h2 className={styles.modalTitle}>
-                            {editingIngredient ? "Edit Ingredient" : "New Ingredient"}
-                        </h2>
+            {/* Main Content Area */}
+            <div className="mt-6">
+                {isCreating ? (
+                    <div className="rounded-lg border bg-card p-6 shadow-sm">
+                        <h2 className="text-xl font-semibold mb-6">Add New Ingredient</h2>
                         <IngredientForm
-                            onSubmit={editingIngredient ? handleUpdate : handleCreate}
-                            onCancel={() => setIsFormOpen(false)}
-                            defaultValues={editingIngredient || undefined}
+                            onSubmit={handleCreate}
+                            onCancel={() => setIsCreating(false)}
                             isLoading={isLoading}
                         />
                     </div>
-                </div>
-            )}
+                ) : editingIngredient ? (
+                    <div className="rounded-lg border bg-card p-6 shadow-sm">
+                        <h2 className="text-xl font-semibold mb-6">Edit Ingredient</h2>
+                        <IngredientForm
+                            defaultValues={editingIngredient}
+                            onSubmit={handleUpdate}
+                            onCancel={() => setEditingIngredient(null)}
+                            isLoading={isLoading}
+                        />
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search ingredients..."
+                                value={searchQuery}
+                                onChange={handleSearch}
+                                className="pl-10 max-w-sm"
+                            />
+                        </div>
 
-            <DeleteConfirmDialog
-                isOpen={!!deleteId}
-                onCancel={() => setDeleteId(null)}
-                onConfirm={handleDelete}
-                isLoading={isLoading}
-                title="Delete Ingredient"
-                message="Are you sure you want to delete this ingredient? This action cannot be undone."
-            />
+                        {isLoading ? (
+                            <div className="py-8 text-center text-muted-foreground">Loading ingredients...</div>
+                        ) : (
+                            <IngredientTable
+                                ingredients={ingredients}
+                                onEdit={setEditingIngredient}
+                                onDelete={handleDelete}
+                            />
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

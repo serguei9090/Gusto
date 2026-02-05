@@ -4,37 +4,37 @@ import Database from "@tauri-apps/plugin-sql";
 let dbInstance: Database | null = null;
 
 export async function getDatabase(): Promise<Database> {
-    if (dbInstance) return dbInstance;
+  if (dbInstance) return dbInstance;
 
-    try {
-        // Initial connection
-        dbInstance = await Database.load("sqlite:restaurant.db");
-        console.log("✅ Database connected via Tauri SQL plugin");
+  try {
+    // Initial connection
+    dbInstance = await Database.load("sqlite:restaurant.db");
+    console.log("✅ Database connected via Tauri SQL plugin");
 
-        // Initialize schema
-        await initSchema(dbInstance);
+    // Initialize schema
+    await initSchema(dbInstance);
 
-        return dbInstance;
-    } catch (error) {
-        console.error("❌ Failed to connect to database:", error);
-        throw error;
-    }
+    return dbInstance;
+  } catch (error) {
+    console.error("❌ Failed to connect to database:", error);
+    throw error;
+  }
 }
 
 async function initSchema(db: Database) {
-    // Check if tables exist
-    const result = await db.select<Array<{ name: string }>>(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='ingredients'"
-    );
+  // Check if tables exist
+  const result = await db.select<Array<{ name: string }>>(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='ingredients'"
+  );
 
-    if (result.length === 0) {
-        console.log("📝 Initializing database schema...");
+  if (result.length === 0) {
+    console.log("📝 Initializing database schema...");
 
-        // Enable foreign keys
-        await db.execute("PRAGMA foreign_keys = ON");
+    // Enable foreign keys
+    await db.execute("PRAGMA foreign_keys = ON");
 
-        // Create tables
-        await db.execute(`
+    // Create tables
+    await db.execute(`
       CREATE TABLE IF NOT EXISTS suppliers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -48,7 +48,7 @@ async function initSchema(db: Database) {
       )
     `);
 
-        await db.execute(`
+    await db.execute(`
       CREATE TABLE IF NOT EXISTS ingredients (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -65,7 +65,7 @@ async function initSchema(db: Database) {
       )
     `);
 
-        await db.execute(`
+    await db.execute(`
       CREATE TABLE IF NOT EXISTS recipes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -83,7 +83,7 @@ async function initSchema(db: Database) {
       )
     `);
 
-        await db.execute(`
+    await db.execute(`
       CREATE TABLE IF NOT EXISTS recipe_ingredients (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         recipe_id INTEGER NOT NULL,
@@ -97,7 +97,7 @@ async function initSchema(db: Database) {
       )
     `);
 
-        await db.execute(`
+    await db.execute(`
       CREATE TABLE IF NOT EXISTS inventory_transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         ingredient_id INTEGER NOT NULL,
@@ -112,7 +112,7 @@ async function initSchema(db: Database) {
       )
     `);
 
-        await db.execute(`
+    await db.execute(`
       CREATE TABLE IF NOT EXISTS price_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         ingredient_id INTEGER NOT NULL,
@@ -124,6 +124,20 @@ async function initSchema(db: Database) {
       )
     `);
 
-        console.log("✅ Database schema initialized");
-    }
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS prep_sheets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        date TEXT NOT NULL,
+        shift TEXT,
+        prep_cook_name TEXT,
+        notes TEXT,
+        recipes_json TEXT NOT NULL,
+        items_json TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    console.log("✅ Database schema initialized");
+  }
 }

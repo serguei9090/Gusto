@@ -1,0 +1,127 @@
+.container {
+    padding: 1rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.section {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: var(--surface-base);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-neutral-200);
+    box-shadow: var(--shadow-sm);
+}
+
+.sectionTitle {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    color: var(--color-neutral-900);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+}
+
+.headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.addRow {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.select {
+    padding: 0.625rem;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--radius-md);
+    background: white;
+    font-size: 0.9375rem;
+    min-width: 200px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 0.75rem;
+    background: var(--color-neutral-50);
+    border-bottom: 2px solid var(--color-neutral-200);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: var(--color-neutral-500);
+    text-transform: uppercase;
+}
+
+.table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--color-neutral-100);
+    vertical-align: middle;
+}
+
+.removeBtn {
+    color: var(--color-neutral-400);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+}
+
+.removeBtn:hover {
+    color: var(--color-error);
+    background: var(--color-error-light);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-neutral-400);
+}
+
+.emptyState svg {
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.emptyState p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.hint {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
