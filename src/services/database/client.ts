@@ -14,6 +14,22 @@ export async function getDatabase(): Promise<Database> {
     // Initialize schema
     await initSchema(dbInstance);
 
+    // Migration: Add currency column to ingredients if it doesn't exist
+    try {
+      await dbInstance.execute("ALTER TABLE ingredients ADD COLUMN currency TEXT DEFAULT 'USD'");
+      console.log("➕ Added 'currency' column to ingredients table");
+    } catch (e) {
+      // Column probably already exists, ignore error
+    }
+
+    // Migration: Add currency column to recipes if it doesn't exist
+    try {
+      await dbInstance.execute("ALTER TABLE recipes ADD COLUMN currency TEXT DEFAULT 'USD'");
+      console.log("➕ Added 'currency' column to recipes table");
+    } catch (e) {
+      // Column probably already exists
+    }
+
     return dbInstance;
   } catch (error) {
     console.error("❌ Failed to connect to database:", error);

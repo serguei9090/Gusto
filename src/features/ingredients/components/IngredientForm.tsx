@@ -50,8 +50,13 @@ export const IngredientForm = ({
   const form = useForm<FormSchema>({
     resolver: zodResolver(createIngredientSchema) as any,
     defaultValues: {
+      name: "",
       currentStock: 0,
+      minStockLevel: 0,
+      currentPrice: 0,
+      pricePerUnit: 0,
       currency: "USD",
+      notes: "",
       ...defaultValues,
     },
   });
@@ -77,6 +82,7 @@ export const IngredientForm = ({
                 <Input
                   placeholder={t("ingredients.placeholders.ingredientName")}
                   {...field}
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />
@@ -100,7 +106,7 @@ export const IngredientForm = ({
                   <SelectContent>
                     {ingredientCategorySchema.options.map((category) => (
                       <SelectItem key={category} value={category}>
-                        {t(`categories.${category}`)}
+                        {t(`common.categories.${category}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>

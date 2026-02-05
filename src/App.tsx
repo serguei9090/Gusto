@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { View } from "@/components/Sidebar";
 import { MainLayout } from "@/components/templates/MainLayout";
 import { DashboardPage } from "@/features/dashboard";
@@ -8,9 +8,16 @@ import { PrepSheetsPage } from "@/features/prep-sheets";
 import { RecipesPage } from "./features/recipes/components/RecipesPage";
 import { SuppliersPage } from "@/features/suppliers";
 import { SettingsPage } from "./features/settings/SettingsPage";
+import { initDb } from "@/lib/db";
 
 function App() {
-  const [currentView, setCurrentView] = useState<View>("dashboard"); // Default to Dashboard in v1
+  const [currentView, setCurrentView] = useState<View>("dashboard");
+
+  // Initialize database on mount
+  useEffect(() => {
+    initDb();
+  }, []);
+
 
   const renderContent = () => {
     switch (currentView) {

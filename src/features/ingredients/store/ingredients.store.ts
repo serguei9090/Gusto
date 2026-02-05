@@ -5,6 +5,7 @@ import type {
   Ingredient,
   UpdateIngredientInput,
 } from "../types";
+import { runWithHandling } from "@/utils/error-handler";
 
 interface IngredientsState {
   // Data (UI Mirror)
@@ -27,59 +28,75 @@ export const useIngredientsStore = create<IngredientsState>((set, get) => ({
 
   fetchIngredients: async () => {
     set({ isLoading: true, error: null });
-    try {
-      const data = await ingredientsRepository.getAll();
-      set({ ingredients: data, isLoading: false });
-    } catch (err) {
-      set({ error: String(err), isLoading: false });
-    }
+    await runWithHandling(
+      "fetchIngredients",
+      async () => {
+        const data = await ingredientsRepository.getAll();
+        set({ ingredients: data, isLoading: false });
+      },
+      (err) => set({ error: String(err), isLoading: false })
+    );
   },
 
   createIngredient: async (data) => {
     set({ isLoading: true, error: null });
-    try {
-      await ingredientsRepository.create(data);
-      // Sync: Re-fetch to ensure UI matches DB source of truth
-      await get().fetchIngredients();
-    } catch (err) {
-      set({ error: String(err), isLoading: false });
-      throw err;
-    }
+    await runWithHandling(
+      "createIngredient",
+      async () => {
+        await ingredientsRepository.create(data);
+        // Sync: Re-fetch to ensure UI matches DB source of truth
+        await get().fetchIngredients();
+      },
+      (err) => {
+        set({ error: String(err), isLoading: false });
+        throw err;
+      }
+    );
   },
 
   updateIngredient: async (id, data) => {
     set({ isLoading: true, error: null });
-    try {
-      await ingredientsRepository.update(id, data);
-      await get().fetchIngredients();
-    } catch (err) {
-      set({ error: String(err), isLoading: false });
-      throw err;
-    }
+    await runWithHandling(
+      "updateIngredient",
+      async () => {
+        await ingredientsRepository.update(id, data);
+        await get().fetchIngredients();
+      },
+      (err) => {
+        set({ error: String(err), isLoading: false });
+        throw err;
+      }
+    );
   },
 
   deleteIngredient: async (id) => {
     set({ isLoading: true, error: null });
-    try {
-      await ingredientsRepository.delete(id);
-      await get().fetchIngredients();
-    } catch (err) {
-      set({ error: String(err), isLoading: false });
-      throw err;
-    }
+    await runWithHandling(
+      "deleteIngredient",
+      async () => {
+        await ingredientsRepository.delete(id);
+        await get().fetchIngredients();
+      },
+      (err) => {
+        set({ error: String(err), isLoading: false });
+        throw err;
+      }
+    );
   },
 
   searchIngredients: async (query) => {
     set({ isLoading: true, error: null });
-    try {
-      if (!query.trim()) {
-        await get().fetchIngredients();
-        return;
-      }
-      const data = await ingredientsRepository.search(query);
-      set({ ingredients: data, isLoading: false });
-    } catch (err) {
-      set({ error: String(err), isLoading: false });
-    }
+    await runWithHandling(
+      "searchIngredients",
+      async () => {
+        if (!query.trim()) {
+          await get().fetchIngredients();
+          return;
+        }
+        const data = await ingredientsRepository.search(query);
+        set({ ingredients: data, isLoading: false });
+      },
+      (err) => set({ error: String(err), isLoading: false })
+    );
   },
 }));

@@ -1,47 +1,50 @@
-/**
- * Database Factory
- * 
- * Provides database access with automatic environment detection:
- * - Tauri: Real database via @/services/database/client  
- * - Browser/Dev: Mock database for testing
- */
-
+import { Kysely } from "kysely";
+import { TauriSqliteDialect } from "./tauri-kysely";
 import { mockDb } from "./db.browser";
 
 // Environment detection
-const isTauri = typeof window !== 'undefined' && '__TAURI__' in window;
-
-/**
- * Get database instance
- * Call this function to get the appropriate database for the current environment
- */
-export async function getDb(): Promise<any> {
-    if (isTauri) {
-        const { getDatabase } = await import("@/services/database/client");
-        return await getDatabase();
-    }
-    return mockDb;
-}
+// In Tauri v2, window.__TAURI__ is often disabled by default. 
+// window.__TAURI_IPC__ is a more reliable check for the presence of the Tauri bridge.
+const isTauri = typeof window !== 'undefined' && (
+    '__TAURI__' in window ||
+    '__TAURI_IPC__' in window ||
+    '__TAURI_METADATA__' in window ||
+    '__TAURI_INTERNALS__' in window ||
+    (window as any).rpc !== undefined ||
+    navigator.userAgent.includes('Tauri')
+);
 
 /**
  * Synchronous database access for immediate use
  * In Tauri mode, this will initially return mock until initialized
  * Use getDb() for guaranteed real database access
  */
-export const db = mockDb;
+// biome-ignore lint/suspicious/noExplicitAny: Mock DB is any
+// biome-ignore lint/style/noVar: Mutable export required for live binding swap
+export let db: any = mockDb;
 
 /**
  * Initialize database at app startup
  * Call this in your app's main entry point
  */
 export async function initDb(): Promise<void> {
+    console.log("🔍 Checking environment...", {
+        isTauri,
+        hasWindow: typeof window !== 'undefined',
+        tauriInWindow: typeof window !== 'undefined' && '__TAURI__' in window,
+        ipcInWindow: typeof window !== 'undefined' && '__TAURI_IPC__' in window,
+        metadataInWindow: typeof window !== 'undefined' && '__TAURI_METADATA__' in window
+    });
+
     if (isTauri) {
         try {
-            const { getDatabase } = await import("@/services/database/client");
-            const realDb = await getDatabase();
-            // Replace mockDb methods with real DB methods
-            Object.assign(db, realDb);
-            console.log("✅  Database initialized (Tauri mode)");
+            console.log("📝 Initializing Tauri Kysely...");
+            const kdb = new Kysely<any>({
+                dialect: new TauriSqliteDialect(),
+            });
+
+            db = kdb;
+            console.log("✅ Database initialized (Tauri mode)");
         } catch (error) {
             console.error("❌ Database initialization failed:", error);
         }
