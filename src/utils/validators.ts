@@ -86,6 +86,20 @@ export const createRecipeSchema = z.object({
         .optional(),
 });
 
+export const recipeIngredientFormSchema = z.object({
+    ingredientId: z.number().int().positive("Ingredient required"),
+    quantity: z.number().positive("Quantity must be positive"),
+    unit: z.string().min(1, "Unit required"),
+    // UI Helpers
+    name: z.string().optional(),
+    price: z.number().optional(),
+    ingredientUnit: z.string().optional()
+});
+
+export const recipeFormSchema = createRecipeSchema.extend({
+    ingredients: z.array(recipeIngredientFormSchema).default([])
+});
+
 // Create Inventory Transaction Schema
 export const createTransactionSchema = z.object({
     ingredientId: z.number().int().positive(),

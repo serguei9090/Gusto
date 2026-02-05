@@ -89,14 +89,44 @@ export interface Recipe {
     updatedAt: string;
 }
 
+export interface CreateRecipeInput {
+    name: string;
+    description?: string | null;
+    category?: RecipeCategory | null;
+    servings: number;
+    prepTimeMinutes?: number | null;
+    cookingInstructions?: string | null;
+    sellingPrice?: number | null;
+    targetCostPercentage?: number | null;
+}
+
+export interface UpdateRecipeInput {
+    name?: string;
+    description?: string | null;
+    category?: RecipeCategory | null;
+    servings?: number;
+    prepTimeMinutes?: number | null;
+    cookingInstructions?: string | null;
+    sellingPrice?: number | null;
+    targetCostPercentage?: number | null;
+}
+
+export interface RecipeWithIngredients extends Recipe {
+    ingredients: (RecipeIngredient & {
+        ingredientName: string;
+        currentPricePerUnit: number; // For real-time cost comparison
+        ingredientUnit: UnitOfMeasure; // Base unit of the ingredient
+    })[];
+}
+
 // Recipe Ingredient Types
 export interface RecipeIngredient {
     id: number;
     recipeId: number;
     ingredientId: number;
     quantity: number;
-    unit: string;
-    cost: number | null;
+    unit: string; // The unit used in the recipe (e.g. "g" vs "kg")
+    cost: number | null; // Calculated cost snapshot
     notes: string | null;
 }
 

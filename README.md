@@ -9,7 +9,7 @@ A standalone Windows desktop application for restaurant recipe costing and inven
 - **Animation**: Framer Motion
 - **Build Tool**: Vite
 - **Package Manager**: Bun
-- **Database**: SQLite with Drizzle ORM
+- **Database**: SQLite with Tauri SQL Plugin
 - **State Management**: Zustand
 - **Styling**: CSS Modules + CSS Variables
 - **Linting/Formatting**: Biome
@@ -34,17 +34,12 @@ A standalone Windows desktop application for restaurant recipe costing and inven
    cp .env.example .env
    ```
 
-3. **Initialize database** (after creating schema):
-   ```bash
-   bun run db:generate
-   bun run db:push
-   ```
-
 ## Development
 
 ```bash
 # Start development server (hot reload)
-bun run dev
+bun run tauri:dev  # Runs App + Backend
+bun run dev        # Runs Frontend only (Browser)
 
 # Type checking
 bun run type-check
@@ -59,16 +54,8 @@ bun run format
 
 ## Database Management
 
-```bash
-# Generate Drizzle migrations
-bun run db:generate
-
-# Apply migrations
-bun run db:push
-
-# Open Drizzle Studio (database GUI)
-bun run db:studio
-```
+Database is automatically initialized on app start using `@tauri-apps/plugin-sql`.
+Schema definition: `src/services/database/client.ts`.
 
 ## Build
 
@@ -88,7 +75,7 @@ src/
 │   ├── templates/      # Page layouts
 │   └── pages/          # Complete pages
 ├── services/           # Business logic & data access
-│   └── database/       # Drizzle schemas
+│   └── database/       # SQL Plugin client & schema
 ├── store/              # Zustand stores
 ├── hooks/              # Custom React hooks
 ├── utils/              # Utility functions

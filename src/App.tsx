@@ -1,88 +1,48 @@
-import { useEffect } from "react";
-import { useIngredientStore } from "./store/ingredientStore";
-import { Button } from "./components/atoms/Button";
-import { Input } from "./components/atoms/Input";
-import { Label } from "./components/atoms/Label";
+import { useState } from "react";
+import { MainLayout } from "@/components/templates/MainLayout";
+import { type View } from "@/components/organisms/Sidebar";
+import { IngredientsPage } from "@/components/pages/IngredientsPage";
+import { RecipesPage } from "@/components/pages/RecipesPage";
 
 function App() {
-    const { ingredients, fetchIngredients, isLoading, error } =
-        useIngredientStore();
+    const [currentView, setCurrentView] = useState<View>("ingredients");
 
-    useEffect(() => {
-        fetchIngredients();
-    }, [fetchIngredients]);
+    const renderContent = () => {
+        switch (currentView) {
+            case "dashboard":
+                return <div style={{ padding: 20 }}>Dashboard Module (Coming in v0.0.2)</div>;
+            case "ingredients":
+                return <IngredientsPage />;
+            case "recipes":
+                return <RecipesPage />;
+            case "inventory":
+                return <div style={{ padding: 20 }}>Inventory (Coming in v0.0.3)</div>;
+            case "settings":
+                return <div style={{ padding: 20 }}>Settings</div>;
+            default:
+                return <IngredientsPage />;
+        }
+    };
+
+    const getTitle = () => {
+        switch (currentView) {
+            case "dashboard": return "Dashboard";
+            case "ingredients": return "Ingredient Management";
+            case "recipes": return "Recipe Manager";
+            case "inventory": return "Inventory Tracker";
+            case "settings": return "Settings";
+            default: return "";
+        }
+    }
 
     return (
-        <div className="container">
-            <h1>RestaurantManage</h1>
-            <p className="subtitle">Recipe Costing & Inventory Management</p>
-
-            <div className="demo-section">
-                <h2>Database Status</h2>
-                {error && <div className="error-box">Error: {error}</div>}
-                {isLoading ? (
-                    <p>Loading ingredients...</p>
-                ) : (
-                    <p className="success-box">
-                        ✅ Connected to SQLite via Tauri Plugin! {ingredients.length} ingredients loaded.
-                    </p>
-                )}
-            </div>
-
-            <div className="demo-section">
-                <h2>Component Demo</h2>
-
-                <div className="component-grid">
-                    <div>
-                        <Label htmlFor="test-input" required>
-                            Test Input Field
-                        </Label>
-                        <Input
-                            id="test-input"
-                            type="text"
-                            placeholder="Enter ingredient name..."
-                            fullWidth
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="error-input">Input with Error</Label>
-                        <Input
-                            id="error-input"
-                            type="text"
-                            error="This field is required"
-                            fullWidth
-                        />
-                    </div>
-                </div>
-
-                <div className="button-group">
-                    <Button variant="primary">Primary Button</Button>
-                    <Button variant="secondary">Secondary</Button>
-                    <Button variant="danger">Delete</Button>
-                    <Button variant="ghost">Cancel</Button>
-                    <Button variant="primary" isLoading>
-                        Loading...
-                    </Button>
-                </div>
-            </div>
-
-            <div className="demo-section">
-                <h2>Next Steps</h2>
-                <ul className="checklist">
-                    <li>✅ Native SQLite via Tauri Plugin</li>
-                    <li>✅ No custom Rust code required</li>
-                    <li>✅ Zustand store connected</li>
-                    <li>✅ Atom components ready</li>
-                    <li>🔨 Build ingredient CRUD UI</li>
-                    <li>🔨 Create ingredient table</li>
-                </ul>
-            </div>
-
-            <p className="footer">
-                Built with Tauri 2.x + React 19 + TypeScript + SQLite Plugin
-            </p>
-        </div>
+        <MainLayout
+            currentView={currentView}
+            onChangeView={setCurrentView}
+            title={getTitle()}
+        >
+            {renderContent()}
+        </MainLayout>
     );
 }
 
