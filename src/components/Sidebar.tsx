@@ -30,17 +30,25 @@ interface SidebarProps {
 
 export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
   const { t } = useTranslation();
-  const { modules } = useSettingsStore();
+  const { modules, moduleOrder } = useSettingsStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const navItems = [
-    { id: "dashboard", label: t("navigation.dashboard"), icon: LayoutDashboard },
-    { id: "ingredients", label: t("navigation.ingredients"), icon: ShoppingBasket },
-    { id: "recipes", label: t("navigation.recipes"), icon: ChefHat },
-    { id: "inventory", label: t("navigation.inventory"), icon: Package },
-    ...(modules.suppliers ? [{ id: "suppliers", label: t("navigation.suppliers"), icon: Users }] : []),
-    ...(modules.prepSheets ? [{ id: "prepsheets", label: t("navigation.prepSheets"), icon: ClipboardList }] : []),
-    { id: "settings", label: t("navigation.settings"), icon: Settings },
+  const moduleConfig: Record<string, { label: string; icon: any }> = {
+    dashboard: { label: t("navigation.dashboard"), icon: LayoutDashboard },
+    ingredients: { label: t("navigation.ingredients"), icon: ShoppingBasket },
+    recipes: { label: t("navigation.recipes"), icon: ChefHat },
+    inventory: { label: t("navigation.inventory"), icon: Package },
+    suppliers: { label: t("navigation.suppliers"), icon: Users },
+    prepSheets: { label: t("navigation.prepSheets"), icon: ClipboardList },
+    settings: { label: t("navigation.settings"), icon: Settings },
+  };
+
+  // Filter and sort items based on order and visibility, ensuring settings is always last
+  const displayItems = [
+    ...moduleOrder
+      .filter((id) => modules[id] && moduleConfig[id])
+      .map((id) => ({ id, ...moduleConfig[id] })),
+    { id: "settings", ...moduleConfig.settings }, // Always append settings at the end
   ];
 
   return (
@@ -75,7 +83,7 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
       </div>
 
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto overflow-x-hidden">
-        {navItems.map((item) => (
+        {displayItems.map((item) => (
           <button
             key={item.id}
             onClick={() => onChangeView(item.id as View)}

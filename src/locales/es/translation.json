@@ -91,9 +91,12 @@
         },
         "modules": {
             "title": "Módulos",
-            "description": "Habilitar o deshabilitar funciones opcionales.",
+            "description": "Habilitar, deshabilitar o reorganizar funciones.",
             "suppliersHelp": "Gestionar proveedores externos.",
-            "prepSheetsHelp": "Crear planes de producción."
+            "prepSheetsHelp": "Crear planes de producción.",
+            "dragToReorder": "Arrastre para reordenar los elementos.",
+            "visible": "Visible",
+            "hidden": "Oculto"
         }
     },
     "ingredients": {

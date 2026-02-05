@@ -9,13 +9,12 @@ interface ExchangeRates {
 interface SettingsState {
     baseCurrency: Currency;
     exchangeRates: ExchangeRates;
-    modules: {
-        suppliers: boolean;
-        prepSheets: boolean;
-    };
+    modules: Record<string, boolean>;
+    moduleOrder: string[];
     setBaseCurrency: (currency: Currency) => void;
     setExchangeRate: (currency: Currency, rate: number) => void;
-    toggleModule: (module: 'suppliers' | 'prepSheets', enabled: boolean) => void;
+    toggleModule: (module: string, enabled: boolean) => void;
+    reorderModules: (order: string[]) => void;
     resetDefaults: () => void;
 }
 
@@ -31,9 +30,21 @@ export const useSettingsStore = create<SettingsState>()(
             baseCurrency: 'USD',
             exchangeRates: DEFAULT_RATES,
             modules: {
+                dashboard: true,
+                ingredients: true,
+                recipes: true,
+                inventory: true,
                 suppliers: true,
                 prepSheets: true,
-            } as any,
+            },
+            moduleOrder: [
+                "dashboard",
+                "ingredients",
+                "recipes",
+                "inventory",
+                "suppliers",
+                "prepSheets",
+            ],
             setBaseCurrency: (currency) =>
                 set(() => ({ baseCurrency: currency })),
             setExchangeRate: (currency, rate) =>
@@ -43,21 +54,37 @@ export const useSettingsStore = create<SettingsState>()(
                         [currency]: rate,
                     },
                 })),
-            toggleModule: (module: 'suppliers' | 'prepSheets', enabled: boolean) =>
+            toggleModule: (module: string, enabled: boolean) =>
                 set((state) => ({
                     modules: {
-                        ...(state as any).modules,
+                        ...state.modules,
                         [module]: enabled,
                     },
+                })),
+            reorderModules: (order: string[]) =>
+                set(() => ({
+                    moduleOrder: order,
                 })),
             resetDefaults: () =>
                 set({
                     baseCurrency: 'USD',
                     exchangeRates: DEFAULT_RATES,
                     modules: {
+                        dashboard: true,
+                        ingredients: true,
+                        recipes: true,
+                        inventory: true,
                         suppliers: true,
                         prepSheets: true,
                     },
+                    moduleOrder: [
+                        "dashboard",
+                        "ingredients",
+                        "recipes",
+                        "inventory",
+                        "suppliers",
+                        "prepSheets",
+                    ],
                 }),
         }),
         {

@@ -91,9 +91,12 @@
         },
         "modules": {
             "title": "Modules",
-            "description": "Enable or disable optional features.",
+            "description": "Enable, disable, or rearrange features.",
             "suppliersHelp": "Manage external suppliers.",
-            "prepSheetsHelp": "Create production plans."
+            "prepSheetsHelp": "Create production plans.",
+            "dragToReorder": "Drag to reorder items in the sidebar.",
+            "visible": "Visible",
+            "hidden": "Hidden"
         }
     },
     "ingredients": {

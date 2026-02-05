@@ -17,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
     SUPPORTED_CURRENCIES,
@@ -25,7 +24,8 @@ import {
     getCurrencySymbol,
 } from "@/utils/currency";
 import { useSettingsStore } from "./store/settings.store";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, GripVertical } from "lucide-react";
+import { Reorder } from "framer-motion";
 
 export const SettingsPage = () => {
     const { t, changeLanguage, currentLanguage } = useTranslation();
@@ -33,15 +33,17 @@ export const SettingsPage = () => {
         baseCurrency,
         exchangeRates,
         modules,
+        moduleOrder,
         setBaseCurrency,
         setExchangeRate,
         toggleModule,
+        reorderModules,
         resetDefaults,
     } = useSettingsStore();
 
     const handleRateChange = (currency: string, value: string) => {
-        const rate = parseFloat(value);
-        if (!isNaN(rate)) {
+        const rate = Number.parseFloat(value);
+        if (!Number.isNaN(rate)) {
             setExchangeRate(currency as any, rate);
         }
     };
@@ -157,29 +159,44 @@ export const SettingsPage = () => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between space-x-2">
-                        <div className="flex flex-col space-y-1">
-                            <Label htmlFor="module-suppliers">{t("navigation.suppliers")}</Label>
-                            <span className="text-sm text-muted-foreground">{t("settings.modules.suppliersHelp")}</span>
-                        </div>
-                        <Switch
-                            id="module-suppliers"
-                            checked={modules?.suppliers ?? true}
-                            onCheckedChange={(checked) => toggleModule('suppliers', checked)}
-                        />
+                    <div className="text-sm text-muted-foreground mb-4">
+                        {t("settings.modules.dragToReorder")}
                     </div>
-                    <Separator />
-                    <div className="flex items-center justify-between space-x-2">
-                        <div className="flex flex-col space-y-1">
-                            <Label htmlFor="module-prepsheets">{t("navigation.prepSheets")}</Label>
-                            <span className="text-sm text-muted-foreground">{t("settings.modules.prepSheetsHelp")}</span>
-                        </div>
-                        <Switch
-                            id="module-prepsheets"
-                            checked={modules?.prepSheets ?? true}
-                            onCheckedChange={(checked) => toggleModule('prepSheets', checked)}
-                        />
-                    </div>
+                    <Reorder.Group
+                        axis="y"
+                        values={moduleOrder}
+                        onReorder={reorderModules}
+                        className="space-y-2"
+                    >
+                        {moduleOrder.map((moduleId) => (
+                            <Reorder.Item
+                                key={moduleId}
+                                value={moduleId}
+                                className="flex items-center justify-between p-3 bg-card border rounded-md cursor-move hover:bg-muted/50 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                                    <div className="flex flex-col">
+                                        <Label htmlFor={`module-${moduleId}`} className="cursor-pointer font-medium">
+                                            {t(`navigation.${moduleId}`)}
+                                        </Label>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs text-muted-foreground">
+                                        {modules[moduleId]
+                                            ? t("settings.modules.visible")
+                                            : t("settings.modules.hidden")}
+                                    </span>
+                                    <Switch
+                                        id={`module-${moduleId}`}
+                                        checked={modules[moduleId] ?? true}
+                                        onCheckedChange={(checked) => toggleModule(moduleId, checked)}
+                                    />
+                                </div>
+                            </Reorder.Item>
+                        ))}
+                    </Reorder.Group>
                 </CardContent>
             </Card>
         </div>
