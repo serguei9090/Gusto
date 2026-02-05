@@ -3,6 +3,8 @@ import { MainLayout } from "@/components/templates/MainLayout";
 import { type View } from "@/components/organisms/Sidebar";
 import { IngredientsPage } from "@/components/pages/IngredientsPage";
 import { RecipesPage } from "@/components/pages/RecipesPage";
+import { InventoryPage } from "@/components/pages/InventoryPage";
+import { SuppliersPage } from "@/components/pages/SuppliersPage";
 
 function App() {
     const [currentView, setCurrentView] = useState<View>("ingredients");
@@ -16,7 +18,9 @@ function App() {
             case "recipes":
                 return <RecipesPage />;
             case "inventory":
-                return <div style={{ padding: 20 }}>Inventory (Coming in v0.0.3)</div>;
+                return <InventoryPage />;
+            case "suppliers":
+                return <SuppliersPage />;
             case "settings":
                 return <div style={{ padding: 20 }}>Settings</div>;
             default:
@@ -30,6 +34,7 @@ function App() {
             case "ingredients": return "Ingredient Management";
             case "recipes": return "Recipe Manager";
             case "inventory": return "Inventory Tracker";
+            case "suppliers": return "Supplier Directory";
             case "settings": return "Settings";
             default: return "";
         }

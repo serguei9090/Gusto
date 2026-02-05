@@ -1,0 +1,27 @@
+.container {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.error {
+    padding: 1rem;
+    background: #fef2f2;
+    color: #b91c1c;
+    border-radius: var(--radius-md);
+    border: 1px solid #fee2e2;
+    font-size: 0.875rem;
+}

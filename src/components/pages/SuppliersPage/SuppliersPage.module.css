@@ -1,0 +1,62 @@
+.container {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.searchArea {
+    flex: 1;
+    max-width: 400px;
+}
+
+.error {
+    padding: 1rem;
+    background: #fef2f2;
+    color: #b91c1c;
+    border-radius: var(--radius-md);
+    border: 1px solid #fee2e2;
+    font-size: 0.875rem;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background: var(--surface-base);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 700px;
+    box-shadow: var(--shadow-xl);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modalHeader {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--color-neutral-200);
+}
+
+.modalHeader h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}

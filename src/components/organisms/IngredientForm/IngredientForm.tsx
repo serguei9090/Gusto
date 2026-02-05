@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { createIngredientSchema } from "@/utils/validators";
+import { useSupplierStore } from "@/store/supplierStore";
 import { FormField } from "@/components/molecules/FormField";
 import { Button } from "@/components/atoms/Button";
 import { Label } from "@/components/atoms/Label";
@@ -24,6 +26,8 @@ const CATEGORIES = [
 const UNITS = ["kg", "g", "l", "ml", "piece", "cup", "tbsp", "tsp"];
 
 export const IngredientForm = ({ defaultValues, onSubmit, onCancel, isLoading }: IngredientFormProps) => {
+    const { suppliers, fetchSuppliers } = useSupplierStore();
+
     const {
         register,
         handleSubmit,
@@ -36,6 +40,10 @@ export const IngredientForm = ({ defaultValues, onSubmit, onCancel, isLoading }:
             ...defaultValues,
         },
     });
+
+    useEffect(() => {
+        fetchSuppliers();
+    }, [fetchSuppliers]);
 
     const submitHandler = handleSubmit((data) => {
         onSubmit(data as unknown as CreateIngredientInput);
@@ -120,6 +128,26 @@ export const IngredientForm = ({ defaultValues, onSubmit, onCancel, isLoading }:
                     error={errors.minStockLevel?.message}
                     {...register("minStockLevel", { valueAsNumber: true })}
                 />
+            </div>
+
+            <div className={styles.row}>
+                <div style={{ width: '100%' }}>
+                    <Label htmlFor="supplierId">
+                        Preferred Supplier
+                    </Label>
+                    <select
+                        id="supplierId"
+                        className={styles.select}
+                        {...register("supplierId", {
+                            valueAsNumber: true
+                        })}
+                    >
+                        <option value="">None</option>
+                        {suppliers.map(s => (
+                            <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             <div className={styles.actions}>

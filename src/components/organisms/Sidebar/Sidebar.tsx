@@ -1,7 +1,7 @@
-import { LayoutDashboard, ShoppingBasket, ChefHat, Package, Settings } from "lucide-react";
+import { LayoutDashboard, ShoppingBasket, ChefHat, Package, Users, Settings } from "lucide-react";
 import styles from "./Sidebar.module.css";
 
-export type View = "dashboard" | "ingredients" | "recipes" | "inventory" | "settings";
+export type View = "dashboard" | "ingredients" | "recipes" | "inventory" | "suppliers" | "settings";
 
 interface SidebarProps {
     currentView: View;
@@ -14,6 +14,7 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
         { id: "ingredients", label: "Ingredients", icon: ShoppingBasket },
         { id: "recipes", label: "Recipes", icon: ChefHat },
         { id: "inventory", label: "Inventory", icon: Package },
+        { id: "suppliers", label: "Suppliers", icon: Users },
         { id: "settings", label: "Settings", icon: Settings },
     ];
 
