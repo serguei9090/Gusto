@@ -42,11 +42,21 @@ class SuppliersRepository {
     return result ? this.mapToDomain(result) : null;
   }
 
-  async create(data: Omit<CreateSupplierInput, "id">): Promise<Supplier> {
+  async create(data: any): Promise<Supplier> {
+    const dbData: Omit<CreateSupplierInput, "id"> = {
+      name: data.name,
+      contact_person: data.contactPerson, // Map camelCase to snake_case
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      payment_terms: data.paymentTerms, // Map camelCase to snake_case
+      notes: data.notes,
+    };
+
     // Note: Kysely returns InsertResult { insertId } on SQLite
     const result = await db
       .insertInto("suppliers")
-      .values(data)
+      .values(dbData)
       .executeTakeFirstOrThrow();
 
     if (result.numInsertedOrUpdatedRows === BigInt(0)) {
@@ -63,8 +73,23 @@ class SuppliersRepository {
     return created;
   }
 
-  async update(id: number, data: UpdateSupplierInput): Promise<void> {
-    await db.updateTable("suppliers").set(data).where("id", "=", id).execute();
+  async update(id: number, data: any): Promise<void> {
+    const dbData: UpdateSupplierInput = {
+      name: data.name,
+      contact_person: data.contactPerson, // Map camelCase to snake_case
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      payment_terms: data.paymentTerms, // Map camelCase to snake_case
+      notes: data.notes,
+    };
+
+    // Filter out undefined values to allow partial updates
+    const cleanData = Object.fromEntries(
+      Object.entries(dbData).filter(([_, v]) => v !== undefined)
+    );
+
+    await db.updateTable("suppliers").set(cleanData).where("id", "=", id).execute();
   }
 
   async delete(id: number): Promise<void> {

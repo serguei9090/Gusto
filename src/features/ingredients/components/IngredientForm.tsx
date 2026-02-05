@@ -68,10 +68,10 @@ export const IngredientForm = ({
   return (
     <form onSubmit={submitHandler} className="space-y-6 max-w-2xl mx-auto p-1">
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">{t("common.labels.name")}</Label>
         <Input
           id="name"
-          placeholder="e.g. Tomato Sauce"
+          placeholder={t("ingredients.placeholders.ingredientName")}
           {...register("name")}
           className={cn(
             errors.name && "border-destructive focus-visible:ring-destructive",
@@ -84,7 +84,7 @@ export const IngredientForm = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
+          <Label htmlFor="category">{t("common.labels.category")}</Label>
           <select
             id="category"
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -104,7 +104,7 @@ export const IngredientForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="unit">Unit</Label>
+          <Label htmlFor="unit">{t("common.labels.unit")}</Label>
           <select
             id="unit"
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -126,7 +126,7 @@ export const IngredientForm = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="currentPrice">Price (Total)</Label>
+          <Label htmlFor="currentPrice">{t("ingredients.fields.currentPrice")}</Label>
           <Input
             id="currentPrice"
             type="number"
@@ -145,7 +145,7 @@ export const IngredientForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="pricePerUnit">Price per Unit</Label>
+          <Label htmlFor="pricePerUnit">{t("ingredients.fields.pricePerUnit")}</Label>
           <Input
             id="pricePerUnit"
             type="number"
@@ -187,7 +187,7 @@ export const IngredientForm = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="currentStock">Current Stock</Label>
+          <Label htmlFor="currentStock">{t("ingredients.fields.currentStock")}</Label>
           <Input
             id="currentStock"
             type="number"
@@ -202,7 +202,7 @@ export const IngredientForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="minStock">Min Stock (Alert Level)</Label>
+          <Label htmlFor="minStock">{t("ingredients.fields.minStockLevel")}</Label>
           <Input
             id="minStock"
             type="number"
@@ -218,13 +218,15 @@ export const IngredientForm = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="supplierId">Preferred Supplier</Label>
+        <Label htmlFor="supplierId">{t("ingredients.fields.supplier")}</Label>
         <select
           id="supplierId"
           className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-          {...register("supplierId", { valueAsNumber: true })}
+          {...register("supplierId", {
+            setValueAs: (v) => (v === "" ? null : Number.parseInt(v, 10)),
+          })}
         >
-          <option value="">None</option>
+          <option value="">{t("common.messages.noData")}</option>
           {suppliers.map((s: any) => (
             <option key={s.id} value={s.id}>
               {s.name}
@@ -236,11 +238,11 @@ export const IngredientForm = ({
       <div className="flex justify-end gap-4 pt-4">
         {onCancel && (
           <Button type="button" variant="secondary" onClick={onCancel}>
-            Cancel
+            {t("common.actions.cancel")}
           </Button>
         )}
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : "Save Ingredient"}
+          {isLoading ? t("common.messages.saving") : t("common.actions.save") + " " + t("ingredients.title").slice(0, -1)}
         </Button>
       </div>
     </form >

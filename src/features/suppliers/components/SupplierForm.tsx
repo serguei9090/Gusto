@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -82,6 +83,11 @@ export function SupplierForm({
           <DialogTitle>
             {initialData ? "Edit Supplier" : "Add Supplier"}
           </DialogTitle>
+          <DialogDescription>
+            {initialData
+              ? "Make changes to the supplier details below."
+              : "Enter the details for the new supplier."}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid gap-4 py-2">

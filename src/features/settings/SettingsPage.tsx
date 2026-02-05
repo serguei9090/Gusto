@@ -127,40 +127,38 @@ export const SettingsPage = () => {
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {SUPPORTED_CURRENCIES.map((curr) => {
                                 const isBase = curr === baseCurrency;
-                            };
-
-                            return (
-                            <div
-                                key={curr}
-                                className={`p-4 rounded-lg border ${isBase ? "bg-muted/50 border-primary/20" : "bg-card"
-                                    }`}
-                            >
-                                <div className="flex items-center justify-between mb-2">
-                                    <Label htmlFor={`rate-${curr}`} className="font-semibold">
-                                        {getCurrencyName(curr)} ({getCurrencySymbol(curr)})
-                                    </Label>
-                                    {isBase && (
-                                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                                            {t("settings.currency.baseBadge")}
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-muted-foreground">1 {baseCurrency} =</span>
-                                    <Input
-                                        id={`rate-${curr}`}
-                                        type="number"
-                                        step="0.01"
-                                        min="0.0001"
-                                        disabled={isBase}
-                                        value={isBase ? "1.00" : exchangeRates[curr]}
-                                        onChange={(e) => handleRateChange(curr, e.target.value)}
-                                        className="font-mono"
-                                    />
-                                    <span className="text-sm font-medium">{curr}</span>
-                                </div>
-                            </div>
-                            );
+                                return (
+                                    <div
+                                        key={curr}
+                                        className={`p-4 rounded-lg border ${isBase ? "bg-muted/50 border-primary/20" : "bg-card"
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between mb-2">
+                                            <Label htmlFor={`rate-${curr}`} className="font-semibold">
+                                                {getCurrencyName(curr)} ({getCurrencySymbol(curr)})
+                                            </Label>
+                                            {isBase && (
+                                                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                                    {t("settings.currency.baseBadge")}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-muted-foreground">1 {baseCurrency} =</span>
+                                            <Input
+                                                id={`rate-${curr}`}
+                                                type="number"
+                                                step="0.01"
+                                                min="0.0001"
+                                                disabled={isBase}
+                                                value={isBase ? "1.00" : exchangeRates[curr]}
+                                                onChange={(e) => handleRateChange(curr, e.target.value)}
+                                                className="font-mono"
+                                            />
+                                            <span className="text-sm font-medium">{curr}</span>
+                                        </div>
+                                    </div>
+                                );
                             })}
                         </div>
                     </div>
@@ -168,5 +166,4 @@ export const SettingsPage = () => {
             </Card>
         </div>
     );
-}
 }
