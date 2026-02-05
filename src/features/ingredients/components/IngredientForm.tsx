@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSuppliersStore } from "@/features/suppliers/store/suppliers.store";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 import { createIngredientSchema } from "@/utils/validators";
+import { SUPPORTED_CURRENCIES, getCurrencySymbol, getCurrencyName } from "@/utils/currency";
 import type { CreateIngredientInput } from "../types";
 
 // Infer directly from schema to ensure match
@@ -31,6 +33,7 @@ const CATEGORIES = [
   "other",
 ];
 const UNITS = ["kg", "g", "l", "ml", "piece", "cup", "tbsp", "tsp"];
+const CURRENCIES = Array.from(SUPPORTED_CURRENCIES);
 
 export const IngredientForm = ({
   defaultValues,
@@ -38,7 +41,8 @@ export const IngredientForm = ({
   onCancel,
   isLoading,
 }: IngredientFormProps) => {
-  const { suppliers, fetchSuppliers } = useSupplierStore();
+  const { t } = useTranslation();
+  const { suppliers, fetchSuppliers } = useSuppliersStore();
 
   const {
     register,
@@ -130,7 +134,7 @@ export const IngredientForm = ({
             {...register("currentPrice", { valueAsNumber: true })}
             className={cn(
               errors.currentPrice &&
-                "border-destructive focus-visible:ring-destructive",
+              "border-destructive focus-visible:ring-destructive",
             )}
           />
           {errors.currentPrice && (
@@ -149,7 +153,7 @@ export const IngredientForm = ({
             {...register("pricePerUnit", { valueAsNumber: true })}
             className={cn(
               errors.pricePerUnit &&
-                "border-destructive focus-visible:ring-destructive",
+              "border-destructive focus-visible:ring-destructive",
             )}
           />
           {errors.pricePerUnit && (
@@ -158,6 +162,27 @@ export const IngredientForm = ({
             </p>
           )}
         </div>
+      </div>
+
+      {/* Currency Selection */}
+      <div className="space-y-2">
+        <Label htmlFor="currency">{t("common.labels.currency")}</Label>
+        <select
+          id="currency"
+          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          {...register("currency")}
+        >
+          {CURRENCIES.map((curr) => (
+            <option key={curr} value={curr}>
+              {getCurrencySymbol(curr)} - {getCurrencyName(curr)}
+            </option>
+          ))}
+        </select>
+        {errors.currency && (
+          <p className="text-xs text-destructive">
+            {errors.currency.message}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -200,7 +225,7 @@ export const IngredientForm = ({
           {...register("supplierId", { valueAsNumber: true })}
         >
           <option value="">None</option>
-          {suppliers.map((s) => (
+          {suppliers.map((s: any) => (
             <option key={s.id} value={s.id}>
               {s.name}
             </option>
@@ -218,6 +243,6 @@ export const IngredientForm = ({
           {isLoading ? "Saving..." : "Save Ingredient"}
         </Button>
       </div>
-    </form>
+    </form >
   );
 };

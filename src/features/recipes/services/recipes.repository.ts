@@ -53,7 +53,7 @@ export class RecipesRepository {
 
     return {
       ...recipe,
-      ingredients: ingredients.map((ing) => ({
+      ingredients: ingredients.map((ing: any) => ({
         ...ing,
         // Kysely types might be slightly different than raw SQL result, ensure consistency
         // biome-ignore lint/suspicious/noExplicitAny: Kysely type mismatch
@@ -225,6 +225,7 @@ export class RecipesRepository {
       prepTimeMinutes: row.prep_time_minutes,
       cookingInstructions: row.cooking_instructions,
       sellingPrice: row.selling_price,
+      currency: row.currency || 'USD',
       targetCostPercentage: row.target_cost_percentage,
       totalCost: row.total_cost || 0,
       profitMargin: row.profit_margin || 0,

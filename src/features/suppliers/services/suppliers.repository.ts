@@ -95,8 +95,7 @@ class SuppliersRepository {
       address: row.address,
       paymentTerms: row.payment_terms,
       notes: row.notes,
-      createdAt: row.created_at || undefined,
-      updatedAt: row.updated_at || undefined,
+      createdAt: row.created_at || "",
     };
   }
 }

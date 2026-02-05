@@ -11,7 +11,6 @@ export const DashboardPage = () => {
     urgentReorders,
     topRecipes,
     fetchDashboardData,
-    isLoading,
     error,
   } = useDashboardStore();
 

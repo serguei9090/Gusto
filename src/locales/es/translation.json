@@ -1,0 +1,146 @@
+{
+    "common": {
+        "actions": {
+            "save": "Guardar",
+            "cancel": "Cancelar",
+            "delete": "Eliminar",
+            "edit": "Editar",
+            "add": "Agregar",
+            "search": "Buscar",
+            "filter": "Filtrar",
+            "close": "Cerrar",
+            "confirm": "Confirmar",
+            "back": "Atrás",
+            "next": "Siguiente",
+            "submit": "Enviar",
+            "reset": "Restablecer"
+        },
+        "labels": {
+            "name": "Nombre",
+            "description": "Descripción",
+            "category": "Categoría",
+            "price": "Precio",
+            "currency": "Moneda",
+            "date": "Fecha",
+            "notes": "Notas",
+            "status": "Estado",
+            "total": "Total",
+            "quantity": "Cantidad",
+            "unit": "Unidad"
+        },
+        "messages": {
+            "loading": "Cargando...",
+            "saving": "Guardando...",
+            "success": "¡Éxito!",
+            "error": "Ocurrió un error",
+            "noData": "No hay datos disponibles",
+            "confirmDelete": "¿Está seguro de que desea eliminar este elemento?"
+        },
+        "validation": {
+            "required": "Este campo es obligatorio",
+            "invalidEmail": "Dirección de correo electrónico no válida",
+            "minLength": "La longitud mínima es {{count}} caracteres",
+            "maxLength": "La longitud máxima es {{count}} caracteres",
+            "positive": "Debe ser un número positivo"
+        }
+    },
+    "navigation": {
+        "dashboard": "Panel de Control",
+        "ingredients": "Ingredientes",
+        "recipes": "Recetas",
+        "inventory": "Inventario",
+        "suppliers": "Proveedores",
+        "prepSheets": "Hojas de Preparación",
+        "reports": "Informes",
+        "settings": "Configuración"
+    },
+    "ingredients": {
+        "title": "Ingredientes",
+        "addIngredient": "Agregar Ingrediente",
+        "editIngredient": "Editar Ingrediente",
+        "deleteIngredient": "Eliminar Ingrediente",
+        "ingredientDetails": "Detalles del Ingrediente",
+        "fields": {
+            "currentPrice": "Precio Actual",
+            "pricePerUnit": "Precio por Unidad",
+            "currentStock": "Stock Actual",
+            "minStockLevel": "Nivel Mínimo de Stock",
+            "supplier": "Proveedor",
+            "unitOfMeasure": "Unidad de Medida"
+        },
+        "placeholders": {
+            "searchIngredients": "Buscar ingredientes...",
+            "ingredientName": "ej. Salsa de Tomate"
+        }
+    },
+    "recipes": {
+        "title": "Recetas",
+        "addRecipe": "Agregar Receta",
+        "editRecipe": "Editar Receta",
+        "deleteRecipe": "Eliminar Receta",
+        "recipeDetails": "Detalles de la Receta",
+        "fields": {
+            "servings": "Porciones",
+            "prepTime": "Tiempo de Preparación (minutos)",
+            "cookingInstructions": "Instrucciones de Cocción",
+            "sellingPrice": "Precio de Venta",
+            "targetCostPercentage": "Porcentaje de Costo Objetivo",
+            "totalCost": "Costo Total",
+            "profitMargin": "Margen de Beneficio",
+            "addIngredient": "Agregar Ingrediente"
+        },
+        "placeholders": {
+            "searchRecipes": "Buscar recetas...",
+            "recipeName": "ej. Pizza Margarita",
+            "briefOverview": "Descripción breve..."
+        },
+        "sections": {
+            "basicInfo": "Información Básica",
+            "financials": "Finanzas",
+            "ingredients": "Ingredientes"
+        }
+    },
+    "inventory": {
+        "title": "Inventario",
+        "stockLevel": "Nivel de Stock",
+        "lastUpdated": "Última Actualización",
+        "lowStock": "Alerta de Stock Bajo",
+        "outOfStock": "Sin Stock",
+        "inStock": "En Stock"
+    },
+    "suppliers": {
+        "title": "Proveedores",
+        "addSupplier": "Agregar Proveedor",
+        "editSupplier": "Editar Proveedor",
+        "supplierDetails": "Detalles del Proveedor",
+        "fields": {
+            "contactPerson": "Persona de Contacto",
+            "email": "Correo Electrónico",
+            "phone": "Teléfono",
+            "address": "Dirección",
+            "paymentTerms": "Términos de Pago"
+        }
+    },
+    "prepSheets": {
+        "title": "Hojas de Preparación",
+        "createPrepSheet": "Crear Hoja de Preparación",
+        "prepDate": "Fecha de Preparación",
+        "recipes": "Recetas",
+        "totalIngredients": "Ingredientes Totales Necesarios",
+        "exportPDF": "Exportar a PDF"
+    },
+    "dashboard": {
+        "title": "Panel de Control",
+        "welcomeMessage": "Bienvenido a la Gestión de Restaurantes",
+        "stats": {
+            "totalIngredients": "Ingredientes Totales",
+            "totalRecipes": "Recetas Totales",
+            "lowStockItems": "Artículos con Stock Bajo",
+            "totalSuppliers": "Proveedores Totales"
+        }
+    },
+    "currency": {
+        "usd": "Dólar Estadounidense",
+        "eur": "Euro"
+    }
+}

@@ -5,11 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useIngredientsStore } from "@/features/ingredients/store/ingredients.store";
 import { useInventoryStore } from "@/features/inventory/store/inventory.store";
-import {
-  type InventoryTransaction,
-  InventoryTransactionType,
-} from "@/features/inventory/types";
-import { type Ingredient } from "@/types/ingredient.types";
+import type { Ingredient } from "@/types/ingredient.types";
 import { InventoryTable } from "./InventoryTable";
 import { TransactionModal } from "./TransactionModal";
 

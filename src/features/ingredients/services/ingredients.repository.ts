@@ -15,6 +15,7 @@ export class IngredientsRepository {
         unit_of_measure: data.unitOfMeasure,
         current_price: data.currentPrice,
         price_per_unit: data.pricePerUnit,
+        currency: data.currency || 'USD',
         supplier_id: data.supplierId || null,
         min_stock_level: data.minStockLevel || null,
         current_stock: data.currentStock || 0,
@@ -54,7 +55,7 @@ export class IngredientsRepository {
     data: UpdateIngredientInput,
   ): Promise<Ingredient | null> {
     // Build update object only with defined values
-    const updateData: Partial<Ingredient> & { last_updated: string } = {
+    const updateData: any = {
       last_updated: new Date().toISOString(), // Or let DB handle via default but explicit is fine
     };
 
@@ -66,6 +67,7 @@ export class IngredientsRepository {
       updateData.current_price = data.currentPrice;
     if (data.pricePerUnit !== undefined)
       updateData.price_per_unit = data.pricePerUnit;
+    if (data.currency !== undefined) updateData.currency = data.currency;
     if (data.supplierId !== undefined) updateData.supplier_id = data.supplierId;
     if (data.minStockLevel !== undefined)
       updateData.min_stock_level = data.minStockLevel;
@@ -110,7 +112,7 @@ export class IngredientsRepository {
     const rows = await db
       .selectFrom("ingredients")
       .selectAll()
-      .where((eb) =>
+      .where((eb: any) =>
         eb.and([
           eb("min_stock_level", "is not", null),
           eb("current_stock", "<", eb.ref("min_stock_level")),
@@ -132,7 +134,8 @@ export class IngredientsRepository {
       // biome-ignore lint/suspicious/noExplicitAny: Legacy type casting
       unitOfMeasure: row.unit_of_measure as any,
       currentPrice: row.current_price,
-      pricePerUnit: row.price_per_unit,
+      pricePerUnit: row.price_per_unit || 0, // Fallback if null in DB
+      currency: row.currency || 'USD',
       supplierId: row.supplier_id,
       minStockLevel: row.min_stock_level,
       currentStock: row.current_stock,

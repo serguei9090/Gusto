@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Minus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -29,6 +29,12 @@ import {
   calculateSuggestedPrice,
 } from "@/utils/costEngine";
 import {
+  SUPPORTED_CURRENCIES,
+  getCurrencySymbol,
+  getCurrencyName,
+} from "@/utils/currency";
+import { useTranslation } from "@/hooks/useTranslation";
+import {
   recipeCategorySchema,
   recipeFormSchema,
   unitOfMeasureSchema,
@@ -49,6 +55,7 @@ export const RecipeForm = ({
   onCancel,
   isLoading,
 }: RecipeFormProps) => {
+  const { t } = useTranslation();
   const { ingredients: allIngredients, fetchIngredients } =
     useIngredientsStore();
 
@@ -218,13 +225,28 @@ export const RecipeForm = ({
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="space-y-2">
-              <Label htmlFor="sellingPrice">Selling Price ($)</Label>
+              <Label htmlFor="sellingPrice">{t("recipes.fields.sellingPrice")}</Label>
               <Input
                 type="number"
                 step="0.01"
                 id="sellingPrice"
                 {...register("sellingPrice", { valueAsNumber: true })}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">{t("common.labels.currency")}</Label>
+              <select
+                id="currency"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                {...register("currency")}
+              >
+                {Array.from(SUPPORTED_CURRENCIES).map((curr) => (
+                  <option key={curr} value={curr}>
+                    {getCurrencySymbol(curr)} - {getCurrencyName(curr)}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">

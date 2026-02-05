@@ -5,8 +5,10 @@ import { DashboardPage } from "@/features/dashboard";
 import { IngredientsPage } from "@/features/ingredients";
 import { InventoryPage } from "@/features/inventory";
 import { PrepSheetsPage } from "@/features/prep-sheets";
-import { RecipesPage } from "@/features/recipes";
+import { RecipesPage } from "./features/recipes/components/RecipesPage";
 import { SuppliersPage } from "@/features/suppliers";
+import { SettingsPage } from "./features/settings/SettingsPage";
+import { Toaster } from "@/components/ui/toaster";
 
 function App() {
   const [currentView, setCurrentView] = useState<View>("dashboard"); // Default to Dashboard in v1

@@ -31,6 +31,7 @@ export const createIngredientSchema = z.object({
   unitOfMeasure: unitOfMeasureSchema,
   currentPrice: z.number().positive("Price must be positive"),
   pricePerUnit: z.number().positive("Price per unit must be positive"),
+  currency: z.enum(["USD", "EUR"]).default("USD"),
   supplierId: z.number().int().positive().nullable().optional(),
   minStockLevel: z.number().nonnegative().nullable().optional(),
   currentStock: z.number().nonnegative().default(0),
@@ -78,6 +79,7 @@ export const createRecipeSchema = z.object({
   prepTimeMinutes: z.number().int().nonnegative().nullable().optional(),
   cookingInstructions: z.string().nullable().optional(),
   sellingPrice: z.number().positive().nullable().optional(),
+  currency: z.enum(["USD", "EUR"]).default("USD"),
   targetCostPercentage: z.number().min(0).max(100).nullable().optional(),
 });
 

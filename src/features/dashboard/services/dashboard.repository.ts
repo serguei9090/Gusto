@@ -67,7 +67,7 @@ class DashboardRepository {
       .limit(limit)
       .execute();
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       currentStock: row.current_stock,
@@ -103,7 +103,7 @@ class DashboardRepository {
       .limit(limit)
       .execute();
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       selling_price: row.selling_price || 0,

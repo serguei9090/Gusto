@@ -23,11 +23,14 @@ export const RecipeTable = ({
   onDelete,
   onView,
 }: RecipeTableProps) => {
-  const formatCurrency = (val: number | null) => {
+  const formatCurrency = (val: number | null, currency: string = "USD") => {
     if (val === null || val === undefined) return "-";
+    // TODO: Integrating dynamic rates here would transform the VALUE.
+    // Ideally we just display in the stored currency.
+    // If the user wants to see "Estimated Value in Base Currency", that's a different feature.
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: currency,
     }).format(val);
   };
 
@@ -36,12 +39,6 @@ export const RecipeTable = ({
     return `${val.toFixed(1)}%`;
   };
 
-  const _getMarginBadgeVariant = (val: number | null) => {
-    if (val === null || val === undefined) return "secondary";
-    if (val < 20) return "destructive";
-    if (val < 30) return "outline"; // Warning/Yellow not standard in shadcn badge, use outline or custom
-    return "default"; // Green/Primary
-  };
 
   // Custom color helper for margin text if not using Badge
   const getMarginColor = (val: number | null) => {
@@ -81,8 +78,8 @@ export const RecipeTable = ({
                 {recipe.category || "-"}
               </TableCell>
               <TableCell>{recipe.servings}</TableCell>
-              <TableCell>{formatCurrency(recipe.totalCost)}</TableCell>
-              <TableCell>{formatCurrency(recipe.sellingPrice)}</TableCell>
+              <TableCell>{formatCurrency(recipe.totalCost, recipe.currency)}</TableCell>
+              <TableCell>{formatCurrency(recipe.sellingPrice, recipe.currency)}</TableCell>
               <TableCell>
                 <span className={getMarginColor(recipe.profitMargin)}>
                   {formatPercent(recipe.profitMargin)}

@@ -4,14 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Table,
   TableBody,
   TableCell,
@@ -169,13 +161,12 @@ export const RecipeDetailModal = ({
                   </CardHeader>
                   <CardContent>
                     <div
-                      className={`text-2xl font-bold ${
-                        (selectedRecipe.profitMargin || 0) < 20
-                          ? "text-destructive"
-                          : (selectedRecipe.profitMargin || 0) < 30
-                            ? "text-yellow-700 dark:text-yellow-500"
-                            : "text-green-700 dark:text-green-500"
-                      }`}
+                      className={`text-2xl font-bold ${(selectedRecipe.profitMargin || 0) < 20
+                        ? "text-destructive"
+                        : (selectedRecipe.profitMargin || 0) < 30
+                          ? "text-yellow-700 dark:text-yellow-500"
+                          : "text-green-700 dark:text-green-500"
+                        }`}
                     >
                       {selectedRecipe.profitMargin?.toFixed(1)}%
                     </div>

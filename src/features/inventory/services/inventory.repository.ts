@@ -28,7 +28,7 @@ class InventoryRepository {
     }
     // "adjustment" uses the raw quantity value as a delta (can be positive or negative)
 
-    return await db.transaction().execute(async (trx) => {
+    return await db.transaction().execute(async (trx: any) => {
       // 1. Insert Transaction
       const result = await trx
         .insertInto("inventory_transactions")
@@ -48,7 +48,7 @@ class InventoryRepository {
       // 2. Update Ingredient Stock
       await trx
         .updateTable("ingredients")
-        .set((_eb) => ({
+        .set((_eb: any) => ({
           current_stock: sql`current_stock + ${delta}`,
           last_updated: sql`CURRENT_TIMESTAMP`,
         }))
@@ -86,7 +86,7 @@ class InventoryRepository {
       .orderBy("created_at", "desc")
       .execute();
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       id: row.id,
       ingredientId: row.ingredient_id,
       transactionType: row.transaction_type,
@@ -107,7 +107,7 @@ class InventoryRepository {
       .limit(limit)
       .execute();
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       id: row.id,
       ingredientId: row.ingredient_id,
       transactionType: row.transaction_type,
@@ -131,7 +131,7 @@ class InventoryRepository {
       .orderBy(sql`(current_stock / NULLIF(min_stock_level, 0))`, "asc") // Prevent div by zero if min_stock is 0
       .execute();
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       category: row.category,

@@ -88,6 +88,7 @@ export interface Recipe {
   prepTimeMinutes: number | null;
   cookingInstructions: string | null;
   sellingPrice: number | null;
+  currency: string;
   targetCostPercentage: number | null;
   totalCost: number | null;
   profitMargin: number | null;
@@ -138,6 +139,21 @@ export interface RecipeIngredient {
 
 // Inventory Transaction Types
 export type TransactionType = "purchase" | "usage" | "adjustment" | "waste";
+
+export interface CreateTransactionInput {
+  ingredientId: number;
+  transactionType: TransactionType;
+  quantity: number;
+  costPerUnit: number | null;
+  totalCost: number | null;
+  reference: string | null;
+  notes: string | null;
+}
+
+export interface CreateTransactionResult {
+  transaction: InventoryTransaction;
+  updatedIngredient: Ingredient;
+}
 
 export interface InventoryTransaction {
   id: number;

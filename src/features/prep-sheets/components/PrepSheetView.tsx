@@ -19,6 +19,13 @@ import {
 } from "@/components/ui/table";
 import type { PrepSheet } from "@/features/prep-sheets/types";
 
+interface PrepSheetRecipe {
+  id: number;
+  recipeName: string;
+  requestedServings: number;
+  recipeId: number;
+}
+
 interface PrepSheetViewProps {
   sheet: PrepSheet;
   onClose: () => void;
@@ -69,7 +76,7 @@ export function PrepSheetView({
           <div>
             <h3 className="text-lg font-semibold mb-3">Planned Production</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:grid-cols-2">
-              {sheet.recipes.map((recipe) => (
+              {(sheet.recipes as unknown as PrepSheetRecipe[]).map((recipe) => (
                 <div
                   key={recipe.id}
                   className="flex justify-between items-center bg-muted/30 p-3 rounded-md border print:border-gray-200"

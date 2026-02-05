@@ -120,7 +120,8 @@ export const RecipesPage = () => {
             <div className="p-6 overflow-y-auto flex-1">
               <RecipeForm
                 onSubmit={handleCreateOrUpdate}
-                initialData={editingRecipe || undefined}
+                // biome-ignore lint/suspicious/noExplicitAny: Currency enum mismatch
+                initialData={editingRecipe as any || undefined}
                 onCancel={handleCloseForm}
                 isLoading={isLoading}
               />
