@@ -1,1 +1,0 @@
-export { RecipeDetailModal } from "./RecipeDetailModal";

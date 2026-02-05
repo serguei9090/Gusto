@@ -24,7 +24,7 @@ export async function getDatabase(): Promise<Database> {
 async function initSchema(db: Database) {
   // Check if tables exist
   const result = await db.select<Array<{ name: string }>>(
-    "SELECT name FROM sqlite_master WHERE type='table' AND name='ingredients'"
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='ingredients'",
   );
 
   if (result.length === 0) {

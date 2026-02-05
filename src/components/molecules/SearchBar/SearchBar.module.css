@@ -1,19 +1,19 @@
 .wrapper {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
+  position: relative;
+  width: 100%;
+  max-width: 400px;
 }
 
 .input {
-    padding-left: 2.5rem !important;
+  padding-left: 2.5rem !important;
 }
 
 .icon {
-    position: absolute;
-    left: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--color-neutral-500);
-    pointer-events: none;
-    z-index: 1;
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-neutral-500);
+  pointer-events: none;
+  z-index: 1;
 }

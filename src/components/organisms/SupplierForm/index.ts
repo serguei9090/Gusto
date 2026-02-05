@@ -1,1 +1,0 @@
-export { SupplierForm } from "./SupplierForm";

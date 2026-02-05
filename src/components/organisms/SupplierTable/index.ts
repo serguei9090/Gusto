@@ -1,1 +1,0 @@
-export { SupplierTable } from "./SupplierTable";

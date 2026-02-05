@@ -1,1 +1,0 @@
-export { IngredientForm } from "./IngredientForm";

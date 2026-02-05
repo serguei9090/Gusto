@@ -1,1 +1,5 @@
-export type { CreateTransactionInput, InventoryTransaction, TransactionType } from "@/types/ingredient.types";
+export type {
+  CreateTransactionInput,
+  InventoryTransaction,
+  TransactionType,
+} from "@/types/ingredient.types";
