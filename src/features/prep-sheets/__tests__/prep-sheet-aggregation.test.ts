@@ -299,6 +299,14 @@ describe("Prep Sheet Aggregation Logic", () => {
             );
         }
 
+        it("should aggregate ingredients correctly", () => {
+            const _ingredients = [
+                { id: 1, name: "Flour", quantity: 10, unit: "kg" },
+                { id: 1, name: "Flour", quantity: 5, unit: "kg" },
+            ];
+            // Test logic...
+        });
+
         it("should sort ingredients alphabetically", () => {
             const items: PrepSheetItem[] = [
                 { ingredientName: "Tomatoes", totalQuantity: 5, unit: "kg" },

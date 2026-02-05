@@ -1,9 +1,18 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// Use require for JSON to avoid TypeScript issues
-const enTranslation = require('./locales/en/translation.json');
-const esTranslation = require('./locales/es/translation.json');
+import en from "../locales/en/translation.json";
+import es from "../locales/es/translation.json";
+
+export const defaultNS = "translation";
+export const resources = {
+    en: {
+        translation: en,
+    },
+    es: {
+        translation: es,
+    },
+} as const;
 
 // Define supported languages
 export const SUPPORTED_LANGUAGES = ['en', 'es'] as const;
@@ -21,10 +30,10 @@ i18n
     .init({
         resources: {
             en: {
-                translation: enTranslation,
+                translation: en,
             },
             es: {
-                translation: esTranslation,
+                translation: es,
             },
         },
         lng: 'en', // Default language

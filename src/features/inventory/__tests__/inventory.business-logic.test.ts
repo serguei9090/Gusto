@@ -110,8 +110,31 @@ describe("Inventory Transaction Logic", () => {
             });
 
             it("should handle large positive adjustments", () => {
-                const delta = calculateStockDelta("adjustment", 100);
-                expect(delta).toBe(100);
+                // This test is for a scenario where we might have a helper function
+                // that calculates stock movement, and the delta itself might not be directly used
+                // in the assertion, but rather the resulting stock.
+                // For the purpose of this test, we'll simulate a stock movement function.
+                const currentStock = 50;
+                const incomingStock = 100; // This would be the 'quantity' for an adjustment
+
+                // A placeholder function to simulate stock movement
+                const calculateStockMovement = (
+                    current: number,
+                    incoming: number,
+                    logic: (c: number, i: number) => number
+                ) => {
+                    const _delta = calculateStockDelta("adjustment", incoming); // The delta is calculated but not directly asserted
+                    return { newStock: logic(current, _delta) };
+                };
+
+                const result = calculateStockMovement(
+                    currentStock,
+                    incomingStock,
+                    (current, incoming) => current + incoming // Simple addition logic for test
+                );
+                // We aren't testing delta here, just result total
+                // _delta unused
+                expect(result.newStock).toBe(150);
             });
 
             it("should handle large negative adjustments", () => {

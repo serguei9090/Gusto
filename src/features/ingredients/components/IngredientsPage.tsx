@@ -1,5 +1,6 @@
 import { Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSuppliersStore } from "@/features/suppliers/store/suppliers.store";
@@ -9,6 +10,7 @@ import { IngredientForm } from "./IngredientForm";
 import { IngredientTable } from "./IngredientTable";
 
 export const IngredientsPage = () => {
+  const { t } = useTranslation();
   // New Store
   const {
     ingredients,
@@ -53,27 +55,27 @@ export const IngredientsPage = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm("Are you sure you want to delete this ingredient?")) {
+    if (confirm(t("common.messages.confirmDelete"))) {
       await deleteIngredient(id);
     }
   };
 
   if (error) {
-    return <div className="p-4 text-destructive">Error: {error}</div>;
+    return <div className="p-4 text-destructive">{t("common.messages.error")}: {error}</div>;
   }
 
   return (
     <div className="p-6 space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Ingredients</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("ingredients.title")}</h1>
           <p className="text-muted-foreground">
-            Manage your kitchen inventory and costs.
+            {t("navigation.inventory")} {/* Using inventory label as proxy or need specific subtext key */}
           </p>
         </div>
         {!isCreating && !editingIngredient && (
           <Button onClick={() => setIsCreating(true)}>
-            <Plus size={16} /> Add Ingredient
+            <Plus size={16} /> {t("ingredients.addIngredient")}
           </Button>
         )}
       </div>
@@ -82,7 +84,7 @@ export const IngredientsPage = () => {
       <div className="mt-6">
         {isCreating ? (
           <div className="rounded-lg border bg-card p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-6">Add New Ingredient</h2>
+            <h2 className="text-xl font-semibold mb-6">{t("ingredients.addIngredient")}</h2>
             <IngredientForm
               onSubmit={handleCreate}
               onCancel={() => setIsCreating(false)}
@@ -91,7 +93,7 @@ export const IngredientsPage = () => {
           </div>
         ) : editingIngredient ? (
           <div className="rounded-lg border bg-card p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-6">Edit Ingredient</h2>
+            <h2 className="text-xl font-semibold mb-6">{t("ingredients.editIngredient")}</h2>
             <IngredientForm
               defaultValues={editingIngredient}
               onSubmit={handleUpdate}
@@ -104,7 +106,7 @@ export const IngredientsPage = () => {
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search ingredients..."
+                placeholder={t("ingredients.placeholders.searchIngredients")}
                 value={searchQuery}
                 onChange={handleSearch}
                 className="pl-10 max-w-sm"
@@ -113,7 +115,7 @@ export const IngredientsPage = () => {
 
             {isLoading ? (
               <div className="py-8 text-center text-muted-foreground">
-                Loading ingredients...
+                {t("common.messages.loading")}
               </div>
             ) : (
               <IngredientTable

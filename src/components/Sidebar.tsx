@@ -1,15 +1,12 @@
-```javascript
 import {
   ChefHat,
   ClipboardList,
   LayoutDashboard,
   Package,
-  Search,
-  ChevronLeft,
-  ChevronRight,
   Settings,
+  ShoppingBasket,
+  Users,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { useTranslation } from "@/hooks/useTranslation";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
@@ -37,7 +34,6 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
     { id: "inventory", label: t("navigation.inventory"), icon: Package },
     { id: "suppliers", label: t("navigation.suppliers"), icon: Users },
     { id: "prepsheets", label: t("navigation.prepSheets"), icon: ClipboardList },
-    { id: "prepsheets", label: t("navigation.prepSheets"), icon: ClipboardList },
     { id: "settings", label: t("navigation.settings"), icon: Settings },
   ];
 
@@ -57,13 +53,12 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
             onClick={() => onChangeView(item.id as View)}
             type="button"
             className={`
-w - full flex items - center gap - 3 px - 3 py - 2 rounded - md text - sm font - medium transition - colors
-              ${
-  currentView === item.id
-    ? "bg-primary text-primary-foreground"
-    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-}
-`}
+              w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors
+              ${currentView === item.id
+                ? "bg-green-100 text-green-900 shadow-sm"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }
+            `}
           >
             <item.icon size={20} />
             {item.label}

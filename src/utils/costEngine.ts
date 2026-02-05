@@ -27,14 +27,14 @@ export function calculateIngredientCost(
   }
 }
 
-import { convertCurrency, type Currency } from "./currency";
+import { type Currency } from "./currency";
 
 // ... previous interfaces...
 
 export function calculateRecipeTotal(
   items: CostInputItem[],
-  recipeCurrency: Currency = "USD",
-  exchangeRates?: Record<string, number>
+  _recipeCurrency: Currency = "USD",
+  _exchangeRates?: Record<string, number>
 ) {
   let totalCost = 0;
   const errors: string[] = [];

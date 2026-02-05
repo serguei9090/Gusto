@@ -54,6 +54,27 @@
         "reports": "Informes",
         "settings": "Configuración"
     },
+    "settings": {
+        "title": "Configuración",
+        "subtitle": "Gestionar lógica y preferencias.",
+        "general": {
+            "title": "Configuración General",
+            "description": "Preferencias de aplicación y localización.",
+            "languageLabel": "Idioma / Language",
+            "languageHelp": "Seleccione su idioma preferido.",
+            "selectLanguage": "Seleccionar idioma"
+        },
+        "currency": {
+            "title": "Configuración de Moneda",
+            "description": "Configurar tasas de cambio y moneda de referencia.",
+            "resetDefaults": "Restablecer valores",
+            "baseLabel": "Moneda de Referencia (Base)",
+            "baseHelp": "La moneda utilizada como base 1.00 para los cálculos.",
+            "selectCurrency": "Seleccionar moneda",
+            "exchangeRatesLabel": "Tasas de Cambio (Relativo a {{currency}})",
+            "baseBadge": "Base"
+        }
+    },
     "ingredients": {
         "title": "Ingredientes",
         "addIngredient": "Agregar Ingrediente",
@@ -132,11 +153,17 @@
     "dashboard": {
         "title": "Panel de Control",
         "welcomeMessage": "Bienvenido a la Gestión de Restaurantes",
+        "stockValue": "Valor del Stock",
+        "avgMargin": "Margen Promedio",
         "stats": {
             "totalIngredients": "Ingredientes Totales",
             "totalRecipes": "Recetas Totales",
             "lowStockItems": "Artículos con Stock Bajo",
-            "totalSuppliers": "Proveedores Totales"
+            "totalSuppliers": "Proveedores Totales",
+            "totalInventoryValue": "Valor total del inventario",
+            "belowMinLevel": "Artículos por debajo del nivel mínimo",
+            "acrossAllRecipes": "En todas las recetas",
+            "activeRecipes": "Recetas activas"
         }
     },
     "currency": {

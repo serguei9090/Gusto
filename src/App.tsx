@@ -8,7 +8,6 @@ import { PrepSheetsPage } from "@/features/prep-sheets";
 import { RecipesPage } from "./features/recipes/components/RecipesPage";
 import { SuppliersPage } from "@/features/suppliers";
 import { SettingsPage } from "./features/settings/SettingsPage";
-import { Toaster } from "@/components/ui/toaster";
 
 function App() {
   const [currentView, setCurrentView] = useState<View>("dashboard"); // Default to Dashboard in v1
@@ -28,7 +27,7 @@ function App() {
       case "prepsheets":
         return <PrepSheetsPage />;
       case "settings":
-        return <div style={{ padding: 20 }}>Settings</div>;
+        return <SettingsPage />;
       default:
         return <IngredientsPage />;
     }

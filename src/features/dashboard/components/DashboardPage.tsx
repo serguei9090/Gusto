@@ -1,11 +1,13 @@
 import { AlertTriangle, ChefHat, Package, Percent } from "lucide-react";
 import { useEffect } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useDashboardStore } from "@/features/dashboard/store/dashboard.store";
 import { StatCard } from "./StatCard";
 import { TopRecipesCard } from "./TopRecipesCard";
 import { UrgentReordersCard } from "./UrgentReordersCard";
 
 export const DashboardPage = () => {
+  const { t } = useTranslation();
   const {
     summary,
     urgentReorders,
@@ -25,34 +27,34 @@ export const DashboardPage = () => {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t("dashboard.title")}</h2>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Stock Value"
+          title={t("dashboard.stockValue")}
           value={`$${summary?.totalInventoryValue.toFixed(2) || "0.00"}`}
           icon={Package}
-          description="Total inventory value"
+          description={t("dashboard.stats.totalInventoryValue")}
         />
         <StatCard
-          title="Low Stock Items"
+          title={t("dashboard.stats.lowStockItems")}
           value={summary?.lowStockCount || 0}
           icon={AlertTriangle}
-          description="Items below minimum level"
+          description={t("dashboard.stats.belowMinLevel")}
           className={summary?.lowStockCount ? "border-destructive/50" : ""}
         />
         <StatCard
-          title="Avg. Margin"
+          title={t("dashboard.avgMargin")}
           value={`${summary?.avgProfitMargin.toFixed(1) || 0}%`}
           icon={Percent}
-          description="Across all recipes"
+          description={t("dashboard.stats.acrossAllRecipes")}
         />
         <StatCard
-          title="Total Recipes"
+          title={t("dashboard.stats.totalRecipes")}
           value={summary?.recipeCount || 0}
           icon={ChefHat}
-          description="Active recipes"
+          description={t("dashboard.stats.activeRecipes")}
         />
       </div>
 

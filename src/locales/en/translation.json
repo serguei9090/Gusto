@@ -54,6 +54,27 @@
         "reports": "Reports",
         "settings": "Settings"
     },
+    "settings": {
+        "title": "Settings",
+        "subtitle": "Manage logic and preferences.",
+        "general": {
+            "title": "General Settings",
+            "description": "Application preferences and localization.",
+            "languageLabel": "Language / Idioma",
+            "languageHelp": "Select your preferred language.",
+            "selectLanguage": "Select language"
+        },
+        "currency": {
+            "title": "Currency Settings",
+            "description": "Configure exchange rates and reference currency.",
+            "resetDefaults": "Reset Defaults",
+            "baseLabel": "Reference (Base) Currency",
+            "baseHelp": "The currency used as the 1.00 baseline for calculations.",
+            "selectCurrency": "Select currency",
+            "exchangeRatesLabel": "Exchange Rates (Relative to {{currency}})",
+            "baseBadge": "Base"
+        }
+    },
     "ingredients": {
         "title": "Ingredients",
         "addIngredient": "Add Ingredient",
@@ -132,11 +153,17 @@
     "dashboard": {
         "title": "Dashboard",
         "welcomeMessage": "Welcome to Restaurant Management",
+        "stockValue": "Stock Value",
+        "avgMargin": "Avg. Margin",
         "stats": {
             "totalIngredients": "Total Ingredients",
             "totalRecipes": "Total Recipes",
             "lowStockItems": "Low Stock Items",
-            "totalSuppliers": "Total Suppliers"
+            "totalSuppliers": "Total Suppliers",
+            "totalInventoryValue": "Total inventory value",
+            "belowMinLevel": "Items below minimum level",
+            "acrossAllRecipes": "Across all recipes",
+            "activeRecipes": "Active recipes"
         }
     },
     "currency": {
