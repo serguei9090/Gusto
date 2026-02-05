@@ -5,8 +5,8 @@ import { IngredientsPage } from "@/components/pages/IngredientsPage";
 import { RecipesPage } from "@/features/recipes";
 import { InventoryPage } from "@/features/inventory";
 import { SuppliersPage } from "@/features/suppliers";
-import { DashboardPage } from "@/components/pages/DashboardPage";
-import { PrepSheetsPage } from "@/components/pages/PrepSheetsPage";
+import { DashboardPage } from "@/features/dashboard";
+import { PrepSheetsPage } from "@/features/prep-sheets";
 
 function App() {
     const [currentView, setCurrentView] = useState<View>("dashboard"); // Default to Dashboard in v1

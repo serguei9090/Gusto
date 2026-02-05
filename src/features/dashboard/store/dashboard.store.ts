@@ -1,10 +1,11 @@
 import { create } from "zustand";
-import { dashboardService, type DashboardSummary, type UrgentReorderItem } from "@/services/dashboard.service";
+import { dashboardRepository } from "../services/dashboard.repository";
+import type { DashboardSummary, UrgentReorderItem, TopRecipeItem } from "../types";
 
 interface DashboardStore {
     summary: DashboardSummary | null;
     urgentReorders: UrgentReorderItem[];
-    topRecipes: any[];
+    topRecipes: TopRecipeItem[];
     isLoading: boolean;
     error: string | null;
 
@@ -22,9 +23,9 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
         set({ isLoading: true, error: null });
         try {
             const [summary, urgentReorders, topRecipes] = await Promise.all([
-                dashboardService.getSummary(),
-                dashboardService.getUrgentReorders(),
-                dashboardService.getTopRecipes()
+                dashboardRepository.getSummary(),
+                dashboardRepository.getUrgentReorders(),
+                dashboardRepository.getTopRecipes()
             ]);
 
             set({
@@ -33,11 +34,11 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
                 topRecipes,
                 isLoading: false
             });
-        } catch (error) {
+        } catch (err) {
             set({
-                error: error instanceof Error ? error.message : "Failed to load dashboard",
+                error: err instanceof Error ? err.message : "Failed to load dashboard data",
                 isLoading: false
             });
         }
-    }
+    },
 }));

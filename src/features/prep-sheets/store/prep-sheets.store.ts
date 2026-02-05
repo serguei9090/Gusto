@@ -1,15 +1,15 @@
 import { create } from "zustand";
-import { prepSheetService } from "@/services/prepSheet.service";
-import type { PrepSheet, PrepSheetFormData } from "@/types/prepSheet.types";
+import { prepSheetsRepository } from "../services/prep-sheets.repository";
+import type { PrepSheet, PrepSheetFormData } from "../types";
 
-interface PrepSheetStore {
-    // State
+interface PrepSheetsState {
+    // Data
     prepSheets: PrepSheet[];
     currentSheet: PrepSheet | null;
     isLoading: boolean;
     error: string | null;
 
-    // Builder state
+    // Builder State
     builderSelections: { recipeId: number; servings: number }[];
 
     // Actions
@@ -19,36 +19,34 @@ interface PrepSheetStore {
     deleteSheet: (id: number) => Promise<void>;
     setCurrentSheet: (sheet: PrepSheet | null) => void;
 
-    // Builder actions
+    // Builder Actions
     addRecipeToBuilder: (recipeId: number, servings: number) => void;
     updateBuilderServings: (recipeId: number, servings: number) => void;
     removeRecipeFromBuilder: (recipeId: number) => void;
     clearBuilder: () => void;
 }
 
-export const usePrepSheetStore = create<PrepSheetStore>((set, get) => ({
-    // Initial state
+export const usePrepSheetsStore = create<PrepSheetsState>((set, get) => ({
     prepSheets: [],
     currentSheet: null,
     isLoading: false,
     error: null,
     builderSelections: [],
 
-    // Actions
     fetchPrepSheets: async () => {
         set({ isLoading: true, error: null });
         try {
-            const sheets = await prepSheetService.getAll();
-            set({ prepSheets: sheets, isLoading: false });
+            const data = await prepSheetsRepository.getAll();
+            set({ prepSheets: data, isLoading: false });
         } catch (err) {
             set({ error: String(err), isLoading: false });
         }
     },
 
-    generateSheet: async (formData: PrepSheetFormData) => {
+    generateSheet: async (formData) => {
         set({ isLoading: true, error: null });
         try {
-            const sheet = await prepSheetService.generate(formData);
+            const sheet = await prepSheetsRepository.generate(formData);
             set({ currentSheet: sheet, isLoading: false });
             return sheet;
         } catch (err) {
@@ -57,13 +55,11 @@ export const usePrepSheetStore = create<PrepSheetStore>((set, get) => ({
         }
     },
 
-    saveSheet: async (sheet: PrepSheet) => {
+    saveSheet: async (sheet) => {
         set({ isLoading: true, error: null });
         try {
-            const id = await prepSheetService.save(sheet);
-            // Refresh list
-            const sheets = await prepSheetService.getAll();
-            set({ prepSheets: sheets, isLoading: false });
+            const id = await prepSheetsRepository.save(sheet);
+            await get().fetchPrepSheets(); // Refresh
             return id;
         } catch (err) {
             set({ error: String(err), isLoading: false });
@@ -71,12 +67,11 @@ export const usePrepSheetStore = create<PrepSheetStore>((set, get) => ({
         }
     },
 
-    deleteSheet: async (id: number) => {
+    deleteSheet: async (id) => {
         set({ isLoading: true, error: null });
         try {
-            await prepSheetService.delete(id);
-            const sheets = await prepSheetService.getAll();
-            set({ prepSheets: sheets, isLoading: false });
+            await prepSheetsRepository.delete(id);
+            await get().fetchPrepSheets();
         } catch (err) {
             set({ error: String(err), isLoading: false });
         }
@@ -84,34 +79,35 @@ export const usePrepSheetStore = create<PrepSheetStore>((set, get) => ({
 
     setCurrentSheet: (sheet) => set({ currentSheet: sheet }),
 
-    // Builder actions
     addRecipeToBuilder: (recipeId, servings) => {
-        const existing = get().builderSelections.find(s => s.recipeId === recipeId);
+        const { builderSelections } = get();
+        const existing = builderSelections.find((s) => s.recipeId === recipeId);
         if (existing) {
-            // Update servings if already exists
             set({
-                builderSelections: get().builderSelections.map(s =>
+                builderSelections: builderSelections.map((s) =>
                     s.recipeId === recipeId ? { ...s, servings } : s
-                )
+                ),
             });
         } else {
-            set({ builderSelections: [...get().builderSelections, { recipeId, servings }] });
+            set({ builderSelections: [...builderSelections, { recipeId, servings }] });
         }
     },
 
     updateBuilderServings: (recipeId, servings) => {
         set({
-            builderSelections: get().builderSelections.map(s =>
+            builderSelections: get().builderSelections.map((s) =>
                 s.recipeId === recipeId ? { ...s, servings } : s
-            )
+            ),
         });
     },
 
     removeRecipeFromBuilder: (recipeId) => {
         set({
-            builderSelections: get().builderSelections.filter(s => s.recipeId !== recipeId)
+            builderSelections: get().builderSelections.filter(
+                (s) => s.recipeId !== recipeId
+            ),
         });
     },
 
-    clearBuilder: () => set({ builderSelections: [], currentSheet: null })
+    clearBuilder: () => set({ builderSelections: [], currentSheet: null }),
 }));
