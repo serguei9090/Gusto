@@ -3,18 +3,26 @@ import { Label } from "../../atoms/Label";
 import { Input, type InputProps } from "../../atoms/Input";
 import styles from "./FormField.module.css";
 
-export interface FormFieldProps extends InputProps {
+export interface FormFieldProps extends Omit<InputProps, 'children'> {
     label: string;
+    children?: React.ReactNode;
 }
 
 export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
-    ({ label, id, required, className, ...props }, ref) => {
+    ({ label, id, required, className, children, ...props }, ref) => {
         return (
             <div className={`${styles.wrapper} ${className || ""}`}>
                 <Label htmlFor={id} required={required}>
                     {label}
                 </Label>
-                <Input id={id} ref={ref} fullWidth {...props} />
+                {children ? (
+                    <div className={styles.childrenWrapper}>
+                        {children}
+                        {props.error && <span className={styles.errorText}>{props.error}</span>}
+                    </div>
+                ) : (
+                    <Input id={id} ref={ref} fullWidth {...props} />
+                )}
             </div>
         );
     }

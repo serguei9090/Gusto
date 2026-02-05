@@ -91,9 +91,15 @@ export const RecipeForm = ({ onSubmit, initialData, onCancel, isLoading }: Recip
         e.target.value = ""; // Reset Select
     };
 
-    const submitHandler = handleSubmit(async (data) => {
-        await onSubmit(data as RecipeFormData);
+    const submitHandler = handleSubmit((data) => {
+        onSubmit(data);
     });
+
+    const getMarginClass = (margin: number) => {
+        if (margin < 20) return styles.marginLow;
+        if (margin < 30) return styles.marginMed;
+        return styles.marginHigh;
+    };
 
     return (
         <form onSubmit={submitHandler} className={styles.container}>
@@ -105,7 +111,7 @@ export const RecipeForm = ({ onSubmit, initialData, onCancel, isLoading }: Recip
                     </FormField>
 
                     <FormField label="Category">
-                        <select {...register("category")} className="p-2 border rounded w-full bg-white">
+                        <select {...register("category")} className={styles.select}>
                             <option value="">Select Category</option>
                             {recipeCategorySchema.options.map(cat => (
                                 <option key={cat} value={cat}>{cat}</option>
@@ -121,14 +127,23 @@ export const RecipeForm = ({ onSubmit, initialData, onCancel, isLoading }: Recip
                         <Input type="number" {...register("prepTimeMinutes", { valueAsNumber: true })} />
                     </FormField>
                 </div>
+
+                <div className={styles.fullWidth}>
+                    <FormField label="Description">
+                        <textarea
+                            {...register("description")}
+                            className={styles.textarea}
+                            placeholder="Brief overview of the dish..."
+                        />
+                    </FormField>
+                </div>
             </div>
 
             <div className={styles.section}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
                     <h3 className={styles.sectionTitle}>Ingredients</h3>
                     <div>
-                        {/* Simple Add Selector */}
-                        <select onChange={handleAddIngredient} className="p-2 border rounded text-sm mb-2">
+                        <select onChange={handleAddIngredient} className={styles.ingSelect}>
                             <option value="">+ Add Ingredient...</option>
                             {allIngredients.map(ing => (
                                 <option key={ing.id} value={ing.id}>{ing.name} ({ing.unitOfMeasure})</option>
@@ -137,78 +152,86 @@ export const RecipeForm = ({ onSubmit, initialData, onCancel, isLoading }: Recip
                     </div>
                 </div>
 
-                <table className={styles.ingredientsTable}>
-                    <thead>
-                        <tr>
-                            <th className={styles.th}>Ingredient</th>
-                            <th className={styles.th} style={{ width: 100 }}>Qty</th>
-                            <th className={styles.th} style={{ width: 120 }}>Unit</th>
-                            <th className={styles.th} style={{ textAlign: "right" }}>Cost</th>
-                            <th className={styles.th} style={{ width: 50 }}></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {fields.map((field, index) => (
-                            <tr key={field.id}>
-                                <td className={styles.td}>{field.name || "Loading..."}</td>
-                                <td className={styles.td}>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        {...register(`ingredients.${index}.quantity`, { valueAsNumber: true })}
-                                    />
-                                </td>
-                                <td className={styles.td}>
-                                    <select
-                                        {...register(`ingredients.${index}.unit`)}
-                                        className="w-full p-2 border rounded text-sm bg-transparent"
-                                    >
-                                        {unitOfMeasureSchema.options.map(u => (
-                                            <option key={u} value={u}>{u}</option>
-                                        ))}
-                                    </select>
-                                </td>
-                                <td className={styles.td} style={{ textAlign: "right" }}>
-                                    {/* Calculated Row Cost Display */}
-                                    {/* Note: This logic duplicates slightly but is purely for display */}
-                                    <CostDisplay
-                                        quantity={watchedIngredients[index]?.quantity || 0}
-                                        unit={watchedIngredients[index]?.unit || "kg"}
-                                        basePrice={watchedIngredients[index]?.price || 0}
-                                        baseUnit={watchedIngredients[index]?.ingredientUnit || "kg"}
-                                    />
-                                </td>
-                                <td className={styles.td}>
-                                    <button
-                                        type="button"
-                                        onClick={() => remove(index)}
-                                        className="text-red-500 hover:bg-red-50 p-1 rounded"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                        {fields.length === 0 && (
+                <div className={styles.tableWrapper}>
+                    <table className={styles.ingredientsTable}>
+                        <thead>
                             <tr>
-                                <td colSpan={5} className="text-center p-4 text-gray-500 italic">
-                                    No ingredients added yet.
-                                </td>
+                                <th className={styles.th}>Ingredient</th>
+                                <th className={styles.th} style={{ width: 100 }}>Qty</th>
+                                <th className={styles.th} style={{ width: 120 }}>Unit</th>
+                                <th className={styles.th} style={{ textAlign: "right" }}>Cost</th>
+                                <th className={styles.th} style={{ width: 50 }}></th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {fields.map((field, index) => (
+                                <tr key={field.id}>
+                                    <td className={styles.td}>{field.name || "Loading..."}</td>
+                                    <td className={styles.td}>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            {...register(`ingredients.${index}.quantity`, { valueAsNumber: true })}
+                                        />
+                                    </td>
+                                    <td className={styles.td}>
+                                        <select
+                                            {...register(`ingredients.${index}.unit`)}
+                                            className={styles.selectSmall}
+                                        >
+                                            {unitOfMeasureSchema.options.map(u => (
+                                                <option key={u} value={u}>{u}</option>
+                                            ))}
+                                        </select>
+                                    </td>
+                                    <td className={styles.td} style={{ textAlign: "right" }}>
+                                        <CostDisplay
+                                            quantity={watchedIngredients[index]?.quantity || 0}
+                                            unit={watchedIngredients[index]?.unit || "kg"}
+                                            basePrice={watchedIngredients[index]?.price || 0}
+                                            baseUnit={watchedIngredients[index]?.ingredientUnit || "kg"}
+                                        />
+                                    </td>
+                                    <td className={styles.td}>
+                                        <button
+                                            type="button"
+                                            onClick={() => remove(index)}
+                                            className={styles.removeBtn}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {fields.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className={styles.emptyTable}>
+                                        No ingredients added yet.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Cooking Instructions</h3>
+                <textarea
+                    {...register("cookingInstructions")}
+                    className={styles.textareaLarge}
+                    placeholder="Step by step preparation guide..."
+                />
             </div>
 
             <div className={styles.section}>
                 <h3 className={styles.sectionTitle}>Cost & Profit</h3>
                 <div className={styles.grid}>
                     <FormField label="Selling Price" error={errors.sellingPrice?.message}>
-                        <div style={{ position: "relative" }}>
-                            <span style={{ position: "absolute", left: 8, top: 8, color: "#888" }}>$</span>
+                        <div className={styles.inputWithPrefix}>
+                            <span className={styles.prefix}>$</span>
                             <Input
                                 type="number"
-                                style={{ paddingLeft: "1.5rem" }}
                                 step="0.01"
                                 {...register("sellingPrice", { valueAsNumber: true })}
                             />
@@ -216,37 +239,34 @@ export const RecipeForm = ({ onSubmit, initialData, onCancel, isLoading }: Recip
                     </FormField>
 
                     <FormField label="Target Food Cost %">
-                        <Button type="button" variant="ghost" size="sm" onClick={() => setValue("targetCostPercentage", 30)}>
-                            Set 30%
-                        </Button>
-                        <Input
-                            type="number"
-                            {...register("targetCostPercentage", { valueAsNumber: true })}
-                            placeholder="e.g. 30"
-                        />
+                        <div className={styles.targetCostRow}>
+                            <Input
+                                type="number"
+                                {...register("targetCostPercentage", { valueAsNumber: true })}
+                                placeholder="30"
+                            />
+                            <Button type="button" variant="ghost" size="sm" onClick={() => setValue("targetCostPercentage", 30)}>
+                                30%
+                            </Button>
+                        </div>
                     </FormField>
                 </div>
 
                 <div className={styles.summaryCard}>
                     <div className={styles.summaryItem}>
-                        <label>Total Recipe Cost</label>
-                        <div className="value">${totalCost.toFixed(2)}</div>
+                        <span className={styles.summaryLabel}>Total Recipe Cost</span>
+                        <div className={styles.summaryValue}>${totalCost.toFixed(2)}</div>
                     </div>
                     <div className={styles.summaryItem}>
-                        <label>Actual Margin</label>
-                        <div className={`value ${currentMargin < 20 ? styles.marginLow :
-                            currentMargin < 30 ? styles.marginMed : styles.marginHigh
-                            }`}>
+                        <span className={styles.summaryLabel}>Actual Margin</span>
+                        <div className={`${styles.summaryValue} ${getMarginClass(currentMargin)}`}>
                             {currentMargin.toFixed(1)}%
                         </div>
-                        <div style={{ fontSize: "0.8rem", color: "#666" }}>
-                            Food Cost: {watchedSellingPrice > 0 ? ((totalCost / watchedSellingPrice) * 100).toFixed(1) : 0}%
-                        </div>
                     </div>
                     <div className={styles.summaryItem}>
-                        <label>Suggested Price ({watchedTargetMargin}% Cost)</label>
-                        <div className="value" style={{ color: "#6366f1" }}>
-                            ${isFinite(suggestedPrice) ? suggestedPrice.toFixed(2) : "0.00"}
+                        <span className={styles.summaryLabel}>Suggested Price ({watchedTargetMargin}% Cost)</span>
+                        <div className={`${styles.summaryValue} ${styles.suggested}`}>
+                            ${Number.isFinite(suggestedPrice) ? suggestedPrice.toFixed(2) : "0.00"}
                         </div>
                     </div>
                 </div>
@@ -254,7 +274,9 @@ export const RecipeForm = ({ onSubmit, initialData, onCancel, isLoading }: Recip
 
             <div className={styles.actions}>
                 <Button variant="secondary" onClick={onCancel} type="button">Cancel</Button>
-                <Button variant="primary" type="submit" isLoading={isLoading}>Save Recipe</Button>
+                <Button variant="primary" type="submit" isLoading={isLoading}>
+                    {initialData?.name ? "Update Recipe" : "Save Recipe"}
+                </Button>
             </div>
         </form>
     );

@@ -83,11 +83,17 @@ export const SuppliersPage = () => {
 
             {error && <div className={styles.error}>{error}</div>}
 
-            <SupplierTable
-                suppliers={filteredSuppliers}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-            />
+            {filteredSuppliers.length > 0 ? (
+                <SupplierTable
+                    suppliers={filteredSuppliers}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                />
+            ) : (
+                <div className={styles.emptyState}>
+                    <p>No suppliers found. Add your first supplier to get started.</p>
+                </div>
+            )}
 
             {isFormOpen && (
                 <div className={styles.modalOverlay}>

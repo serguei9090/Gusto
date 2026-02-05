@@ -1,11 +1,11 @@
 import { create } from "zustand";
 import { recipesService } from "@/services/recipes.service";
-import type { Recipe, CreateRecipeInput, UpdateRecipeInput, RecipeCategory } from "@/types/ingredient.types";
+import type { Recipe, CreateRecipeInput, UpdateRecipeInput, RecipeCategory, RecipeWithIngredients } from "@/types/ingredient.types";
 
 interface RecipeStore {
     // State
     recipes: Recipe[];
-    selectedRecipe: Recipe | null;
+    selectedRecipe: RecipeWithIngredients | null;
     isLoading: boolean;
     error: string | null;
     searchQuery: string;
@@ -13,10 +13,11 @@ interface RecipeStore {
 
     // Actions
     fetchRecipes: () => Promise<void>;
+    fetchFullRecipe: (id: number) => Promise<void>;
     createRecipe: (data: CreateRecipeInput) => Promise<Recipe>;
     updateRecipe: (id: number, data: UpdateRecipeInput) => Promise<void>;
     deleteRecipe: (id: number) => Promise<void>;
-    selectRecipe: (recipe: Recipe | null) => void;
+    selectRecipe: (recipe: RecipeWithIngredients | null) => void;
     setSearchQuery: (query: string) => void;
     setCategoryFilter: (category: RecipeCategory | "all") => void;
 }
@@ -39,6 +40,19 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
         } catch (error) {
             set({
                 error: error instanceof Error ? error.message : "Failed to fetch recipes",
+                isLoading: false
+            });
+        }
+    },
+
+    fetchFullRecipe: async (id: number) => {
+        set({ isLoading: true, error: null });
+        try {
+            const selectedRecipe = await recipesService.getById(id);
+            set({ selectedRecipe, isLoading: false });
+        } catch (error) {
+            set({
+                error: error instanceof Error ? error.message : "Failed to fetch recipe details",
                 isLoading: false
             });
         }
@@ -73,14 +87,13 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
         try {
             await recipesService.update(id, data);
 
-            // Refresh logic: Optimistic or re-fetch?
             // Re-fetch since cost calculations involve backend logic triggers
             const recipes = await recipesService.getAll();
 
             set((state) => ({
                 recipes,
-                // Update selected if applicable (though selected requires detailed fetch)
-                selectedRecipe: state.selectedRecipe?.id === id ? { ...state.selectedRecipe, ...data } as Recipe : state.selectedRecipe,
+                // If the updated recipe was the selected one, clear it to force a re-fetch of details if needed
+                selectedRecipe: state.selectedRecipe?.id === id ? null : state.selectedRecipe,
                 isLoading: false
             }));
         } catch (error) {
