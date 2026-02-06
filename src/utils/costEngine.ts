@@ -1,4 +1,5 @@
 import { convertUnit } from "./conversions";
+import { convertCurrency } from "./currencyConverter";
 
 interface RecipeItemCost {
   cost: number;
@@ -11,6 +12,7 @@ interface CostInputItem {
   unit: string; // Unit used in recipe
   currentPricePerUnit: number; // Price of the ingredient
   ingredientUnit: string; // Unit the ingredient is priced in
+  currency: string;
 }
 
 export function calculateIngredientCost(
@@ -27,20 +29,15 @@ export function calculateIngredientCost(
   }
 }
 
-import type { Currency } from "./currency";
-
-// ... previous interfaces...
-
-export function calculateRecipeTotal(
+export async function calculateRecipeTotal(
   items: CostInputItem[],
   wasteBuffer = 0,
-  _recipeCurrency: Currency = "USD",
-  _exchangeRates?: Record<string, number>,
+  recipeCurrency = "USD",
 ) {
   let subtotal = 0;
   const errors: string[] = [];
 
-  items.forEach((item) => {
+  for (const item of items) {
     const result = calculateIngredientCost(
       item.quantity,
       item.unit,
@@ -51,9 +48,18 @@ export function calculateRecipeTotal(
     if (result.error) {
       errors.push(`${item.name}: ${result.error}`);
     } else {
-      subtotal += result.cost;
+      // Convert ingredient cost to recipe currency
+      const conversion = await convertCurrency(
+        result.cost,
+        item.currency || "USD",
+        recipeCurrency,
+      );
+      subtotal += conversion.converted;
+      if (conversion.error) {
+        errors.push(`${item.name}: ${conversion.error}`);
+      }
     }
-  });
+  }
 
   const wasteCost = (subtotal * wasteBuffer) / 100;
   const totalCost = subtotal + wasteCost;

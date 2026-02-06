@@ -34,7 +34,7 @@ describe("Cost Engine", () => {
   });
 
   describe("calculateRecipeTotal", () => {
-    it("should sum ingredient costs", () => {
+    it("should sum ingredient costs", async () => {
       const items = [
         {
           name: "Tomatoes",
@@ -42,6 +42,7 @@ describe("Cost Engine", () => {
           unit: "kg",
           currentPricePerUnit: 5,
           ingredientUnit: "kg",
+          currency: "USD",
         },
         {
           name: "Cheese",
@@ -49,15 +50,16 @@ describe("Cost Engine", () => {
           unit: "kg",
           currentPricePerUnit: 10,
           ingredientUnit: "kg",
+          currency: "USD",
         },
       ];
 
-      const result = calculateRecipeTotal(items);
+      const result = await calculateRecipeTotal(items);
       expect(result.totalCost).toBe(20);
       expect(result.errors).toEqual([]);
     });
 
-    it("should handle unit conversions", () => {
+    it("should handle unit conversions", async () => {
       const items = [
         {
           name: "Flour",
@@ -65,10 +67,11 @@ describe("Cost Engine", () => {
           unit: "g",
           currentPricePerUnit: 2,
           ingredientUnit: "kg",
+          currency: "USD",
         },
       ];
 
-      const result = calculateRecipeTotal(items);
+      const result = await calculateRecipeTotal(items);
       // 500g = 0.5kg at $2/kg = $1
       expect(result.totalCost).toBe(1);
     });

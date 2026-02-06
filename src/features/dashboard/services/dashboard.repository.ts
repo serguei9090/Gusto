@@ -5,14 +5,23 @@ import type {
   UrgentReorderItem,
 } from "@/features/dashboard/types";
 import { db } from "@/lib/db";
+import { calculateTotalWithConversions } from "@/utils/currencyConverter";
 
 class DashboardRepository {
   async getSummary(): Promise<DashboardSummary> {
-    // 1. Total Inventory Value
-    const inventoryValueResult = await db
+    // 1. Fetch all ingredients with their stock, price, and currency
+    const ingredients = await db
       .selectFrom("ingredients")
-      .select(sql<number>`SUM(current_stock * current_price)`.as("totalValue"))
-      .executeTakeFirst();
+      .select(["current_stock", "current_price", "currency"])
+      .execute();
+
+    // Calculate total inventory value with conversions
+    const { total } = await calculateTotalWithConversions(
+      ingredients.map((ing) => ({
+        amount: ing.current_stock * ing.current_price,
+        currency: ing.currency || "USD",
+      })),
+    );
 
     // 2. Low Stock Count
     const lowStockResult = await db
@@ -41,7 +50,7 @@ class DashboardRepository {
     // Actually, let's use a simpler query for now and refine if schema differs.
 
     return {
-      totalInventoryValue: inventoryValueResult?.totalValue || 0,
+      totalInventoryValue: total || 0,
       lowStockCount: Number(lowStockResult?.count || 0),
       avgProfitMargin: recipeStatsResult?.avgMargin || 0,
       recipeCount: Number(recipeStatsResult?.count || 0),

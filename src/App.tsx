@@ -8,18 +8,25 @@ import { DashboardPage } from "@/features/dashboard";
 import { IngredientsPage } from "@/features/ingredients";
 import { InventoryPage } from "@/features/inventory";
 import { PrepSheetsPage } from "@/features/prep-sheets";
+import { useCurrencyStore } from "@/features/settings/store/currency.store";
 import { SuppliersPage } from "@/features/suppliers";
 import { initDb } from "@/lib/db";
 import { RecipesPage } from "./features/recipes/components/RecipesPage";
+import { CurrencySettingsPage } from "./features/settings/pages/CurrencySettingsPage";
 import { SettingsPage } from "./features/settings/SettingsPage";
 
 function App() {
   const [currentView, setCurrentView] = useState<View>("dashboard");
+  const { initialize: initializeCurrency } = useCurrencyStore();
 
-  // Initialize database on mount
+  // Initialize database and currency store on mount
   useEffect(() => {
-    initDb();
-  }, []);
+    const init = async () => {
+      await initDb();
+      await initializeCurrency();
+    };
+    init();
+  }, [initializeCurrency]);
 
   const renderContent = () => {
     switch (currentView) {
@@ -38,7 +45,15 @@ function App() {
       case "calculators":
         return <CalculatorsPage />;
       case "settings":
-        return <SettingsPage />;
+        return (
+          <SettingsPage
+            onNavigateToCurrencySettings={() =>
+              setCurrentView("currency-settings")
+            }
+          />
+        );
+      case "currency-settings":
+        return <CurrencySettingsPage />;
       default:
         return <IngredientsPage />;
     }

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -107,20 +107,49 @@ export const RecipeForm = ({
   const watchedTargetCost = watch("targetCostPercentage") || 25;
   const watchedWasteBuffer = watch("wasteBufferPercentage") || 0;
 
-  // Calculate Total Cost
-  const { subtotal, wasteCost, totalCost } = calculateRecipeTotal(
-    watchedIngredients.map((field) => {
-      const original = allIngredients.find((i) => i.id === field.ingredientId);
-      return {
-        name: original?.name || "Unknown",
-        quantity: field.quantity,
-        unit: field.unit,
-        currentPricePerUnit: field.price || original?.pricePerUnit || 0,
-        ingredientUnit: field.ingredientUnit || original?.unitOfMeasure || "kg",
-      };
-    }),
+  const [costSummary, setCostSummary] = useState({
+    subtotal: 0,
+    wasteCost: 0,
+    totalCost: 0,
+    errors: [] as string[],
+  });
+
+  const watchedCurrency = watch("currency") || "USD";
+
+  // Calculate Total Cost Asynchronously
+  useEffect(() => {
+    const updateCosts = async () => {
+      const items = watchedIngredients.map((field) => {
+        const original = allIngredients.find((i) => i.id === field.ingredientId);
+        return {
+          name: original?.name || "Unknown",
+          quantity: field.quantity,
+          unit: field.unit,
+          currentPricePerUnit: field.price || original?.pricePerUnit || 0,
+          ingredientUnit: field.ingredientUnit || original?.unitOfMeasure || "kg",
+          currency: original?.currency || "USD",
+        };
+      });
+
+      const result = await calculateRecipeTotal(
+        items,
+        watchedWasteBuffer,
+        watchedCurrency,
+      );
+      setCostSummary(result);
+    };
+
+    if (allIngredients.length > 0) {
+      updateCosts();
+    }
+  }, [
+    watchedIngredients,
     watchedWasteBuffer,
-  );
+    watchedCurrency,
+    allIngredients,
+  ]);
+
+  const { subtotal, wasteCost, totalCost } = costSummary;
 
   const suggestedPrice = calculateSuggestedPrice(totalCost, watchedTargetCost);
 

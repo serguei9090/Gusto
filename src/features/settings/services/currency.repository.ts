@@ -77,7 +77,8 @@ export class CurrencyRepository {
           .whereRef("er2.from_currency", "=", "er1.from_currency")
           .whereRef("er2.to_currency", "=", "er1.to_currency"),
       )
-      .orderBy(["from_currency", "to_currency"])
+      .orderBy("from_currency")
+      .orderBy("to_currency")
       .execute();
 
     return result.map((row) => ({
@@ -119,7 +120,29 @@ export class CurrencyRepository {
   }
 
   /**
-   * Update exchange rate
+   * Add a new exchange rate
+   */
+  async addExchangeRate(
+    fromCurrency: string,
+    toCurrency: string,
+    rate: number,
+    effectiveDate?: string,
+    source?: string,
+  ): Promise<void> {
+    await db
+      .insertInto("exchange_rates")
+      .values({
+        from_currency: fromCurrency,
+        to_currency: toCurrency,
+        rate,
+        effective_date: effectiveDate || sql<string>`date('now')`,
+        source: source || "manual",
+      })
+      .execute();
+  }
+
+  /**
+   * Update exchange rate (creates new entry with new date)
    */
   async updateExchangeRate(
     fromCurrency: string,
@@ -137,6 +160,13 @@ export class CurrencyRepository {
         source: source || "manual",
       })
       .execute();
+  }
+
+  /**
+   * Delete an exchange rate by ID
+   */
+  async deleteExchangeRate(id: number): Promise<void> {
+    await db.deleteFrom("exchange_rates").where("id", "=", id).execute();
   }
 
   /**

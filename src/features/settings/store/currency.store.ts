@@ -14,12 +14,20 @@ interface CurrencyState {
   loadExchangeRates: () => Promise<void>;
   loadBaseCurrency: () => Promise<void>;
   setBaseCurrency: (currencyCode: string) => Promise<void>;
+  addExchangeRate: (params: {
+    fromCurrency: string;
+    toCurrency: string;
+    rate: number;
+    effectiveDate?: string;
+    source?: string;
+  }) => Promise<void>;
   updateExchangeRate: (
     fromCurrency: string,
     toCurrency: string,
     rate: number,
     source?: string,
   ) => Promise<void>;
+  deleteExchangeRate: (id: number) => Promise<void>;
   addCurrency: (currency: Omit<Currency, "isActive">) => Promise<void>;
   toggleCurrencyStatus: (code: string) => Promise<void>;
   initialize: () => Promise<void>;
@@ -92,6 +100,29 @@ export const useCurrencyStore = create<CurrencyState>((set, get) => ({
     }
   },
 
+  addExchangeRate: async (params) => {
+    try {
+      set({ isLoading: true, error: null });
+      await currencyRepository.addExchangeRate(
+        params.fromCurrency,
+        params.toCurrency,
+        params.rate,
+        params.effectiveDate,
+        params.source,
+      );
+      await get().loadExchangeRates();
+    } catch (error) {
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to add exchange rate",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
   updateExchangeRate: async (
     fromCurrency: string,
     toCurrency: string,
@@ -113,6 +144,22 @@ export const useCurrencyStore = create<CurrencyState>((set, get) => ({
           error instanceof Error
             ? error.message
             : "Failed to update exchange rate",
+        isLoading: false,
+      });
+    }
+  },
+
+  deleteExchangeRate: async (id: number) => {
+    try {
+      set({ isLoading: true, error: null });
+      await currencyRepository.deleteExchangeRate(id);
+      await get().loadExchangeRates();
+    } catch (error) {
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to delete exchange rate",
         isLoading: false,
       });
     }

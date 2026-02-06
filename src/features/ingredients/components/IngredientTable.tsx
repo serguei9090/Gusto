@@ -1,6 +1,7 @@
 import { AlertTriangle, Edit2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { formatCurrencyAmount } from "@/utils/currencyConverter";
 import type { Ingredient } from "../types";
 
 interface IngredientTableProps {
@@ -66,10 +67,11 @@ export const IngredientTable = ({
                 </span>
               </td>
               <td className="p-4 align-middle">
-                ${ing.currentPrice.toFixed(2)}
+                {formatCurrencyAmount(ing.currentPrice, ing.currency || "USD")}
               </td>
               <td className="p-4 align-middle">
-                ${ing.pricePerUnit.toFixed(2)} / {ing.unitOfMeasure}
+                {formatCurrencyAmount(ing.pricePerUnit, ing.currency || "USD")}{" "}
+                / {ing.unitOfMeasure}
               </td>
               <td className="p-4 align-middle">
                 <span className="flex items-center gap-2">

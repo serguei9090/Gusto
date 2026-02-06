@@ -24,6 +24,7 @@ export interface JoinedRecipeIngredientRow {
   ingredientName: string;
   currentPricePerUnit: number;
   ingredientUnit: string;
+  currency: string;
 }
 
 import {
@@ -68,6 +69,7 @@ export class RecipesRepository {
         "i.name as ingredientName",
         "i.price_per_unit as currentPricePerUnit",
         "i.unit_of_measure as ingredientUnit",
+        "i.currency",
       ])
       .where("ri.recipe_id", "=", id)
       .execute();
@@ -215,15 +217,17 @@ export class RecipesRepository {
     if (!recipe) return;
 
     // 1. Calculate Cost
-    const { totalCost } = calculateRecipeTotal(
+    const { totalCost } = await calculateRecipeTotal(
       recipe.ingredients.map((i) => ({
         name: i.ingredientName,
         quantity: i.quantity,
         unit: i.unit,
         currentPricePerUnit: i.currentPricePerUnit,
         ingredientUnit: i.ingredientUnit as string,
+        currency: i.currency || "USD",
       })),
       recipe.wasteBufferPercentage || 0,
+      recipe.currency || "USD",
     );
 
     // 2. Calculate Suggested Price

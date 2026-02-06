@@ -19,7 +19,7 @@ interface SettingsState {
 }
 
 const DEFAULT_RATES: ExchangeRates = {
-  USD: 1.0,
+  USD: 1,
   EUR: 0.92,
   CUP: 24, // Fixed: removed .00 to avoid lint error
 };

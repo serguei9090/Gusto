@@ -1,28 +1,36 @@
 import Database from "@tauri-apps/plugin-sql";
 import { runMigrations } from "./migrationManager";
 
-// Singleton instance
+// Singleton instance and initialization lock
 let dbInstance: Database | null = null;
+let initPromise: Promise<Database> | null = null;
 
 export async function getDatabase(): Promise<Database> {
   if (dbInstance) return dbInstance;
+  if (initPromise) return initPromise;
 
-  try {
-    // Initial connection
-    dbInstance = await Database.load("sqlite:restaurant.db");
-    console.log("✅ Database connected via Tauri SQL plugin");
+  initPromise = (async () => {
+    try {
+      // Initial connection
+      const db = await Database.load("sqlite:restaurant.db");
+      console.log("✅ Database connected via Tauri SQL plugin");
 
-    // Initialize schema
-    await initSchema(dbInstance);
+      // Initialize schema
+      await initSchema(db);
 
-    // Run migrations
-    await runMigrations(dbInstance);
+      // Run migrations
+      await runMigrations(db);
 
-    return dbInstance;
-  } catch (error) {
-    console.error("❌ Failed to connect to database:", error);
-    throw error;
-  }
+      dbInstance = db;
+      return db;
+    } catch (error) {
+      console.error("❌ Failed to connect to database:", error);
+      initPromise = null; // Reset lock on failure so we can retry
+      throw error;
+    }
+  })();
+
+  return initPromise;
 }
 
 async function initSchema(db: Database) {

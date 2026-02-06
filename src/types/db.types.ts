@@ -29,6 +29,8 @@ export interface RecipesTable {
   waste_buffer_percentage: number | null;
   total_cost: number | null;
   profit_margin: number | null;
+  current_version: number | null;
+  last_version_date: string | null;
   created_at: Generated<string>;
   updated_at: Generated<string>;
 }
@@ -106,6 +108,30 @@ export interface AppSettingsTable {
   updated_at: Generated<string>;
 }
 
+export interface RecipeVersionsTable {
+  id: Generated<number>;
+  recipe_id: number;
+  version_number: number;
+  name: string;
+  description: string | null;
+  category: string | null;
+  servings: number;
+  prep_time_minutes: number | null;
+  cooking_instructions: string | null;
+  selling_price: number | null;
+  currency: string;
+  target_cost_percentage: number | null;
+  waste_buffer_percentage: number | null;
+  total_cost: number | null;
+  profit_margin: number | null;
+  ingredients_snapshot: string; // JSON string
+  change_reason: string | null;
+  change_notes: string | null;
+  created_by: string | null;
+  created_at: Generated<string>;
+  is_current: number; // 1 or 0
+}
+
 export interface Database {
   ingredients: IngredientsTable;
   recipes: RecipesTable;
@@ -116,4 +142,5 @@ export interface Database {
   currencies: CurrenciesTable;
   exchange_rates: ExchangeRatesTable;
   app_settings: AppSettingsTable;
+  recipe_versions: RecipeVersionsTable;
 }

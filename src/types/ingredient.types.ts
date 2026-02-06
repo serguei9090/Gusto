@@ -27,6 +27,7 @@ export interface Ingredient {
   unitOfMeasure: UnitOfMeasure;
   currentPrice: number;
   pricePerUnit: number;
+  currency: Currency;
   supplierId: number | null;
   minStockLevel: number | null;
   currentStock: number;
@@ -40,6 +41,7 @@ export interface CreateIngredientInput {
   unitOfMeasure: UnitOfMeasure;
   currentPrice: number;
   pricePerUnit: number;
+  currency?: Currency;
   supplierId?: number | null;
   minStockLevel?: number | null;
   currentStock?: number;
@@ -52,6 +54,7 @@ export interface UpdateIngredientInput {
   unitOfMeasure?: UnitOfMeasure;
   currentPrice?: number;
   pricePerUnit?: number;
+  currency?: Currency;
   supplierId?: number | null;
   minStockLevel?: number | null;
   currentStock?: number;
@@ -128,6 +131,7 @@ export interface RecipeWithIngredients extends Recipe {
     ingredientName: string;
     currentPricePerUnit: number; // For real-time cost comparison
     ingredientUnit: UnitOfMeasure; // Base unit of the ingredient
+    currency: string;
   })[];
 }
 

@@ -9,10 +9,10 @@ import {
 import { useCurrencyStore } from "../store/currency.store";
 
 interface CurrencySelectorProps {
-  value: string;
-  onChange: (currency: string) => void;
-  label?: string;
-  className?: string;
+  readonly value: string;
+  readonly onChange: (currency: string) => void;
+  readonly label?: string;
+  readonly className?: string;
 }
 
 export function CurrencySelector({
@@ -20,7 +20,7 @@ export function CurrencySelector({
   onChange,
   label = "Currency",
   className,
-}: CurrencySelectorProps) {
+}: Readonly<CurrencySelectorProps>) {
   const { currencies, loadCurrencies } = useCurrencyStore();
 
   useEffect(() => {
@@ -36,11 +36,13 @@ export function CurrencySelector({
           <SelectValue placeholder="Select currency" />
         </SelectTrigger>
         <SelectContent>
-          {currencies.map((currency) => (
-            <SelectItem key={currency.code} value={currency.code}>
-              {currency.symbol} {currency.code} - {currency.name}
-            </SelectItem>
-          ))}
+          {currencies
+            .filter((c) => c.isActive)
+            .map((currency) => (
+              <SelectItem key={currency.code} value={currency.code}>
+                {currency.symbol} {currency.code} - {currency.name}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
     </div>

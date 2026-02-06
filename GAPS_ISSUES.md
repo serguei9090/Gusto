@@ -103,16 +103,33 @@
 
 ### 5. Recipe Versioning
 **Severity:** 🟡 **Medium**  
-**Priority:** P3
+**Priority:** P3  
+**Status:** ✅ **IMPLEMENTED**
 
-**Missing:**
-- No recipe history
-- Can't track cost changes over time
-- No rollback capability
+**Implemented:**
+- ✅ Database table: `recipe_versions`
+- ✅ Migration: `003_add_recipe_versioning.ts`
+- ✅ Recipe version repository with full CRUD operations
+- ✅ Automatic version creation on recipe updates
+- ✅ Complete snapshot of recipe state (including ingredients)
+- ✅ Change tracking with reason/notes
+- ✅ Rollback capability to any previous version
+- ✅ Version comparison functionality
+- ✅ Cost history tracking
+- ✅ Version pruning (keep last N versions)
 
-**Impact:**
-- Lost historical data when recipe is modified
-- Can't analyze cost trends
+**Features:**
+- Track all changes to recipes over time
+- Analyze cost trends with `getCostHistory()`
+- Compare any two versions with `compareVersions()`
+- Rollback to previous versions with `rollbackToVersion()`
+- Automatic initial version creation for existing recipes
+
+**Next Steps:**
+- Create UI for viewing version history
+- Add version comparison view
+- Implement rollback UI with confirmation
+- Add cost trend visualization charts
 
 ### 6. Mobile App / Cloud Sync
 **Severity:** 🟢 **Enhancement**  

@@ -27,10 +27,10 @@ interface PrepSheetRecipe {
 }
 
 interface PrepSheetViewProps {
-  sheet: PrepSheet;
-  onClose: () => void;
-  onSave?: () => void;
-  showSaveButton?: boolean;
+  readonly sheet: PrepSheet;
+  readonly onClose: () => void;
+  readonly onSave?: () => void;
+  readonly showSaveButton?: boolean;
 }
 
 export function PrepSheetView({
@@ -40,7 +40,7 @@ export function PrepSheetView({
   showSaveButton,
 }: PrepSheetViewProps) {
   const handlePrint = () => {
-    window.print();
+    globalThis.print();
   };
 
   return (

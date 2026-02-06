@@ -24,7 +24,8 @@ export type View =
   | "suppliers"
   | "prepsheets"
   | "calculators"
-  | "settings";
+  | "settings"
+  | "currency-settings";
 
 interface SidebarProps {
   currentView: View;

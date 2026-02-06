@@ -2,6 +2,10 @@ import { AlertTriangle, ChefHat, Package, Percent } from "lucide-react";
 import { useEffect } from "react";
 import { useDashboardStore } from "@/features/dashboard/store/dashboard.store";
 import { useTranslation } from "@/hooks/useTranslation";
+import {
+  formatCurrencyAmount,
+  getBaseCurrency,
+} from "@/utils/currencyConverter";
 import { StatCard } from "./StatCard";
 import { TopRecipesCard } from "./TopRecipesCard";
 import { UrgentReordersCard } from "./UrgentReordersCard";
@@ -10,6 +14,8 @@ export const DashboardPage = () => {
   const { t } = useTranslation();
   const { summary, urgentReorders, topRecipes, fetchDashboardData, error } =
     useDashboardStore();
+
+  const baseCurrency = getBaseCurrency();
 
   useEffect(() => {
     fetchDashboardData();
@@ -30,7 +36,10 @@ export const DashboardPage = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title={t("dashboard.stockValue")}
-          value={`$${summary?.totalInventoryValue.toFixed(2) || "0.00"}`}
+          value={formatCurrencyAmount(
+            summary?.totalInventoryValue || 0,
+            baseCurrency,
+          )}
           icon={Package}
           description={t("dashboard.stats.totalInventoryValue")}
         />

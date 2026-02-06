@@ -68,6 +68,65 @@ export const IngredientsPage = () => {
     );
   }
 
+  const renderMainContent = () => {
+    if (isCreating) {
+      return (
+        <div className="rounded-lg border bg-card p-6 shadow-sm">
+          <h2 className="text-xl font-semibold mb-6">
+            {t("ingredients.addIngredient")}
+          </h2>
+          <IngredientForm
+            onSubmit={handleCreate}
+            onCancel={() => setIsCreating(false)}
+            isLoading={isLoading}
+          />
+        </div>
+      );
+    }
+
+    if (editingIngredient) {
+      return (
+        <div className="rounded-lg border bg-card p-6 shadow-sm">
+          <h2 className="text-xl font-semibold mb-6">
+            {t("ingredients.editIngredient")}
+          </h2>
+          <IngredientForm
+            defaultValues={editingIngredient}
+            onSubmit={handleUpdate}
+            onCancel={() => setEditingIngredient(null)}
+            isLoading={isLoading}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("ingredients.placeholders.searchIngredients")}
+            value={searchQuery}
+            onChange={handleSearch}
+            className="pl-10 max-w-sm"
+          />
+        </div>
+
+        {isLoading ? (
+          <div className="py-8 text-center text-muted-foreground">
+            {t("common.messages.loading")}
+          </div>
+        ) : (
+          <IngredientTable
+            ingredients={ingredients}
+            onEdit={setEditingIngredient}
+            onDelete={handleDelete}
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="p-6 space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -88,56 +147,7 @@ export const IngredientsPage = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="mt-6">
-        {isCreating ? (
-          <div className="rounded-lg border bg-card p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-6">
-              {t("ingredients.addIngredient")}
-            </h2>
-            <IngredientForm
-              onSubmit={handleCreate}
-              onCancel={() => setIsCreating(false)}
-              isLoading={isLoading}
-            />
-          </div>
-        ) : editingIngredient ? (
-          <div className="rounded-lg border bg-card p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-6">
-              {t("ingredients.editIngredient")}
-            </h2>
-            <IngredientForm
-              defaultValues={editingIngredient}
-              onSubmit={handleUpdate}
-              onCancel={() => setEditingIngredient(null)}
-              isLoading={isLoading}
-            />
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={t("ingredients.placeholders.searchIngredients")}
-                value={searchQuery}
-                onChange={handleSearch}
-                className="pl-10 max-w-sm"
-              />
-            </div>
-
-            {isLoading ? (
-              <div className="py-8 text-center text-muted-foreground">
-                {t("common.messages.loading")}
-              </div>
-            ) : (
-              <IngredientTable
-                ingredients={ingredients}
-                onEdit={setEditingIngredient}
-                onDelete={handleDelete}
-              />
-            )}
-          </div>
-        )}
-      </div>
+      <div className="mt-6">{renderMainContent()}</div>
     </div>
   );
 };

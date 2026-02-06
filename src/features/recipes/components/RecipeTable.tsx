@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Recipe } from "@/types/ingredient.types";
+import { formatCurrencyAmount } from "@/utils/currencyConverter";
 
 interface RecipeTableProps {
   recipes: Recipe[];
@@ -25,13 +26,7 @@ export const RecipeTable = ({
 }: RecipeTableProps) => {
   const formatCurrency = (val: number | null, currency: string = "USD") => {
     if (val === null || val === undefined) return "-";
-    // TODO: Integrating dynamic rates here would transform the VALUE.
-    // Ideally we just display in the stored currency.
-    // If the user wants to see "Estimated Value in Base Currency", that's a different feature.
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
-    }).format(val);
+    return formatCurrencyAmount(val, currency);
   };
 
   const formatPercent = (val: number | null) => {
@@ -39,7 +34,6 @@ export const RecipeTable = ({
     return `${val.toFixed(1)}%`;
   };
 
-  // Custom color helper for margin text if not using Badge
   const getMarginColor = (val: number | null) => {
     if (val === null || val === undefined) return "text-muted-foreground";
     if (val < 20) return "text-destructive font-medium";

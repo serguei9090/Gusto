@@ -1,6 +1,6 @@
 import { Reorder } from "framer-motion";
 import { GripVertical, RotateCcw } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -20,34 +19,26 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "@/hooks/useTranslation";
-import {
-  type Currency,
-  getCurrencyName,
-  getCurrencySymbol,
-  SUPPORTED_CURRENCIES,
-} from "@/utils/currency";
+import { useCurrencyStore } from "./store/currency.store";
 import { useSettingsStore } from "./store/settings.store";
 
-export const SettingsPage = () => {
-  const { t, changeLanguage, currentLanguage } = useTranslation();
-  const {
-    baseCurrency,
-    exchangeRates,
-    modules,
-    moduleOrder,
-    setBaseCurrency,
-    setExchangeRate,
-    toggleModule,
-    reorderModules,
-    resetDefaults,
-  } = useSettingsStore();
+interface SettingsPageProps {
+  onNavigateToCurrencySettings?: () => void;
+}
 
-  const handleRateChange = (currency: Currency, value: string) => {
-    const rate = Number.parseFloat(value);
-    if (!Number.isNaN(rate)) {
-      setExchangeRate(currency, rate);
-    }
-  };
+export const SettingsPage = ({
+  onNavigateToCurrencySettings,
+}: SettingsPageProps) => {
+  const { t, changeLanguage, currentLanguage } = useTranslation();
+  const { modules, moduleOrder, toggleModule, reorderModules, resetDefaults } =
+    useSettingsStore();
+
+  const { currencies, baseCurrency, loadCurrencies, setBaseCurrency } =
+    useCurrencyStore();
+
+  useEffect(() => {
+    loadCurrencies();
+  }, [loadCurrencies]);
 
   return (
     <div className="h-full flex flex-col space-y-6 p-8">
@@ -98,11 +89,18 @@ export const SettingsPage = () => {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>{t("settings.currency.title")}</CardTitle>
-          <CardDescription>
-            {t("settings.currency.description")}
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="space-y-1">
+            <CardTitle>{t("settings.currency.title")}</CardTitle>
+            <CardDescription>
+              {t("settings.currency.description")}
+            </CardDescription>
+          </div>
+          {onNavigateToCurrencySettings && (
+            <Button onClick={onNavigateToCurrencySettings} variant="outline">
+              Advanced Settings
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-4">
@@ -111,53 +109,32 @@ export const SettingsPage = () => {
               <p className="text-sm text-muted-foreground">
                 {t("settings.currency.baseHelp")}
               </p>
-              <Select
-                value={baseCurrency}
-                onValueChange={(val) => setBaseCurrency(val as Currency)}
-              >
+              <Select value={baseCurrency} onValueChange={setBaseCurrency}>
                 <SelectTrigger className="w-[240px]">
                   <SelectValue
                     placeholder={t("settings.currency.selectCurrency")}
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from(SUPPORTED_CURRENCIES).map((curr) => (
-                    <SelectItem key={curr} value={curr}>
-                      {curr} - {getCurrencyName(curr)} (
-                      {getCurrencySymbol(curr)})
-                    </SelectItem>
-                  ))}
+                  {currencies
+                    .filter((c) => c.isActive)
+                    .map((curr) => (
+                      <SelectItem key={curr.code} value={curr.code}>
+                        {curr.code} - {curr.name} ({curr.symbol})
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-4">
-              <Label>
-                {t("settings.currency.exchangeRatesLabel", {
-                  currency: baseCurrency,
-                })}
-              </Label>
-              {Array.from(SUPPORTED_CURRENCIES).map((curr) => {
-                if (curr === baseCurrency) return null;
-                return (
-                  <div key={curr} className="flex items-center gap-4">
-                    <div className="w-[100px] font-medium flex items-center gap-2">
-                      {curr}
-                      <Badge variant="outline">{getCurrencySymbol(curr)}</Badge>
-                    </div>
-                    <Input
-                      type="number"
-                      step="0.0001"
-                      value={exchangeRates[curr] || ""}
-                      onChange={(e) => handleRateChange(curr, e.target.value)}
-                      className="w-[150px]"
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      1 {baseCurrency} = {exchangeRates[curr]} {curr}
-                    </span>
-                  </div>
-                );
-              })}
+            <div className="flex justify-end">
+              <Button
+                onClick={onNavigateToCurrencySettings}
+                variant="link"
+                className="text-primary p-0 h-auto"
+              >
+                Advanced Currency & Exchange Rate Management →
+              </Button>
             </div>
           </div>
         </CardContent>
