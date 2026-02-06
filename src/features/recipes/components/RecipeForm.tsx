@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useIngredientsStore } from "@/features/ingredients/store/ingredients.store";
+import { CurrencySelector } from "@/features/settings/components/CurrencySelector";
+import { useCurrencyStore } from "@/features/settings/store/currency.store";
 import { useTranslation } from "@/hooks/useTranslation";
 import {
   calculateFoodCostPercentage,
@@ -30,12 +32,8 @@ import {
   calculateRecipeTotal,
   calculateSuggestedPrice,
 } from "@/utils/costEngine";
-import {
-  type Currency,
-  getCurrencyName,
-  getCurrencySymbol,
-  SUPPORTED_CURRENCIES,
-} from "@/utils/currency";
+import { type Currency, getCurrencySymbol } from "@/utils/currency";
+
 import {
   recipeCategorySchema,
   recipeFormSchema,
@@ -60,11 +58,13 @@ export const RecipeForm = ({
   const { t } = useTranslation();
   const { ingredients: allIngredients, fetchIngredients } =
     useIngredientsStore();
+  const { initialize: initializeCurrency } = useCurrencyStore();
 
-  // Load ingredients if empty
+  // Load ingredients and currencies if empty
   useEffect(() => {
     if (allIngredients.length === 0) fetchIngredients();
-  }, [allIngredients.length, fetchIngredients]);
+    initializeCurrency();
+  }, [allIngredients.length, fetchIngredients, initializeCurrency]);
 
   const {
     register,
@@ -264,17 +264,12 @@ export const RecipeForm = ({
 
             <div className="space-y-2">
               <Label htmlFor="currency">{t("common.labels.currency")}</Label>
-              <select
-                id="currency"
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                {...register("currency")}
-              >
-                {Array.from(SUPPORTED_CURRENCIES).map((curr) => (
-                  <option key={curr} value={curr}>
-                    {getCurrencySymbol(curr)} - {getCurrencyName(curr)}
-                  </option>
-                ))}
-              </select>
+              <CurrencySelector
+                value={watch("currency") ?? "USD"}
+                onChange={(value) =>
+                  setValue("currency", value as "USD" | "EUR" | "CUP")
+                }
+              />
             </div>
 
             <div className="space-y-2">

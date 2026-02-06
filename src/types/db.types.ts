@@ -81,6 +81,31 @@ export interface PrepSheetsTable {
   created_at: Generated<string>;
 }
 
+export interface CurrenciesTable {
+  code: string;
+  name: string;
+  symbol: string;
+  decimal_places: number;
+  is_active: number;
+  created_at: Generated<string>;
+}
+
+export interface ExchangeRatesTable {
+  id: Generated<number>;
+  from_currency: string;
+  to_currency: string;
+  rate: number;
+  effective_date: string;
+  source: string | null;
+  created_at: Generated<string>;
+}
+
+export interface AppSettingsTable {
+  key: string;
+  value: string;
+  updated_at: Generated<string>;
+}
+
 export interface Database {
   ingredients: IngredientsTable;
   recipes: RecipesTable;
@@ -88,4 +113,7 @@ export interface Database {
   inventory_transactions: InventoryTransactionsTable;
   suppliers: SuppliersTable;
   prep_sheets: PrepSheetsTable;
+  currencies: CurrenciesTable;
+  exchange_rates: ExchangeRatesTable;
+  app_settings: AppSettingsTable;
 }

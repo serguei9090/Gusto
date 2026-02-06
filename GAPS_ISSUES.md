@@ -17,115 +17,14 @@
 
 ---
 
-## Critical Issues
-
-### Database Connection in Browser Mode
-**Severity:** ⚠️ **Medium**  
-**File:** [src/lib/db.ts](file:///i:/01-Master_Code/Apps/RestaurantManage/src/lib/db.ts)
-
-**Issue:**  
-The `db.ts` file contains a mock implementation to bypass Kysely/Tauri/Vite integration issues during development/testing in browser mode.
-
-**Impact:**
-- Tests may pass with mock data but fail with real database
-- Inconsistency between dev and production behavior
-
-**Recommended Fix:**
-- Implement proper environment detection
-- Use conditional exports for browser vs. Tauri environments
-- Consider using Kysely properly with dialect configuration
-
-```typescript
-// Proposed solution
-import { Database } from '@tauri-apps/plugin-sql';
-
-export const db = import.meta.env.TAURI
-  ? await Database.load('sqlite:restaurant.db')
-  : createMockDb(); // For browser testing only
-```
-
----
-
 ## Code Quality Issues
 
-### 1. CSS At-Rules Not Recognized by Biome
-**Severity:** 🟡 **Low**  
-**Files:** [src/index.css](file:///i:/01-Master_Code/Apps/RestaurantManage/src/index.css)
-
-**Linting Errors:**
-- `Unknown at rule @theme` (line 3)
-- `Unknown at rule @apply` (lines 125, 129)
-
-**Cause:**  
-Tailwind CSS v4 uses `@theme` and `@apply` directives that Biome doesn't recognize.
-
-**Recommended Fix:**
-- Update Biome configuration to ignore Tailwind-specific at-rules
-- Or disable CSS linting for Tailwind files
-
-```json
-// biome.json
-{
-  "linter": {
-    "rules": {
-      "css": {
-        "noUnknownAtRule": "off"
-      }
-    }
-  }
-}
-```
 
 ### 2. RegExp in Playwright Selectors
 **Severity:** 🟡 **Low**  
-**Files:**
-- [e2e/03-ingredients.spec.ts](file:///i:/01-Master_Code/Apps/RestaurantManage/e2e/03-ingredients.spec.ts#L53)
-- [e2e/04-recipes.spec.ts](file:///i:/01-Master_Code/Apps/RestaurantManage/e2e/04-recipes.spec.ts#L79)
-- [e2e/06-prep-sheets.spec.ts](file:///i:/01-Master_Code/Apps/RestaurantManage/e2e/06-prep-sheets.spec.ts#L37-L42)
-- [e2e/critical-flow.spec.ts](file:///i:/01-Master_Code/Apps/RestaurantManage/e2e/critical-flow.spec.ts#L40-L63)
+**Status:** ✅ **COMPLETE** (All selectOption calls use string literals)
 
-**TypeScript Errors:**
-```
-Argument of type '{ label: RegExp; }' is not assignable to parameter of type 'string | ...'
-```
 
-**Cause:**  
-Playwright's `selectOption()` expects `string` for label, not `RegExp`.
-
-**Recommended Fix:**
-Use `getByText()` or `getByLabel()` with regex instead:
-
-```typescript
-// Current (wrong)
-await page.locator('select').selectOption({ label: /Fresh Produce/ });
-
-// Fixed
-const option = page.getByRole('option', { name: /Fresh Produce/ });
-await option.click();
-```
-
-### 3. parseFloat and String.replace Warnings
-**Severity:** 🟡 **Low**  
-**File:** [e2e/07-dashboard.spec.ts](file:///i:/01-Master_Code/Apps/RestaurantManage/e2e/07-dashboard.spec.ts#L44-L112)
-
-**Linting Warnings:**
-- Prefer `Number.parseFloat` over `parseFloat`
-- Prefer `String#replaceAll()` over `String#replace()`
-
-**Recommended Fix:**
-```typescript
-// Before
-const value = parseFloat(text.replace(/[^0-9.]/g, ''));
-
-// After
-const value = Number.parseFloat(text.replaceAll(/[^0-9.]/g, ''));
-```
-
-### 4. Unused Imports in Unit Tests
-**Severity:** 🟡 **Low**  
-**File:** [src/utils/__tests__/costEngine.test.ts](file:///i:/01-Master_Code/Apps/RestaurantManage/src/utils/__tests__/costEngine.test.ts)
-
-**Status:** ✅ **FIXED** (removed old duplicate test file)
 
 ---
 
@@ -153,17 +52,26 @@ const value = Number.parseFloat(text.replaceAll(/[^0-9.]/g, ''));
 
 ### 2. Multi-Currency Support
 **Severity:** 🟡 **Medium**  
-**Priority:** P2
+**Priority:** P2  
+**Status:** ✅ **IMPLEMENTED**
 
-**Missing:**
-- All prices are in single currency
-- No exchange rate support
-- No currency selection
+**Implemented:**
+- ✅ Database tables: `currencies`, `exchange_rates`, `app_settings`
+- ✅ Migration: `002_add_currency_support.ts`
+- ✅ Currency repository with Kysely query builder
+- ✅ Currency store (Zustand) for state management
+- ✅ CurrencySelector UI component
+- ✅ 10 default currencies (USD, EUR, GBP, CAD, AUD, JPY, CNY, INR, MXN, BRL)
+- ✅ Exchange rate management
+- ✅ Base currency configuration
+- ✅ **Integrated CurrencySelector into ingredient forms**
+- ✅ **Integrated CurrencySelector into recipe forms**
 
-**Use Cases:**
-- International suppliers
-- Multi-location restaurants
-- Import cost tracking
+**Next Steps:**
+- Add currency conversion in cost calculations (when calculating recipe totals)
+- Create currency settings page for managing exchange rates
+- Add exchange rate API integration for automatic updates
+
 
 ### 3. Production Planning
 **Severity:** 🟡 **Medium**  
@@ -504,14 +412,12 @@ Create `docs/adr/` folder with:
 |-------|----------|----------|--------|--------|
 | User Authentication | 🔴 High | P1 | High | ❌ Open |
 | Missing Unit Tests | 🟡 Medium | P1 | Medium | ✅ **Complete** (91 tests) |
-| Database Connection Mock | 🟡 Medium | P2 | Low | ❌ Open |
 | Multi-Currency Support | 🟡 Medium | P2 | High | ❌ Open |
 | Purchase Orders | 🟡 Medium | P2 | Medium | ❌ Open |
 | Performance Indexes | 🟡 Medium | P2 | Low | ❌ Open |
 | E2E Test Selectors | 🟡 Medium | P2 | Low | ❌ Open |
 | Bulk Operations | 🟡 Medium | P2 | Medium | ❌ Open |
 | API Documentation | 🟡 Medium | P2 | Low | ❌ Open |
-| CSS Linting Errors | 🟡 Low | P3 | Low | ❌ Open |
 | RegExp Selector Errors | 🟡 Low | P3 | Low | ❌ Open |
 | Accessibility | 🟡 Medium | P3 | Medium | ❌ Open |
 | Dark Mode | 🟢 Low | P3 | Low | ❌ Open |
@@ -523,9 +429,7 @@ Create `docs/adr/` folder with:
 
 These can be addressed immediately:
 
-- [ ] Fix CSS linting: Update Biome config to ignore Tailwind at-rules
 - [ ] Fix Playwright selectors: Replace RegExp labels with proper selectors
-- [ ] Fix parseFloat warnings: Use `Number.parseFloat` and `replaceAll()`
 - [ ] Add database indexes for common queries
 - [ ] Add JSDoc comments to public API functions
 - [ ] Create unit tests for conversions utility

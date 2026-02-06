@@ -20,13 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CurrencySelector } from "@/features/settings/components/CurrencySelector";
+import { useCurrencyStore } from "@/features/settings/store/currency.store";
 import { useSuppliersStore } from "@/features/suppliers/store/suppliers.store";
 import { useTranslation } from "@/hooks/useTranslation";
-import {
-  getCurrencyName,
-  getCurrencySymbol,
-  SUPPORTED_CURRENCIES,
-} from "@/utils/currency";
 import {
   createIngredientSchema,
   ingredientCategorySchema,
@@ -44,8 +41,6 @@ interface IngredientFormProps {
   isLoading?: boolean;
 }
 
-const CURRENCIES = Array.from(SUPPORTED_CURRENCIES);
-
 export const IngredientForm = ({
   defaultValues,
   onSubmit,
@@ -54,6 +49,7 @@ export const IngredientForm = ({
 }: IngredientFormProps) => {
   const { t } = useTranslation();
   const { suppliers, fetchSuppliers } = useSuppliersStore();
+  const { initialize: initializeCurrency } = useCurrencyStore();
 
   const form = useForm<FormSchema>({
     // biome-ignore lint/suspicious/noExplicitAny: Hook Form resolver type mismatch with strict Zod schemas is a known limitation
@@ -72,7 +68,8 @@ export const IngredientForm = ({
 
   useEffect(() => {
     if (suppliers.length === 0) fetchSuppliers();
-  }, [suppliers.length, fetchSuppliers]);
+    initializeCurrency();
+  }, [suppliers.length, fetchSuppliers, initializeCurrency]);
 
   const submitHandler = form.handleSubmit((data) => {
     onSubmit(data as CreateIngredientInput);
@@ -237,20 +234,12 @@ export const IngredientForm = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel>{t("common.labels.currency")}</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("common.labels.currency")} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {CURRENCIES.map((curr) => (
-                    <SelectItem key={curr} value={curr}>
-                      {getCurrencySymbol(curr)} - {getCurrencyName(curr)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <CurrencySelector
+                  value={field.value ?? "USD"}
+                  onChange={field.onChange}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
