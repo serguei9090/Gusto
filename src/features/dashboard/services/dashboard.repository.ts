@@ -33,10 +33,7 @@ class DashboardRepository {
       .selectFrom("recipes")
       .select([
         sql<number>`COUNT(*)`.as("count"),
-        sql<number>`AVG(CASE WHEN target_cost_percentage > 0 THEN (100 - target_cost_percentage) ELSE 0 END)`.as(
-          "avgMargin",
-        ),
-        // fallback calculation if margin isn't explicit, or just select profit_margin if it exists
+        sql<number>`AVG(profit_margin)`.as("avgMargin"),
       ])
       .executeTakeFirst();
 

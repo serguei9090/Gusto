@@ -9,6 +9,7 @@ import type {
 import {
   calculateProfitMargin,
   calculateRecipeTotal,
+  calculateSuggestedPrice,
 } from "@/utils/costEngine";
 
 export class RecipesRepository {
@@ -123,7 +124,11 @@ export class RecipesRepository {
       .where("id", "=", id)
       .execute();
 
-    if (data.sellingPrice !== undefined || data.servings !== undefined) {
+    if (
+      data.sellingPrice !== undefined ||
+      data.servings !== undefined ||
+      data.targetCostPercentage !== undefined
+    ) {
       await this.recalculateCosts(id);
     }
   }
@@ -198,11 +203,17 @@ export class RecipesRepository {
       })),
     );
 
-    // 2. Calculate Margin
-    const sellingPrice = recipe.sellingPrice || 0;
-    const profitMargin = calculateProfitMargin(totalCost, sellingPrice);
+    // 2. Calculate Suggested Price
+    const suggestedPrice = calculateSuggestedPrice(
+      totalCost,
+      recipe.targetCostPercentage || 25,
+    );
 
-    // 3. Update DB
+    // 3. Calculate Margin (use suggested price if selling price is empty)
+    const effectivePrice = recipe.sellingPrice || suggestedPrice;
+    const profitMargin = calculateProfitMargin(totalCost, effectivePrice);
+
+    // 4. Update DB
     await db
       .updateTable("recipes")
       .set({

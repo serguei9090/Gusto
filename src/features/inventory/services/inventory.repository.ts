@@ -28,52 +28,42 @@ class InventoryRepository {
     }
     // "adjustment" uses the raw quantity value as a delta (can be positive or negative)
 
-    return await db.transaction().execute(async (trx: any) => {
-      // 1. Insert Transaction
-      const result = await trx
-        .insertInto("inventory_transactions")
-        .values({
-          ingredient_id: ingredientId,
-          transaction_type: transactionType,
-          quantity: quantity,
-          cost_per_unit: costPerUnit,
-          total_cost: totalCost,
-          reference: reference,
-          notes: notes,
-          // created_at is default current_timestamp in schema
-        })
-        .returningAll()
-        .executeTakeFirstOrThrow();
+    // 1. Insert Transaction
+    const result = await db
+      .insertInto("inventory_transactions")
+      .values({
+        ingredient_id: ingredientId,
+        transaction_type: transactionType,
+        quantity: quantity,
+        cost_per_unit: costPerUnit,
+        total_cost: totalCost,
+        reference: reference,
+        notes: notes,
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
 
-      // 2. Update Ingredient Stock
-      await trx
-        .updateTable("ingredients")
-        .set((_eb: any) => ({
-          current_stock: sql`current_stock + ${delta}`,
-          last_updated: sql`CURRENT_TIMESTAMP`,
-        }))
-        .where("id", "=", ingredientId)
-        .execute();
+    // 2. Update Ingredient Stock
+    await db
+      .updateTable("ingredients")
+      .set((_eb: any) => ({
+        current_stock: sql`current_stock + ${delta}`,
+        last_updated: sql`CURRENT_TIMESTAMP`,
+      }))
+      .where("id", "=", ingredientId)
+      .execute();
 
-      // Map snake_case result to camelCase (if needed, but Kysely usually maps based on dialect?
-      // Actually, my Kysely setup might be returning raw snake_case from SQLite unless I used CamelCasePlugin.
-      // The `db.ts` setup uses `SqliteAdapter`.
-      // Let's assume the previous `recipes.repository.ts` worked without manual mapping or used `selectFrom`.
-      // The legacy service manually selected specific fields or just `SELECT *`.
-      // Let's return the result directly.
-
-      return {
-        id: result.id,
-        ingredientId: result.ingredient_id,
-        transactionType: result.transaction_type,
-        quantity: result.quantity,
-        costPerUnit: result.cost_per_unit,
-        totalCost: result.total_cost,
-        reference: result.reference,
-        notes: result.notes,
-        createdAt: result.created_at,
-      } as InventoryTransaction;
-    });
+    return {
+      id: result.id,
+      ingredientId: result.ingredient_id,
+      transactionType: result.transaction_type,
+      quantity: result.quantity,
+      costPerUnit: result.cost_per_unit,
+      totalCost: result.total_cost,
+      reference: result.reference,
+      notes: result.notes,
+      createdAt: result.created_at,
+    } as InventoryTransaction;
   }
 
   async getTransactionsByIngredient(

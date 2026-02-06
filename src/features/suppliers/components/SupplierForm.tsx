@@ -46,6 +46,7 @@ export function SupplierForm({
       phone: "",
       address: "",
       paymentTerms: "",
+      accountNumber: "",
       notes: "",
     },
   });
@@ -60,6 +61,7 @@ export function SupplierForm({
           phone: initialData.phone || "",
           address: initialData.address || "",
           paymentTerms: initialData.paymentTerms || "",
+          accountNumber: initialData.accountNumber || "",
           notes: initialData.notes || "",
         });
       } else {
@@ -70,6 +72,7 @@ export function SupplierForm({
           phone: "",
           address: "",
           paymentTerms: "",
+          accountNumber: "",
           notes: "",
         });
       }
@@ -152,14 +155,24 @@ export function SupplierForm({
               />
             </div>
 
-            {/* Payment Terms */}
-            <div className="space-y-2">
-              <Label htmlFor="paymentTerms">Payment Terms</Label>
-              <Input
-                id="paymentTerms"
-                placeholder="e.g. Net 30, COD"
-                {...register("paymentTerms")}
-              />
+            {/* Payment Terms & Account Number Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="paymentTerms">Payment Terms</Label>
+                <Input
+                  id="paymentTerms"
+                  placeholder="e.g. Net 30, COD"
+                  {...register("paymentTerms")}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="accountNumber">Account Number</Label>
+                <Input
+                  id="accountNumber"
+                  placeholder="AC-12345"
+                  {...register("accountNumber")}
+                />
+              </div>
             </div>
 
             {/* Notes */}

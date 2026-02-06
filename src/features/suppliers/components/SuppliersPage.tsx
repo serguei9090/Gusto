@@ -1,5 +1,5 @@
-import { Plus, Search, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Plus, Search, Users, X } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { useSuppliersStore } from "@/features/suppliers/store/suppliers.store";
 import type { Supplier } from "@/features/suppliers/types";
 import { SupplierForm } from "./SupplierForm";
 import { SupplierTable } from "./SupplierTable";
+import { SupplierDetailModal } from "./SupplierDetailModal";
 import { useTranslation } from "@/hooks/useTranslation";
 
 export const SuppliersPage = () => {
@@ -23,14 +24,30 @@ export const SuppliersPage = () => {
   const { t } = useTranslation();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
-    null,
-  );
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [viewingSupplier, setViewingSupplier] = useState<Supplier | null>(null);
 
   useEffect(() => {
     fetchSuppliers();
   }, [fetchSuppliers]);
+
+  const handleCloseForm = useCallback(() => {
+    setIsFormOpen(false);
+    setEditingSupplier(null);
+  }, []);
+
+  // Handle ESC key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleCloseForm();
+        setViewingSupplier(null);
+      }
+    };
+    globalThis.addEventListener("keydown", handleEsc);
+    return () => globalThis.removeEventListener("keydown", handleEsc);
+  }, [handleCloseForm]);
 
   const filteredSuppliers = suppliers.filter(
     (s) =>
@@ -38,11 +55,10 @@ export const SuppliersPage = () => {
       s.contactPerson?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  // biome-ignore lint/suspicious/noExplicitAny: Form data
-  const handleCreateOrUpdate = async (data: any) => {
+  const handleCreateOrUpdate = async (data: Omit<Supplier, "id">) => {
     try {
-      if (selectedSupplier) {
-        await updateSupplier(selectedSupplier.id, data);
+      if (editingSupplier) {
+        await updateSupplier(editingSupplier.id, data);
       } else {
         await createSupplier(data);
       }
@@ -63,18 +79,12 @@ export const SuppliersPage = () => {
   };
 
   const handleEdit = (supplier: Supplier) => {
-    setSelectedSupplier(supplier);
+    setEditingSupplier(supplier);
     setIsFormOpen(true);
   };
 
-  const handleValuesChange = (open: boolean) => {
-    setIsFormOpen(open);
-    if (!open) setSelectedSupplier(null);
-  };
-
-  const handleCloseForm = () => {
-    setIsFormOpen(false);
-    setSelectedSupplier(null);
+  const handleView = (supplier: Supplier) => {
+    setViewingSupplier(supplier);
   };
 
   return (
@@ -128,21 +138,29 @@ export const SuppliersPage = () => {
         </div>
       )}
 
-      <div className="flex-1 overflow-auto bg-card rounded-md border">
+      <div className="flex-1 overflow-auto bg-card rounded-md border shadow-sm">
         <SupplierTable
           suppliers={filteredSuppliers}
+          onView={handleView}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
       </div>
 
       <SupplierForm
-        initialData={selectedSupplier}
+        initialData={editingSupplier}
         open={isFormOpen}
-        onOpenChange={handleValuesChange}
+        onOpenChange={setIsFormOpen}
         onSubmit={handleCreateOrUpdate}
         isLoading={isLoading}
       />
+
+      {viewingSupplier && (
+        <SupplierDetailModal
+          supplier={viewingSupplier}
+          onClose={() => setViewingSupplier(null)}
+        />
+      )}
     </div>
   );
 };

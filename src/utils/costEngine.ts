@@ -77,7 +77,7 @@ export function calculateRecipeTotal(
 }
 
 /**
- * Calculates Profit Margin Percentage.
+ * Calculates Profit Margin Percentage (Gross Profit / Selling Price).
  * Formula: ((Selling Price - Cost) / Selling Price) * 100
  */
 export function calculateProfitMargin(
@@ -89,15 +89,27 @@ export function calculateProfitMargin(
 }
 
 /**
- * Calculates Suggested Selling Price based on Target Margin.
- * Formula: Cost / (1 - Margin%)
+ * Calculates Food Cost Percentage (Cost / Selling Price).
+ * Formula: (Cost / Selling Price) * 100
+ */
+export function calculateFoodCostPercentage(
+  cost: number,
+  sellingPrice: number,
+): number {
+  if (sellingPrice <= 0) return 0;
+  return (cost / sellingPrice) * 100;
+}
+
+/**
+ * Calculates Suggested Selling Price based on Target Food Cost %.
+ * Formula: Cost / (TargetCost% / 100)
  */
 export function calculateSuggestedPrice(
   cost: number,
-  targetMarginPercent: number,
+  targetCostPercentage: number,
 ): number {
-  if (targetMarginPercent >= 100 || targetMarginPercent < 0) return 0;
-  const marginDecimal = targetMarginPercent / 100;
-  const price = cost / (1 - marginDecimal);
+  if (targetCostPercentage <= 0) return 0;
+  const targetDecimal = targetCostPercentage / 100;
+  const price = cost / targetDecimal;
   return Math.round(price * 100) / 100; // Round to 2 decimals
 }

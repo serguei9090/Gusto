@@ -39,15 +39,21 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
     recipes: { label: t("navigation.recipes"), icon: ChefHat },
     inventory: { label: t("navigation.inventory"), icon: Package },
     suppliers: { label: t("navigation.suppliers"), icon: Users },
-    prepSheets: { label: t("navigation.prepSheets"), icon: ClipboardList },
+    prepsheets: { label: t("navigation.prepSheets"), icon: ClipboardList },
     settings: { label: t("navigation.settings"), icon: Settings },
   };
 
   // Filter and sort items based on order and visibility, ensuring settings is always last
   const displayItems = [
     ...moduleOrder
-      .filter((id) => modules[id] && moduleConfig[id])
-      .map((id) => ({ id, ...moduleConfig[id] })),
+      .filter((id) => {
+        const normalizedId = id === "prepSheets" ? "prepsheets" : id;
+        return modules[id] && moduleConfig[normalizedId];
+      })
+      .map((id) => {
+        const normalizedId = id === "prepSheets" ? "prepsheets" : id;
+        return { id: normalizedId, ...moduleConfig[normalizedId] };
+      }),
     { id: "settings", ...moduleConfig.settings }, // Always append settings at the end
   ];
 

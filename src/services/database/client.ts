@@ -30,6 +30,34 @@ export async function getDatabase(): Promise<Database> {
       // Column probably already exists
     }
 
+    // Migration: Add account_number to suppliers
+    try {
+      await dbInstance.execute("ALTER TABLE suppliers ADD COLUMN account_number TEXT");
+      console.log("➕ Added 'account_number' column to suppliers table");
+    } catch (e) {
+      // Column probably already exists
+    }
+
+    // Migration: Create prep_sheets table if it doesn't exist
+    try {
+      await dbInstance.execute(`
+        CREATE TABLE IF NOT EXISTS prep_sheets (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          date TEXT NOT NULL,
+          shift TEXT,
+          prep_cook_name TEXT,
+          notes TEXT,
+          recipes_json TEXT NOT NULL,
+          items_json TEXT NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log("➕ Ensured 'prep_sheets' table exists");
+    } catch (e) {
+      console.error("❌ Failed to create prep_sheets table:", e);
+    }
+
     return dbInstance;
   } catch (error) {
     console.error("❌ Failed to connect to database:", error);
@@ -155,6 +183,58 @@ async function initSchema(db: Database) {
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Migration: Add Triggers for automatic stock management
+    if (dbInstance) {
+      const db = dbInstance;
+      try {
+        // Purchase increases stock
+        await db.execute(`
+          CREATE TRIGGER IF NOT EXISTS update_stock_after_purchase
+          AFTER INSERT ON inventory_transactions
+          FOR EACH ROW
+          WHEN NEW.transaction_type = 'purchase'
+          BEGIN
+            UPDATE ingredients 
+            SET current_stock = current_stock + NEW.quantity,
+                last_updated = CURRENT_TIMESTAMP
+            WHERE id = NEW.ingredient_id;
+          END;
+        `);
+
+        // Usage/Waste decreases stock
+        await db.execute(`
+          CREATE TRIGGER IF NOT EXISTS update_stock_after_usage
+          AFTER INSERT ON inventory_transactions
+          FOR EACH ROW
+          WHEN NEW.transaction_type IN ('usage', 'waste')
+          BEGIN
+            UPDATE ingredients 
+            SET current_stock = current_stock - NEW.quantity,
+                last_updated = CURRENT_TIMESTAMP
+            WHERE id = NEW.ingredient_id;
+          END;
+        `);
+
+        // Adjustment directly sets a delta (if we want to use quantity as delta)
+        await db.execute(`
+          CREATE TRIGGER IF NOT EXISTS update_stock_after_adjustment
+          AFTER INSERT ON inventory_transactions
+          FOR EACH ROW
+          WHEN NEW.transaction_type = 'adjustment'
+          BEGIN
+            UPDATE ingredients 
+            SET current_stock = current_stock + NEW.quantity,
+                last_updated = CURRENT_TIMESTAMP
+            WHERE id = NEW.ingredient_id;
+          END;
+        `);
+
+        console.log("⚡ Stock management triggers initialized");
+      } catch (e) {
+        console.error("❌ Failed to initialize triggers:", e);
+      }
+    }
 
     console.log("✅ Database schema initialized");
   }

@@ -1,4 +1,4 @@
-import { Edit3, Mail, MapPin, Phone, Trash2 } from "lucide-react";
+import { Edit3, Eye, Mail, MapPin, Phone, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,12 +13,14 @@ import type { Supplier } from "@/features/suppliers/types";
 
 interface SupplierTableProps {
   suppliers: Supplier[];
+  onView: (supplier: Supplier) => void;
   onEdit: (supplier: Supplier) => void;
   onDelete: (id: number) => void;
 }
 
 export function SupplierTable({
   suppliers,
+  onView,
   onEdit,
   onDelete,
 }: SupplierTableProps) {
@@ -45,7 +47,9 @@ export function SupplierTable({
             suppliers.map((supplier) => (
               <TableRow key={supplier.id}>
                 <TableCell>
-                  <div className="font-medium">{supplier.name}</div>
+                  <div className="font-medium text-primary hover:underline cursor-pointer" onClick={() => onView(supplier)}>
+                    {supplier.name}
+                  </div>
                   {supplier.address && (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                       <MapPin className="h-3 w-3" />
@@ -82,6 +86,15 @@ export function SupplierTable({
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onView(supplier)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span className="sr-only">View</span>
+                    </Button>
                     <Button
                       variant="ghost"
                       size="sm"

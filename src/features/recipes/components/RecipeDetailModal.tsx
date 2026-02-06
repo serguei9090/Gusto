@@ -30,6 +30,15 @@ export const RecipeDetailModal = ({
     if (recipeId) fetchFullRecipe(recipeId);
   }, [recipeId, fetchFullRecipe]);
 
+  // Handle ESC key to close
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    globalThis.addEventListener("keydown", handleEsc);
+    return () => globalThis.removeEventListener("keydown", handleEsc);
+  }, [onClose]);
+
   const handlePrint = () => {
     globalThis.print();
   };

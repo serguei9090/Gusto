@@ -11,6 +11,13 @@ interface PrepSheetsState {
 
   // Builder State
   builderSelections: { recipeId: number; servings: number }[];
+  builderFields: {
+    name: string;
+    date: string;
+    shift: "morning" | "evening" | "";
+    prepCookName: string;
+    notes: string;
+  };
 
   // Actions
   fetchPrepSheets: () => Promise<void>;
@@ -23,8 +30,21 @@ interface PrepSheetsState {
   addRecipeToBuilder: (recipeId: number, servings: number) => void;
   updateBuilderServings: (recipeId: number, servings: number) => void;
   removeRecipeFromBuilder: (recipeId: number) => void;
+  setBuilderField: (field: string, value: any) => void;
   clearBuilder: () => void;
+
+  // UI State
+  notification: { message: string; type: "success" | "error" } | null;
+  clearNotification: () => void;
 }
+
+const INITIAL_FIELDS = {
+  name: "",
+  date: new Date().toISOString().split("T")[0],
+  shift: "" as const,
+  prepCookName: "",
+  notes: "",
+};
 
 export const usePrepSheetsStore = create<PrepSheetsState>((set, get) => ({
   prepSheets: [],
@@ -32,6 +52,8 @@ export const usePrepSheetsStore = create<PrepSheetsState>((set, get) => ({
   isLoading: false,
   error: null,
   builderSelections: [],
+  builderFields: INITIAL_FIELDS,
+  notification: null,
 
   fetchPrepSheets: async () => {
     set({ isLoading: true, error: null });
@@ -60,9 +82,22 @@ export const usePrepSheetsStore = create<PrepSheetsState>((set, get) => ({
     try {
       const id = await prepSheetsRepository.save(sheet);
       await get().fetchPrepSheets(); // Refresh
+      set({
+        notification: {
+          message: "Prep sheet saved successfully!",
+          type: "success",
+        },
+      });
       return id;
     } catch (err) {
-      set({ error: String(err), isLoading: false });
+      set({
+        error: String(err),
+        notification: {
+          message: "Failed to save prep sheet",
+          type: "error",
+        },
+        isLoading: false,
+      });
       throw err;
     }
   },
@@ -72,6 +107,12 @@ export const usePrepSheetsStore = create<PrepSheetsState>((set, get) => ({
     try {
       await prepSheetsRepository.delete(id);
       await get().fetchPrepSheets();
+      set({
+        notification: {
+          message: "Prep sheet deleted",
+          type: "success",
+        },
+      });
     } catch (err) {
       set({ error: String(err), isLoading: false });
     }
@@ -111,5 +152,21 @@ export const usePrepSheetsStore = create<PrepSheetsState>((set, get) => ({
     });
   },
 
-  clearBuilder: () => set({ builderSelections: [], currentSheet: null }),
+  setBuilderField: (field, value) => {
+    set((state) => ({
+      builderFields: {
+        ...state.builderFields,
+        [field]: value,
+      },
+    }));
+  },
+
+  clearBuilder: () =>
+    set({
+      builderSelections: [],
+      builderFields: INITIAL_FIELDS,
+      currentSheet: null,
+    }),
+
+  clearNotification: () => set({ notification: null }),
 }));

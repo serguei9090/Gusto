@@ -26,14 +26,25 @@ export const PrepSheetsPage = () => {
     deleteSheet,
     clearBuilder,
     isLoading,
+    notification,
+    clearNotification,
   } = usePrepSheetsStore();
   const { t } = useTranslation();
 
   const [viewingSheet, setViewingSheet] = useState<PrepSheet | null>(null);
+  const [activeTab, setActiveTab] = useState("create");
 
   useEffect(() => {
     fetchPrepSheets();
   }, [fetchPrepSheets]);
+
+  // Handle building-in simple notification clearing
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => clearNotification(), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification, clearNotification]);
 
   // biome-ignore lint/suspicious/noExplicitAny: Form data type
   const handleGenerate = async (formData: any) => {
@@ -46,6 +57,7 @@ export const PrepSheetsPage = () => {
       await saveSheet(viewingSheet);
       setViewingSheet(null);
       clearBuilder();
+      setActiveTab("saved"); // Switch to saved sheets tab
     }
   };
 
@@ -68,7 +80,7 @@ export const PrepSheetsPage = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="create" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="create">{t("prepSheets.createNew")}</TabsTrigger>
           <TabsTrigger value="saved">
@@ -76,6 +88,25 @@ export const PrepSheetsPage = () => {
             {t("prepSheets.savedSheets")} ({prepSheets.length})
           </TabsTrigger>
         </TabsList>
+
+        {notification && (
+          <div
+            className={`p-4 rounded-md flex items-center justify-between transition-all animate-in fade-in slide-in-from-top-4 ${notification.type === "success"
+                ? "bg-green-100 text-green-800 border-green-200"
+                : "bg-red-100 text-red-800 border-red-200"
+              } border`}
+          >
+            <span>{notification.message}</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearNotification}
+              className="h-auto p-1"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
         <TabsContent value="create" className="space-y-4">
           <PrepSheetBuilder onGenerate={handleGenerate} isLoading={isLoading} />

@@ -1,15 +1,9 @@
-import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Plus, X } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Recipe } from "@/types/ingredient.types";
 import { useRecipeStore } from "../store/recipes.store";
-// import { RecipeDetailModal } from "@/components/organisms/RecipeDetailModal"; // Need to migrate this too eventually or keep using shared
-// For now, let's assume we maintain the old modal or assume we just didn't migrate it yet.
-// Since I can't see the modal code, I'll comment it out or leave it if it's importable.
-// I'll try to import it from the old location for now, assuming it still exists.
-// Actually, I should probably check if it relies on old types.
-// Let's assume for this "step" we focus on the main page, and I will fix the modal import if it breaks.
 import { RecipeDetailModal } from "./RecipeDetailModal";
 import { RecipeForm } from "./RecipeForm";
 import { RecipeTable } from "./RecipeTable";
@@ -33,9 +27,26 @@ export const RecipesPage = () => {
   const [viewingRecipeId, setViewingRecipeId] = useState<number | null>(null);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
 
+  const handleCloseForm = useCallback(() => {
+    setIsFormOpen(false);
+    setEditingRecipe(null);
+  }, []);
+
   useEffect(() => {
     fetchRecipes();
   }, [fetchRecipes]);
+
+  // Handle ESC key to close modals
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleCloseForm();
+        setViewingRecipeId(null);
+      }
+    };
+    globalThis.addEventListener("keydown", handleEsc);
+    return () => globalThis.removeEventListener("keydown", handleEsc);
+  }, [handleCloseForm]);
 
   const filteredRecipes = recipes.filter((r) =>
     r.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -60,11 +71,6 @@ export const RecipesPage = () => {
     setIsFormOpen(true);
   };
 
-  const handleCloseForm = () => {
-    setIsFormOpen(false);
-    setEditingRecipe(null);
-  };
-
   const handleDelete = async (id: number) => {
     if (confirm("Are you sure you want to delete this recipe?")) {
       await deleteRecipe(id);
@@ -81,17 +87,20 @@ export const RecipesPage = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Input
-            className="w-[300px]"
-            placeholder={t("recipes.placeholders.searchRecipes")}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
           <Button onClick={() => setIsFormOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             {t("recipes.addRecipe")}
           </Button>
         </div>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Input
+          className="w-full max-w-sm"
+          placeholder={t("recipes.placeholders.searchRecipes")}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
 
       {error && (
@@ -112,10 +121,13 @@ export const RecipesPage = () => {
       {isFormOpen && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-4xl bg-background border rounded-lg shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="p-6 border-b">
+            <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-lg font-semibold">
                 {editingRecipe ? t("recipes.editRecipe") : t("recipes.addRecipe")}
               </h2>
+              <Button variant="ghost" size="icon" onClick={handleCloseForm}>
+                <X className="h-4 w-4" />
+              </Button>
             </div>
             <div className="p-6 overflow-y-auto flex-1">
               <RecipeForm
@@ -139,3 +151,4 @@ export const RecipesPage = () => {
     </div>
   );
 };
+

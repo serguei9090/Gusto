@@ -78,7 +78,7 @@ export function PrepSheetView({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:grid-cols-2">
               {(sheet.recipes as unknown as PrepSheetRecipe[]).map((recipe) => (
                 <div
-                  key={recipe.id}
+                  key={recipe.recipeId}
                   className="flex justify-between items-center bg-muted/30 p-3 rounded-md border print:border-gray-200"
                 >
                   <span className="font-medium">{recipe.recipeName}</span>

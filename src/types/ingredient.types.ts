@@ -66,6 +66,7 @@ export interface Supplier {
   phone: string | null;
   address: string | null;
   paymentTerms: string | null;
+  accountNumber: string | null;
   notes: string | null;
   createdAt: string;
 }

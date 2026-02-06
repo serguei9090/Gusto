@@ -35,7 +35,7 @@ export const useSettingsStore = create<SettingsState>()(
                 recipes: true,
                 inventory: true,
                 suppliers: true,
-                prepSheets: true,
+                prepsheets: true,
             },
             moduleOrder: [
                 "dashboard",
@@ -43,7 +43,7 @@ export const useSettingsStore = create<SettingsState>()(
                 "recipes",
                 "inventory",
                 "suppliers",
-                "prepSheets",
+                "prepsheets",
             ],
             setBaseCurrency: (currency) =>
                 set(() => ({ baseCurrency: currency })),
@@ -75,7 +75,7 @@ export const useSettingsStore = create<SettingsState>()(
                         recipes: true,
                         inventory: true,
                         suppliers: true,
-                        prepSheets: true,
+                        prepsheets: true,
                     },
                     moduleOrder: [
                         "dashboard",
@@ -83,7 +83,7 @@ export const useSettingsStore = create<SettingsState>()(
                         "recipes",
                         "inventory",
                         "suppliers",
-                        "prepSheets",
+                        "prepsheets",
                     ],
                 }),
         }),

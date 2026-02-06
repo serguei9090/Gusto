@@ -67,6 +67,7 @@ export const createSupplierSchema = z.object({
   phone: z.string().max(20).nullable().optional(),
   address: z.string().max(500).nullable().optional(),
   paymentTerms: z.string().max(200).nullable().optional(),
+  accountNumber: z.string().max(100).nullable().optional(),
   notes: z.string().max(500).nullable().optional(),
 });
 
@@ -78,9 +79,9 @@ export const createRecipeSchema = z.object({
   servings: z.number().int().positive("Servings must be positive"),
   prepTimeMinutes: z.number().int().nonnegative().nullable().optional(),
   cookingInstructions: z.string().nullable().optional(),
-  sellingPrice: z.number().positive().nullable().optional(),
+  sellingPrice: z.preprocess((v) => (v === "" || v === null || (v !== v) ? undefined : v), z.number().optional()),
   currency: z.enum(["USD", "EUR"]).default("USD"),
-  targetCostPercentage: z.number().min(0).max(100).nullable().optional(),
+  targetCostPercentage: z.preprocess((v) => (v === "" || v === null || (v !== v) ? undefined : v), z.number().min(0).max(100).optional()),
 });
 
 export const recipeIngredientFormSchema = z.object({

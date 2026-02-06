@@ -36,19 +36,16 @@ export function PrepSheetBuilder({
 }: PrepSheetBuilderProps) {
   const {
     builderSelections,
+    builderFields,
     addRecipeToBuilder,
     updateBuilderServings,
     removeRecipeFromBuilder,
+    setBuilderField,
   } = usePrepSheetsStore();
 
   const { recipes, fetchRecipes } = useRecipeStore();
 
-  // Local form state
-  const [name, setName] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [shift, setShift] = useState<"morning" | "evening" | "">("");
-  const [prepCookName, setPrepCookName] = useState("");
-  const [notes, setNotes] = useState("");
+  const { name, date, shift, prepCookName, notes } = builderFields;
   const [selectedRecipeToAdd, setSelectedRecipeToAdd] = useState("");
 
   useEffect(() => {
@@ -105,7 +102,7 @@ export function PrepSheetBuilder({
                 id="name"
                 placeholder="e.g. Monday Morning Prep"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setBuilderField("name", e.target.value)}
               />
             </div>
 
@@ -116,7 +113,7 @@ export function PrepSheetBuilder({
                   id="date"
                   type="date"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={(e) => setBuilderField("date", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -124,7 +121,7 @@ export function PrepSheetBuilder({
                 <Select
                   value={shift}
                   // biome-ignore lint/suspicious/noExplicitAny: Select value type
-                  onValueChange={(val: any) => setShift(val)}
+                  onValueChange={(val: any) => setBuilderField("shift", val)}
                 >
                   <SelectTrigger id="shift">
                     <SelectValue placeholder="Select shift" />
@@ -143,7 +140,7 @@ export function PrepSheetBuilder({
                 id="cook"
                 placeholder="Assigned to..."
                 value={prepCookName}
-                onChange={(e) => setPrepCookName(e.target.value)}
+                onChange={(e) => setBuilderField("prepCookName", e.target.value)}
               />
             </div>
 
@@ -153,7 +150,7 @@ export function PrepSheetBuilder({
                 id="notes"
                 placeholder="Special instructions..."
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={(e) => setBuilderField("notes", e.target.value)}
               />
             </div>
           </div>

@@ -25,6 +25,7 @@ import { useIngredientsStore } from "@/features/ingredients/store/ingredients.st
 import {
   calculateIngredientCost,
   calculateProfitMargin,
+  calculateFoodCostPercentage,
   calculateRecipeTotal,
   calculateSuggestedPrice,
 } from "@/utils/costEngine";
@@ -87,10 +88,9 @@ export const RecipeForm = ({
     name: "ingredients",
   });
 
-  // Real-time calculations
   const watchedIngredients = watch("ingredients");
-  const watchedSellingPrice = watch("sellingPrice") || 0;
-  const watchedTargetMargin = watch("targetCostPercentage") || 30;
+  const watchedSellingPrice = watch("sellingPrice");
+  const watchedTargetCost = watch("targetCostPercentage") || 25;
 
   // Calculate Total Cost
   const { totalCost } = calculateRecipeTotal(
@@ -106,11 +106,15 @@ export const RecipeForm = ({
     }),
   );
 
-  const currentMargin = calculateProfitMargin(totalCost, watchedSellingPrice);
   const suggestedPrice = calculateSuggestedPrice(
     totalCost,
-    watchedTargetMargin,
+    watchedTargetCost,
   );
+
+  // If selling price is empty, use suggested price for margin calculations
+  const effectivePrice = watchedSellingPrice || suggestedPrice || 0;
+  const currentMargin = calculateProfitMargin(totalCost, effectivePrice);
+  const currentFoodCost = calculateFoodCostPercentage(totalCost, effectivePrice);
 
   const handleAddIngredient = (value: string) => {
     const id = Number(value);
@@ -225,12 +229,16 @@ export const RecipeForm = ({
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="space-y-2">
-              <Label htmlFor="sellingPrice">{t("recipes.fields.sellingPrice")} <span className="text-destructive">*</span></Label>
+              <Label htmlFor="sellingPrice">
+                {t("recipes.fields.sellingPrice")}
+                <span className="ml-2 text-[10px] text-muted-foreground uppercase opacity-70">(Optional)</span>
+              </Label>
               <Input
                 type="number"
                 step="0.01"
                 id="sellingPrice"
                 {...register("sellingPrice", { valueAsNumber: true })}
+                placeholder={suggestedPrice > 0 ? suggestedPrice.toFixed(2) : "0.00"}
               />
             </div>
 
@@ -250,42 +258,66 @@ export const RecipeForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="targetCost">Target Cost %</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="targetCost">Target Food Cost %</Label>
+                <span className="text-[10px] font-mono text-muted-foreground">Default: 25%</span>
+              </div>
               <div className="flex gap-2">
                 <Input
                   type="number"
                   id="targetCost"
                   {...register("targetCostPercentage", { valueAsNumber: true })}
-                  placeholder="30"
+                  placeholder="25"
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setValue("targetCostPercentage", 30)}
-                >
-                  30%
-                </Button>
+                <div className="flex gap-1">
+                  {[20, 25, 30].map(val => (
+                    <Button
+                      key={val}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="px-2"
+                      onClick={() => setValue("targetCostPercentage", val)}
+                    >
+                      {val}%
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="mt-6 p-4 bg-muted/50 rounded-lg space-y-3">
+            <div className="mt-6 p-4 bg-muted/30 border border-border/50 rounded-lg space-y-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Total Cost:</span>
-                <span className="font-semibold">${totalCost.toFixed(2)}</span>
+                <span className="text-muted-foreground">Recipe Total Cost:</span>
+                <span className="font-semibold">{getCurrencySymbol(watch("currency") || "USD")}{totalCost.toFixed(2)}</span>
               </div>
+
+              <div className="h-px bg-border/50 my-2" />
+
               <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Actual Margin:</span>
-                <span className={`font-bold ${getMarginColor(currentMargin)}`}>
-                  {currentMargin.toFixed(1)}%
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Suggested Price:</span>
+                <span className="text-muted-foreground">Suggested Price ({watchedTargetCost}% Cost):</span>
                 <span className="font-semibold text-primary">
-                  $
+                  {getCurrencySymbol(watch("currency") || "USD")}
                   {Number.isFinite(suggestedPrice)
                     ? suggestedPrice.toFixed(2)
                     : "0.00"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground text-xs italic">
+                  {watchedSellingPrice ? "Actual Food Cost:" : "Target Food Cost:"}
+                </span>
+                <span className={`font-medium ${getMarginColor(100 - currentFoodCost)}`}>
+                  {currentFoodCost.toFixed(1)}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground font-medium">
+                  {watchedSellingPrice ? "Net Profit Margin:" : "Target Profit Margin:"}
+                </span>
+                <span className={`font-bold ${getMarginColor(currentMargin)}`}>
+                  {currentMargin.toFixed(1)}%
                 </span>
               </div>
             </div>
@@ -371,6 +403,7 @@ export const RecipeForm = ({
                         baseUnit={
                           watchedIngredients[index]?.ingredientUnit || "kg"
                         }
+                        currency={watch("currency") || "USD"}
                       />
                     </td>
                     <td className="p-4 align-middle">
@@ -433,11 +466,13 @@ const CostDisplay = ({
   unit,
   basePrice,
   baseUnit,
+  currency,
 }: {
   quantity: number;
   unit: string;
   basePrice: number;
   baseUnit: string;
+  currency: string;
 }) => {
   const { cost, error } = calculateIngredientCost(
     quantity,
@@ -451,5 +486,6 @@ const CostDisplay = ({
         !
       </span>
     );
-  return <span>${cost.toFixed(2)}</span>;
+  // @ts-ignore
+  return <span>{getCurrencySymbol(currency)}{cost.toFixed(2)}</span>;
 };

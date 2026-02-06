@@ -11,6 +11,7 @@ export interface SupplierTable {
   phone: string | null;
   address: string | null;
   payment_terms: string | null;
+  account_number: string | null;
   notes: string | null;
   created_at: string | null;
   updated_at?: string | null;
@@ -45,49 +46,33 @@ class SuppliersRepository {
   async create(data: any): Promise<Supplier> {
     const dbData: Omit<CreateSupplierInput, "id"> = {
       name: data.name,
-      contact_person: data.contactPerson, // Map camelCase to snake_case
+      contact_person: data.contactPerson,
       email: data.email,
       phone: data.phone,
       address: data.address,
-      payment_terms: data.paymentTerms, // Map camelCase to snake_case
+      payment_terms: data.paymentTerms,
+      account_number: data.accountNumber,
       notes: data.notes,
     };
 
-    // Note: Kysely returns InsertResult { insertId } on SQLite
     const result = await db
       .insertInto("suppliers")
       .values(dbData)
+      .returningAll()
       .executeTakeFirstOrThrow();
 
-    if (result.numInsertedOrUpdatedRows === BigInt(0)) {
-      throw new Error("Failed to create supplier");
-    }
-
-    // SQLite doesn't return the inserted row by default in all drivers,
-    // but Kysely's .returningAll() works if the dialect supports it (Postgres/SQLite usually)
-    // For safer cross-driver support with Tauri SQL, fetch by ID
-    let id = Number(result.insertId);
-
-    // Fallback: If insertId is missing but rows were affected, fetch the latest entry
-    if (!id && result.numInsertedOrUpdatedRows > BigInt(0)) {
-      const latest = await db.selectFrom("suppliers").select("id").orderBy("id", "desc").limit(1).executeTakeFirst();
-      if (latest) id = latest.id;
-    }
-
-    const created = await this.getById(id);
-    if (!created) throw new Error("Could not retrieve created supplier");
-
-    return created;
+    return this.mapToDomain(result);
   }
 
   async update(id: number, data: any): Promise<void> {
     const dbData: UpdateSupplierInput = {
       name: data.name,
-      contact_person: data.contactPerson, // Map camelCase to snake_case
+      contact_person: data.contactPerson,
       email: data.email,
       phone: data.phone,
       address: data.address,
-      payment_terms: data.paymentTerms, // Map camelCase to snake_case
+      payment_terms: data.paymentTerms,
+      account_number: data.accountNumber,
       notes: data.notes,
     };
 
@@ -126,6 +111,7 @@ class SuppliersRepository {
       phone: row.phone,
       address: row.address,
       paymentTerms: row.payment_terms,
+      accountNumber: row.account_number,
       notes: row.notes,
       createdAt: row.created_at || "",
     };
