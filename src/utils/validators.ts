@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SUPPORTED_CURRENCIES } from "./currency";
 
 // Ingredient Category Enum
 export const ingredientCategorySchema = z.enum([
@@ -31,7 +32,7 @@ export const createIngredientSchema = z.object({
   unitOfMeasure: unitOfMeasureSchema,
   currentPrice: z.number().positive("Price must be positive"),
   pricePerUnit: z.number().positive("Price per unit must be positive"),
-  currency: z.enum(["USD", "EUR"]).default("USD"),
+  currency: z.enum(SUPPORTED_CURRENCIES).default("USD"),
   supplierId: z.number().int().positive().nullable().optional(),
   minStockLevel: z.number().nonnegative().nullable().optional(),
   currentStock: z.number().nonnegative().default(0),
@@ -63,7 +64,10 @@ export const transactionTypeSchema = z.enum([
 export const createSupplierSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   contactPerson: z.string().max(100).nullable().optional(),
-  email: z.union([z.string().email({ message: "Invalid email" }), z.literal("")]).nullable().optional(),
+  email: z
+    .union([z.email({ error: "Invalid email" }), z.literal("")])
+    .nullable()
+    .optional(),
   phone: z.string().max(20).nullable().optional(),
   address: z.string().max(500).nullable().optional(),
   paymentTerms: z.string().max(200).nullable().optional(),
@@ -79,10 +83,19 @@ export const createRecipeSchema = z.object({
   servings: z.number().int().positive("Servings must be positive"),
   prepTimeMinutes: z.number().int().nonnegative().nullable().optional(),
   cookingInstructions: z.string().nullable().optional(),
-  sellingPrice: z.preprocess((v) => (v === "" || v === null || (v !== v) ? undefined : v), z.number().optional()),
-  currency: z.enum(["USD", "EUR"]).default("USD"),
-  targetCostPercentage: z.preprocess((v) => (v === "" || v === null || (v !== v) ? undefined : v), z.number().min(0).max(100).optional()),
-  wasteBufferPercentage: z.preprocess((v) => (v === "" || v === null || (v !== v) ? undefined : v), z.number().min(0).max(100).optional().default(0)),
+  sellingPrice: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? undefined : v),
+    z.number().optional(),
+  ),
+  currency: z.enum(SUPPORTED_CURRENCIES).default("USD"),
+  targetCostPercentage: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? undefined : v),
+    z.number().min(0).max(100).optional(),
+  ),
+  wasteBufferPercentage: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? undefined : v),
+    z.number().min(0).max(100).optional().default(0),
+  ),
 });
 
 export const recipeIngredientFormSchema = z.object({

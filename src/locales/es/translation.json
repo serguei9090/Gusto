@@ -1,222 +1,222 @@
 {
-    "common": {
-        "actions": {
-            "save": "Guardar",
-            "cancel": "Cancelar",
-            "delete": "Eliminar",
-            "edit": "Editar",
-            "add": "Agregar",
-            "search": "Buscar",
-            "filter": "Filtrar",
-            "close": "Cerrar",
-            "confirm": "Confirmar",
-            "back": "Atrás",
-            "next": "Siguiente",
-            "submit": "Enviar",
-            "reset": "Restablecer"
-        },
-        "labels": {
-            "name": "Nombre",
-            "description": "Descripción",
-            "category": "Categoría",
-            "price": "Precio",
-            "currency": "Moneda",
-            "date": "Fecha",
-            "notes": "Notas",
-            "status": "Estado",
-            "total": "Total",
-            "quantity": "Cantidad",
-            "unit": "Unidad"
-        },
-        "messages": {
-            "loading": "Cargando...",
-            "saving": "Guardando...",
-            "success": "¡Éxito!",
-            "error": "Ocurrió un error",
-            "noData": "No hay datos disponibles",
-            "confirmDelete": "¿Está seguro de que desea eliminar este elemento?"
-        },
-        "validation": {
-            "required": "Este campo es obligatorio",
-            "invalidEmail": "Dirección de correo electrónico no válida",
-            "minLength": "La longitud mínima es {{count}} caracteres",
-            "maxLength": "La longitud máxima es {{count}} caracteres",
-            "positive": "Debe ser un número positivo"
-        },
-        "categories": {
-            "protein": "Proteína",
-            "vegetable": "Vegetal",
-            "dairy": "Lácteo",
-            "spice": "Especias",
-            "grain": "Grano",
-            "fruit": "Fruta",
-            "condiment": "Condimento",
-            "other": "Otro",
-            "appetizer": "Entrante",
-            "main": "Plato Principal",
-            "dessert": "Postre",
-            "beverage": "Bebida",
-            "side": "Acompañamiento"
-        }
+  "common": {
+    "actions": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "add": "Agregar",
+      "search": "Buscar",
+      "filter": "Filtrar",
+      "close": "Cerrar",
+      "confirm": "Confirmar",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "submit": "Enviar",
+      "reset": "Restablecer"
     },
-    "navigation": {
-        "dashboard": "Panel de Control",
-        "ingredients": "Ingredientes",
-        "recipes": "Recetas",
-        "inventory": "Inventario",
-        "suppliers": "Proveedores",
-        "prepSheets": "Hojas de Preparación",
-        "reports": "Informes",
-        "calculators": "Calculadoras",
-        "settings": "Configuración"
+    "labels": {
+      "name": "Nombre",
+      "description": "Descripción",
+      "category": "Categoría",
+      "price": "Precio",
+      "currency": "Moneda",
+      "date": "Fecha",
+      "notes": "Notas",
+      "status": "Estado",
+      "total": "Total",
+      "quantity": "Cantidad",
+      "unit": "Unidad"
     },
-    "settings": {
-        "title": "Configuración",
-        "subtitle": "Gestionar lógica y preferencias.",
-        "general": {
-            "title": "Configuración General",
-            "description": "Preferencias de aplicación y localización.",
-            "languageLabel": "Idioma / Language",
-            "languageHelp": "Seleccione su idioma preferido.",
-            "selectLanguage": "Seleccionar idioma"
-        },
-        "currency": {
-            "title": "Configuración de Moneda",
-            "description": "Configurar tasas de cambio y moneda de referencia.",
-            "resetDefaults": "Restablecer valores",
-            "baseLabel": "Moneda de Referencia (Base)",
-            "baseHelp": "La moneda utilizada como base 1.00 para los cálculos.",
-            "selectCurrency": "Seleccionar moneda",
-            "exchangeRatesLabel": "Tasas de Cambio (Relativo a {{currency}})",
-            "baseBadge": "Base"
-        },
-        "modules": {
-            "title": "Módulos",
-            "description": "Habilitar, deshabilitar o reorganizar funciones.",
-            "suppliersHelp": "Gestionar proveedores externos.",
-            "prepSheetsHelp": "Crear planes de producción.",
-            "calculatorsHelp": "Herramientas de costos y matemáticas.",
-            "dragToReorder": "Arrastre para reordenar los elementos.",
-            "visible": "Visible",
-            "hidden": "Oculto"
-        }
+    "messages": {
+      "loading": "Cargando...",
+      "saving": "Guardando...",
+      "success": "¡Éxito!",
+      "error": "Ocurrió un error",
+      "noData": "No hay datos disponibles",
+      "confirmDelete": "¿Está seguro de que desea eliminar este elemento?"
     },
-    "ingredients": {
-        "title": "Ingredientes",
-        "addIngredient": "Agregar Ingrediente",
-        "editIngredient": "Editar Ingrediente",
-        "deleteIngredient": "Eliminar Ingrediente",
-        "ingredientDetails": "Detalles del Ingrediente",
-        "fields": {
-            "currentPrice": "Precio Actual",
-            "pricePerUnit": "Precio por Unidad",
-            "currentStock": "Stock Actual",
-            "minStockLevel": "Nivel Mínimo de Stock",
-            "supplier": "Proveedor",
-            "unitOfMeasure": "Unidad de Medida"
-        },
-        "placeholders": {
-            "searchIngredients": "Buscar ingredientes...",
-            "ingredientName": "ej. Salsa de Tomate"
-        }
+    "validation": {
+      "required": "Este campo es obligatorio",
+      "invalidEmail": "Dirección de correo electrónico no válida",
+      "minLength": "La longitud mínima es {{count}} caracteres",
+      "maxLength": "La longitud máxima es {{count}} caracteres",
+      "positive": "Debe ser un número positivo"
     },
-    "recipes": {
-        "title": "Recetas",
-        "addRecipe": "Agregar Receta",
-        "editRecipe": "Editar Receta",
-        "deleteRecipe": "Eliminar Receta",
-        "recipeDetails": "Detalles de la Receta",
-        "fields": {
-            "servings": "Porciones",
-            "prepTime": "Tiempo de Preparación (minutos)",
-            "cookingInstructions": "Instrucciones de Cocción",
-            "sellingPrice": "Precio de Venta",
-            "targetCostPercentage": "Porcentaje de Costo Objetivo",
-            "totalCost": "Costo Total",
-            "profitMargin": "Margen de Beneficio",
-            "addIngredient": "Agregar Ingrediente"
-        },
-        "placeholders": {
-            "searchRecipes": "Buscar recetas...",
-            "recipeName": "ej. Pizza Margarita",
-            "briefOverview": "Descripción breve..."
-        },
-        "sections": {
-            "basicInfo": "Información Básica",
-            "financials": "Finanzas",
-            "ingredients": "Ingredientes"
-        },
-        "subtitle": "Gestione los elementos de su menú y calcule los costos."
-    },
-    "inventory": {
-        "title": "Inventario",
-        "stockLevel": "Nivel de Stock",
-        "lastUpdated": "Última Actualización",
-        "lowStock": "Stock Bajo",
-        "lowStockAlert": "Alerta de Stock Bajo",
-        "outOfStock": "Sin Stock",
-        "inStock": "En Stock",
-        "subtitle": "Gestione los niveles de existencias y realice un seguimiento de las transacciones.",
-        "searchPlaceholder": "Buscar inventario...",
-        "totalItems": "Artículos Totales",
-        "activeIngredients": "Ingredientes activos",
-        "itemsNeedingAttention": "Artículos que requieren atención"
-    },
-    "suppliers": {
-        "title": "Proveedores",
-        "addSupplier": "Agregar Proveedor",
-        "editSupplier": "Editar Proveedor",
-        "supplierDetails": "Detalles del Proveedor",
-        "fields": {
-            "contactPerson": "Persona de Contacto",
-            "email": "Correo Electrónico",
-            "phone": "Teléfono",
-            "address": "Dirección",
-            "paymentTerms": "Términos de Pago"
-        },
-        "subtitle": "Gestione sus fuentes de ingredientes y contactos.",
-        "searchPlaceholder": "Buscar proveedores...",
-        "totalSuppliers": "Proveedores Totales",
-        "activePartners": "Socios activos"
-    },
-    "prepSheets": {
-        "title": "Hojas de Preparación",
-        "createPrepSheet": "Crear Hoja de Preparación",
-        "prepDate": "Fecha de Preparación",
-        "recipes": "Recetas",
-        "totalIngredients": "Ingredientes Totales Necesarios",
-        "exportPDF": "Exportar a PDF",
-        "subtitle": "Planifique la producción y genere listas de preparación combinadas.",
-        "createNew": "Crear Nuevo",
-        "savedSheets": "Hojas Guardadas",
-        "noSavedSheets": "No hay hojas de preparación guardadas",
-        "generatePrompt": "Genere y guarde una hoja de preparación para verla aquí.",
-        "shift": "Turno",
-        "actions": "Acciones",
-        "view": "Ver"
-    },
-    "dashboard": {
-        "title": "Panel de Control",
-        "welcomeMessage": "Bienvenido a la Gestión de Restaurantes",
-        "stockValue": "Valor del Stock",
-        "avgMargin": "Margen Promedio",
-        "stats": {
-            "totalIngredients": "Ingredientes Totales",
-            "totalRecipes": "Recetas Totales",
-            "lowStockItems": "Artículos con Stock Bajo",
-            "totalSuppliers": "Proveedores Totales",
-            "totalInventoryValue": "Valor total del inventario",
-            "belowMinLevel": "Artículos por debajo del nivel mínimo",
-            "acrossAllRecipes": "En todas las recetas",
-            "activeRecipes": "Recetas activas"
-        },
-        "urgentReorders": "Reordenes Urgentes",
-        "stockLevelsHealthy": "Niveles de stock saludables",
-        "highMarginRecipes": "Recetas de Alto Margen",
-        "noRecipeData": "No hay datos de recetas disponibles"
+    "categories": {
+      "protein": "Proteína",
+      "vegetable": "Vegetal",
+      "dairy": "Lácteo",
+      "spice": "Especias",
+      "grain": "Grano",
+      "fruit": "Fruta",
+      "condiment": "Condimento",
+      "other": "Otro",
+      "appetizer": "Entrante",
+      "main": "Plato Principal",
+      "dessert": "Postre",
+      "beverage": "Bebida",
+      "side": "Acompañamiento"
+    }
+  },
+  "navigation": {
+    "dashboard": "Panel de Control",
+    "ingredients": "Ingredientes",
+    "recipes": "Recetas",
+    "inventory": "Inventario",
+    "suppliers": "Proveedores",
+    "prepSheets": "Hojas de Preparación",
+    "reports": "Informes",
+    "calculators": "Calculadoras",
+    "settings": "Configuración"
+  },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Gestionar lógica y preferencias.",
+    "general": {
+      "title": "Configuración General",
+      "description": "Preferencias de aplicación y localización.",
+      "languageLabel": "Idioma / Language",
+      "languageHelp": "Seleccione su idioma preferido.",
+      "selectLanguage": "Seleccionar idioma"
     },
     "currency": {
-        "usd": "Dólar Estadounidense",
-        "eur": "Euro"
+      "title": "Configuración de Moneda",
+      "description": "Configurar tasas de cambio y moneda de referencia.",
+      "resetDefaults": "Restablecer valores",
+      "baseLabel": "Moneda de Referencia (Base)",
+      "baseHelp": "La moneda utilizada como base 1.00 para los cálculos.",
+      "selectCurrency": "Seleccionar moneda",
+      "exchangeRatesLabel": "Tasas de Cambio (Relativo a {{currency}})",
+      "baseBadge": "Base"
+    },
+    "modules": {
+      "title": "Módulos",
+      "description": "Habilitar, deshabilitar o reorganizar funciones.",
+      "suppliersHelp": "Gestionar proveedores externos.",
+      "prepSheetsHelp": "Crear planes de producción.",
+      "calculatorsHelp": "Herramientas de costos y matemáticas.",
+      "dragToReorder": "Arrastre para reordenar los elementos.",
+      "visible": "Visible",
+      "hidden": "Oculto"
     }
+  },
+  "ingredients": {
+    "title": "Ingredientes",
+    "addIngredient": "Agregar Ingrediente",
+    "editIngredient": "Editar Ingrediente",
+    "deleteIngredient": "Eliminar Ingrediente",
+    "ingredientDetails": "Detalles del Ingrediente",
+    "fields": {
+      "currentPrice": "Precio Actual",
+      "pricePerUnit": "Precio por Unidad",
+      "currentStock": "Stock Actual",
+      "minStockLevel": "Nivel Mínimo de Stock",
+      "supplier": "Proveedor",
+      "unitOfMeasure": "Unidad de Medida"
+    },
+    "placeholders": {
+      "searchIngredients": "Buscar ingredientes...",
+      "ingredientName": "ej. Salsa de Tomate"
+    }
+  },
+  "recipes": {
+    "title": "Recetas",
+    "addRecipe": "Agregar Receta",
+    "editRecipe": "Editar Receta",
+    "deleteRecipe": "Eliminar Receta",
+    "recipeDetails": "Detalles de la Receta",
+    "fields": {
+      "servings": "Porciones",
+      "prepTime": "Tiempo de Preparación (minutos)",
+      "cookingInstructions": "Instrucciones de Cocción",
+      "sellingPrice": "Precio de Venta",
+      "targetCostPercentage": "Porcentaje de Costo Objetivo",
+      "totalCost": "Costo Total",
+      "profitMargin": "Margen de Beneficio",
+      "addIngredient": "Agregar Ingrediente"
+    },
+    "placeholders": {
+      "searchRecipes": "Buscar recetas...",
+      "recipeName": "ej. Pizza Margarita",
+      "briefOverview": "Descripción breve..."
+    },
+    "sections": {
+      "basicInfo": "Información Básica",
+      "financials": "Finanzas",
+      "ingredients": "Ingredientes"
+    },
+    "subtitle": "Gestione los elementos de su menú y calcule los costos."
+  },
+  "inventory": {
+    "title": "Inventario",
+    "stockLevel": "Nivel de Stock",
+    "lastUpdated": "Última Actualización",
+    "lowStock": "Stock Bajo",
+    "lowStockAlert": "Alerta de Stock Bajo",
+    "outOfStock": "Sin Stock",
+    "inStock": "En Stock",
+    "subtitle": "Gestione los niveles de existencias y realice un seguimiento de las transacciones.",
+    "searchPlaceholder": "Buscar inventario...",
+    "totalItems": "Artículos Totales",
+    "activeIngredients": "Ingredientes activos",
+    "itemsNeedingAttention": "Artículos que requieren atención"
+  },
+  "suppliers": {
+    "title": "Proveedores",
+    "addSupplier": "Agregar Proveedor",
+    "editSupplier": "Editar Proveedor",
+    "supplierDetails": "Detalles del Proveedor",
+    "fields": {
+      "contactPerson": "Persona de Contacto",
+      "email": "Correo Electrónico",
+      "phone": "Teléfono",
+      "address": "Dirección",
+      "paymentTerms": "Términos de Pago"
+    },
+    "subtitle": "Gestione sus fuentes de ingredientes y contactos.",
+    "searchPlaceholder": "Buscar proveedores...",
+    "totalSuppliers": "Proveedores Totales",
+    "activePartners": "Socios activos"
+  },
+  "prepSheets": {
+    "title": "Hojas de Preparación",
+    "createPrepSheet": "Crear Hoja de Preparación",
+    "prepDate": "Fecha de Preparación",
+    "recipes": "Recetas",
+    "totalIngredients": "Ingredientes Totales Necesarios",
+    "exportPDF": "Exportar a PDF",
+    "subtitle": "Planifique la producción y genere listas de preparación combinadas.",
+    "createNew": "Crear Nuevo",
+    "savedSheets": "Hojas Guardadas",
+    "noSavedSheets": "No hay hojas de preparación guardadas",
+    "generatePrompt": "Genere y guarde una hoja de preparación para verla aquí.",
+    "shift": "Turno",
+    "actions": "Acciones",
+    "view": "Ver"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcomeMessage": "Bienvenido a la Gestión de Restaurantes",
+    "stockValue": "Valor del Stock",
+    "avgMargin": "Margen Promedio",
+    "stats": {
+      "totalIngredients": "Ingredientes Totales",
+      "totalRecipes": "Recetas Totales",
+      "lowStockItems": "Artículos con Stock Bajo",
+      "totalSuppliers": "Proveedores Totales",
+      "totalInventoryValue": "Valor total del inventario",
+      "belowMinLevel": "Artículos por debajo del nivel mínimo",
+      "acrossAllRecipes": "En todas las recetas",
+      "activeRecipes": "Recetas activas"
+    },
+    "urgentReorders": "Reordenes Urgentes",
+    "stockLevelsHealthy": "Niveles de stock saludables",
+    "highMarginRecipes": "Recetas de Alto Margen",
+    "noRecipeData": "No hay datos de recetas disponibles"
+  },
+  "currency": {
+    "usd": "Dólar Estadounidense",
+    "eur": "Euro"
+  }
 }

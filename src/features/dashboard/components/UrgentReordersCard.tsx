@@ -1,8 +1,8 @@
 import { AlertCircle, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { UrgentReorderItem } from "../types";
 import { useTranslation } from "@/hooks/useTranslation";
+import type { UrgentReorderItem } from "../types";
 
 interface UrgentReordersCardProps {
   items: UrgentReorderItem[];

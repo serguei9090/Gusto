@@ -64,12 +64,12 @@ class DashboardRepository {
       .limit(limit)
       .execute();
 
-    return rows.map((row: any) => ({
+    return rows.map((row) => ({
       id: row.id,
       name: row.name,
       currentStock: row.current_stock,
-      minStockLevel: row.min_stock_level!,
-      deficit: row.min_stock_level! - row.current_stock,
+      minStockLevel: row.min_stock_level ?? 0,
+      deficit: (row.min_stock_level ?? 0) - row.current_stock,
       unit: row.unit_of_measure,
     }));
   }
@@ -100,7 +100,7 @@ class DashboardRepository {
       .limit(limit)
       .execute();
 
-    return rows.map((row: any) => ({
+    return rows.map((row) => ({
       id: row.id,
       name: row.name,
       selling_price: row.selling_price || 0,

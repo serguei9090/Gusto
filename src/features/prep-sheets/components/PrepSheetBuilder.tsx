@@ -33,7 +33,7 @@ interface PrepSheetBuilderProps {
 export function PrepSheetBuilder({
   onGenerate,
   isLoading,
-}: PrepSheetBuilderProps) {
+}: Readonly<PrepSheetBuilderProps>) {
   const {
     builderSelections,
     builderFields,
@@ -66,7 +66,7 @@ export function PrepSheetBuilder({
 
   const handleAddRecipe = () => {
     if (!selectedRecipeToAdd) return;
-    const recipeId = parseInt(selectedRecipeToAdd);
+    const recipeId = Number.parseInt(selectedRecipeToAdd, 10);
     const recipe = recipes.find((r) => r.id === recipeId);
     if (recipe) {
       addRecipeToBuilder(recipe.id, recipe.servings); // Default to base servings
@@ -74,8 +74,7 @@ export function PrepSheetBuilder({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     onGenerate({
       name,
       date,
@@ -97,7 +96,9 @@ export function PrepSheetBuilder({
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="name">Sheet Name <span className="text-destructive">*</span></Label>
+              <Label htmlFor="name">
+                Sheet Name <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="name"
                 placeholder="e.g. Monday Morning Prep"
@@ -108,7 +109,9 @@ export function PrepSheetBuilder({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="date">Date <span className="text-destructive">*</span></Label>
+                <Label htmlFor="date">
+                  Date <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="date"
                   type="date"
@@ -120,8 +123,9 @@ export function PrepSheetBuilder({
                 <Label htmlFor="shift">Shift</Label>
                 <Select
                   value={shift}
-                  // biome-ignore lint/suspicious/noExplicitAny: Select value type
-                  onValueChange={(val: any) => setBuilderField("shift", val)}
+                  onValueChange={(val: string) =>
+                    setBuilderField("shift", val as "morning" | "evening")
+                  }
                 >
                   <SelectTrigger id="shift">
                     <SelectValue placeholder="Select shift" />
@@ -140,7 +144,9 @@ export function PrepSheetBuilder({
                 id="cook"
                 placeholder="Assigned to..."
                 value={prepCookName}
-                onChange={(e) => setBuilderField("prepCookName", e.target.value)}
+                onChange={(e) =>
+                  setBuilderField("prepCookName", e.target.value)
+                }
               />
             </div>
 
@@ -214,7 +220,7 @@ export function PrepSheetBuilder({
                         onChange={(e) =>
                           updateBuilderServings(
                             item.recipeId,
-                            parseInt(e.target.value) || 0,
+                            Number.parseInt(e.target.value, 10) || 0,
                           )
                         }
                         className="w-24"
@@ -241,7 +247,7 @@ export function PrepSheetBuilder({
           <div className="flex justify-end">
             <Button
               size="lg"
-              onClick={handleSubmit}
+              onClick={() => handleSubmit()}
               disabled={!isValid || isLoading}
             >
               {isLoading ? (

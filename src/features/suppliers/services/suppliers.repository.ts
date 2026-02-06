@@ -1,24 +1,11 @@
-import type { Insertable, Updateable } from "kysely";
-import type { Supplier } from "@/features/suppliers/types"; // Ensure this matches your type definition location
+import type { Insertable, Selectable, Updateable } from "kysely";
+import type { Supplier, SupplierFormData } from "@/features/suppliers/types";
 import { db } from "@/lib/db";
+import type { SuppliersTable } from "@/types/db.types";
 
-// Define the interface matching the database table
-export interface SupplierTable {
-  id: number;
-  name: string;
-  contact_person: string | null;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  payment_terms: string | null;
-  account_number: string | null;
-  notes: string | null;
-  created_at: string | null;
-  updated_at?: string | null;
-}
-
-export type CreateSupplierInput = Insertable<SupplierTable>;
-export type UpdateSupplierInput = Updateable<SupplierTable>;
+export type SupplierRow = Selectable<SuppliersTable>;
+export type CreateSupplierInput = Insertable<Omit<SuppliersTable, "id">>;
+export type UpdateSupplierInput = Updateable<SuppliersTable>;
 
 class SuppliersRepository {
   async getAll(): Promise<Supplier[]> {
@@ -43,8 +30,8 @@ class SuppliersRepository {
     return result ? this.mapToDomain(result) : null;
   }
 
-  async create(data: any): Promise<Supplier> {
-    const dbData: Omit<CreateSupplierInput, "id"> = {
+  async create(data: SupplierFormData): Promise<Supplier> {
+    const dbData: CreateSupplierInput = {
       name: data.name,
       contact_person: data.contactPerson,
       email: data.email,
@@ -64,7 +51,7 @@ class SuppliersRepository {
     return this.mapToDomain(result);
   }
 
-  async update(id: number, data: any): Promise<void> {
+  async update(id: number, data: Partial<SupplierFormData>): Promise<void> {
     const dbData: UpdateSupplierInput = {
       name: data.name,
       contact_person: data.contactPerson,
@@ -78,10 +65,14 @@ class SuppliersRepository {
 
     // Filter out undefined values to allow partial updates
     const cleanData = Object.fromEntries(
-      Object.entries(dbData).filter(([_, v]) => v !== undefined)
+      Object.entries(dbData).filter(([_, v]) => v !== undefined),
     );
 
-    await db.updateTable("suppliers").set(cleanData).where("id", "=", id).execute();
+    await db
+      .updateTable("suppliers")
+      .set(cleanData)
+      .where("id", "=", id)
+      .execute();
   }
 
   async delete(id: number): Promise<void> {
@@ -102,7 +93,7 @@ class SuppliersRepository {
     await db.deleteFrom("suppliers").where("id", "=", id).execute();
   }
 
-  private mapToDomain(row: SupplierTable): Supplier {
+  private mapToDomain(row: SupplierRow): Supplier {
     return {
       id: row.id,
       name: row.name,

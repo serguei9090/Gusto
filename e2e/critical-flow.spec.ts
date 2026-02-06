@@ -1,8 +1,5 @@
 import { expect, test } from "./fixtures";
-import {
-  capturePageScreenshot,
-  waitForPageReady,
-} from "./helpers/screenshots";
+import { capturePageScreenshot, waitForPageReady } from "./helpers/screenshots";
 
 test.describe("Phase 8: Critical End-to-End Flow", () => {
   test("should complete full workflow: Supplier → Ingredient → Recipe → Inventory → Dashboard", async ({
@@ -37,7 +34,7 @@ test.describe("Phase 8: Critical End-to-End Flow", () => {
 
     await page
       .locator('select[name="supplierId"]')
-      .selectOption({ label: /E2E Test Supplier/i });
+      .selectOption({ label: "E2E Test Supplier" });
 
     await page.getByRole("button", { name: "Save" }).click();
     await expect(page.getByText("E2E Test Ingredient")).toBeVisible();
@@ -60,8 +57,11 @@ test.describe("Phase 8: Critical End-to-End Flow", () => {
     await page
       .locator('select[name="ingredientId"]')
       .first()
-      .selectOption({ label: /E2E Test Ingredient/i });
-    await page.getByLabel(/Quantity/i).first().fill("2");
+      .selectOption({ label: "E2E Test Ingredient" });
+    await page
+      .getByLabel(/Quantity/i)
+      .first()
+      .fill("2");
 
     await page.getByRole("button", { name: "Save Recipe" }).click();
     await expect(page.getByText("E2E Test Recipe")).toBeVisible();
@@ -96,7 +96,9 @@ test.describe("Phase 8: Critical End-to-End Flow", () => {
     await page.getByRole("link", { name: "Dashboard" }).first().click();
     await waitForPageReady(page);
 
-    await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Dashboard" }),
+    ).toBeVisible();
 
     // Verify stats are displaying
     await expect(page.getByText(/stock value/i)).toBeVisible();
@@ -107,29 +109,29 @@ test.describe("Phase 8: Critical End-to-End Flow", () => {
     // FINAL VERIFICATION: Check data integrity across all tables
     const supplier = database.db
       .prepare("SELECT * FROM suppliers WHERE name = 'E2E Test Supplier'")
-      .get() as any;
+      .get() as { id: number };
 
     const ingredient = database.db
       .prepare("SELECT * FROM ingredients WHERE name = 'E2E Test Ingredient'")
-      .get() as any;
+      .get() as { id: number; supplier_id: number };
 
     const recipe = database.db
       .prepare("SELECT * FROM recipes WHERE name = 'E2E Test Recipe'")
-      .get() as any;
+      .get() as { id: number };
 
     const recipeIngredient = database.db
       .prepare(
         `SELECT * FROM recipe_ingredients 
          WHERE recipe_id = ? AND ingredient_id = ?`,
       )
-      .get(recipe.id, ingredient.id) as any;
+      .get(recipe.id, ingredient.id) as { quantity: number };
 
     const transaction = database.db
       .prepare(
         `SELECT * FROM inventory_transactions 
          WHERE ingredient_id = ? AND notes = 'Used in E2E test'`,
       )
-      .get(ingredient.id) as any;
+      .get(ingredient.id) as { transaction_type: string; quantity: number };
 
     // Verify all entities are properly linked
     expect(supplier).toBeTruthy();

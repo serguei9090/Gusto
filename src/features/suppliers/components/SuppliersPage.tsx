@@ -1,15 +1,15 @@
-import { Plus, Search, Users, X } from "lucide-react";
-import { useEffect, useState, useCallback } from "react";
+import { Plus, Search, Users } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useSuppliersStore } from "@/features/suppliers/store/suppliers.store";
-import type { Supplier } from "@/features/suppliers/types";
+import type { Supplier, SupplierFormData } from "@/features/suppliers/types";
+import { useTranslation } from "@/hooks/useTranslation";
+import { SupplierDetailModal } from "./SupplierDetailModal";
 import { SupplierForm } from "./SupplierForm";
 import { SupplierTable } from "./SupplierTable";
-import { SupplierDetailModal } from "./SupplierDetailModal";
-import { useTranslation } from "@/hooks/useTranslation";
 
 export const SuppliersPage = () => {
   const {
@@ -55,7 +55,7 @@ export const SuppliersPage = () => {
       s.contactPerson?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const handleCreateOrUpdate = async (data: Omit<Supplier, "id">) => {
+  const handleCreateOrUpdate = async (data: SupplierFormData) => {
     try {
       if (editingSupplier) {
         await updateSupplier(editingSupplier.id, data);
@@ -91,10 +91,10 @@ export const SuppliersPage = () => {
     <div className="h-full flex flex-col space-y-6 p-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t("suppliers.title")}</h2>
-          <p className="text-muted-foreground">
-            {t("suppliers.subtitle")}
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {t("suppliers.title")}
+          </h2>
+          <p className="text-muted-foreground">{t("suppliers.subtitle")}</p>
         </div>
         <div className="flex items-center space-x-2">
           <Button onClick={() => setIsFormOpen(true)}>
@@ -113,7 +113,9 @@ export const SuppliersPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{suppliers.length}</div>
-            <p className="text-xs text-muted-foreground">{t("suppliers.activePartners")}</p>
+            <p className="text-xs text-muted-foreground">
+              {t("suppliers.activePartners")}
+            </p>
           </CardContent>
         </Card>
       </div>

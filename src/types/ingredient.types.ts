@@ -1,3 +1,4 @@
+import type { Currency } from "@/utils/currency";
 // Ingredient Types
 export type IngredientCategory =
   | "protein"
@@ -89,7 +90,7 @@ export interface Recipe {
   prepTimeMinutes: number | null;
   cookingInstructions: string | null;
   sellingPrice: number | null;
-  currency: string;
+  currency: Currency;
   targetCostPercentage: number | null;
   wasteBufferPercentage: number | null;
   totalCost: number | null;

@@ -8,9 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { convert } from "../lib/unit-utils";
 import { SmartNumericInput } from "./SmartNumericInput";
 import { UnitSelect } from "./UnitSelect";
-import { convert } from "../lib/unit-utils";
 
 export const YieldCalculator = () => {
   const [apWeight, setApWeight] = useState<number>(1);
@@ -38,7 +38,8 @@ export const YieldCalculator = () => {
       // If imperial, maybe show oz
       if (apUnit === "lb" || apUnit === "oz") {
         const oz = convert(lossInGrams, "g", "oz");
-        lossDisplay = oz >= 1 ? `${oz.toFixed(1)}oz` : `${Math.round(lossInGrams)}g`;
+        lossDisplay =
+          oz >= 1 ? `${oz.toFixed(1)}oz` : `${Math.round(lossInGrams)}g`;
       } else {
         lossDisplay = `${Math.round(lossInGrams)}g`;
       }
@@ -46,7 +47,14 @@ export const YieldCalculator = () => {
       lossDisplay = `${lossWeightInAp.toFixed(2)}${apUnit}`;
     }
 
-    return { yieldPercent, trueCost, lossWeight: lossWeightInAp, lossValue, lossDisplay, apUnit };
+    return {
+      yieldPercent,
+      trueCost,
+      lossWeight: lossWeightInAp,
+      lossValue,
+      lossDisplay,
+      apUnit,
+    };
   }, [apWeight, apUnit, epWeight, epUnit, apPrice]);
 
   return (
@@ -119,10 +127,11 @@ export const YieldCalculator = () => {
             </div>
 
             <div
-              className={`p-4 rounded-lg border space-y-1 ${stats.trueCost > apPrice
-                ? "bg-orange-50 border-orange-200"
-                : "bg-green-50 border-green-200"
-                }`}
+              className={`p-4 rounded-lg border space-y-1 ${
+                stats.trueCost > apPrice
+                  ? "bg-orange-50 border-orange-200"
+                  : "bg-green-50 border-green-200"
+              }`}
             >
               <Label className="text-xs text-muted-foreground uppercase">
                 True Cost (EP Price per {apUnit})
@@ -157,8 +166,8 @@ export const YieldCalculator = () => {
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>
             If you buy 1{apUnit} for ${apPrice.toFixed(2)} but throw away{" "}
-            {stats.lossDisplay} of trimmings, your usable cost is actually{" "}
-            ${stats.trueCost.toFixed(2)} per {apUnit}.
+            {stats.lossDisplay} of trimmings, your usable cost is actually $
+            {stats.trueCost.toFixed(2)} per {apUnit}.
           </span>
         </div>
       </CardContent>

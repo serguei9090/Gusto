@@ -1,10 +1,18 @@
+import type { Selectable } from "kysely";
 import { db } from "@/lib/db";
+import type { IngredientsTable } from "@/types/db.types";
+
+export type IngredientRow = Selectable<IngredientsTable>;
+
+import type { Currency } from "@/utils/currency";
+import { logger } from "@/utils/logger";
 import type {
   CreateIngredientInput,
   Ingredient,
+  IngredientCategory,
+  UnitOfMeasure,
   UpdateIngredientInput,
 } from "../types";
-import { logger } from "@/utils/logger";
 
 export class IngredientsRepository {
   async create(data: CreateIngredientInput): Promise<Ingredient> {
@@ -17,7 +25,7 @@ export class IngredientsRepository {
       unit_of_measure: data.unitOfMeasure,
       current_price: data.currentPrice || 0,
       price_per_unit: data.pricePerUnit || 0,
-      currency: data.currency || 'USD',
+      currency: data.currency || "USD",
       supplier_id: data.supplierId || null,
       min_stock_level: data.minStockLevel || 0,
       current_stock: data.currentStock || 0,
@@ -34,8 +42,11 @@ export class IngredientsRepository {
         .returning("id")
         .executeTakeFirst();
 
-      if (!result || !result.id) {
-        logger.error("IngredientsRepository.create: Failed to retrieve ID.", { payload, result });
+      if (!result?.id) {
+        logger.error("IngredientsRepository.create: Failed to retrieve ID.", {
+          payload,
+          result,
+        });
         throw new Error("Failed to insert ingredient: could not retrieve ID.");
       }
 
@@ -75,7 +86,7 @@ export class IngredientsRepository {
     data: UpdateIngredientInput,
   ): Promise<Ingredient | null> {
     // Build update object only with defined values
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       last_updated: new Date().toISOString(),
     };
 
@@ -131,6 +142,7 @@ export class IngredientsRepository {
     const rows = await db
       .selectFrom("ingredients")
       .selectAll()
+      // biome-ignore lint/suspicious/noExplicitAny: Kysely helper type
       .where((eb: any) =>
         eb.and([
           eb("min_stock_level", "is not", null),
@@ -142,18 +154,15 @@ export class IngredientsRepository {
     return rows.map(this.mapRowToIngredient);
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: Row type from Kysely raw result
-  private mapRowToIngredient(row: any): Ingredient {
+  private mapRowToIngredient(row: IngredientRow): Ingredient {
     return {
       id: row.id,
       name: row.name,
-      // biome-ignore lint/suspicious/noExplicitAny: Legacy type casting
-      category: row.category as any, // Cast to union type
-      // biome-ignore lint/suspicious/noExplicitAny: Legacy type casting
-      unitOfMeasure: row.unit_of_measure as any,
+      category: row.category as IngredientCategory,
+      unitOfMeasure: row.unit_of_measure as UnitOfMeasure,
       currentPrice: row.current_price,
       pricePerUnit: row.price_per_unit || 0, // Fallback if null in DB
-      currency: row.currency || 'USD',
+      currency: (row.currency || "USD") as Currency,
       supplierId: row.supplier_id,
       minStockLevel: row.min_stock_level,
       currentStock: row.current_stock,

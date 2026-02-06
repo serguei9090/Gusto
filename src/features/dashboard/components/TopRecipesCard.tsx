@@ -1,8 +1,8 @@
 import { DollarSign, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { TopRecipeItem } from "../types";
 import { useTranslation } from "@/hooks/useTranslation";
+import type { TopRecipeItem } from "../types";
 
 interface TopRecipesCardProps {
   recipes: TopRecipeItem[];

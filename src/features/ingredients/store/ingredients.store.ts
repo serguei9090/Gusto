@@ -1,11 +1,11 @@
 import { create } from "zustand";
+import { runWithHandling } from "@/utils/error-handler";
 import { ingredientsRepository } from "../services/ingredients.repository";
 import type {
   CreateIngredientInput,
   Ingredient,
   UpdateIngredientInput,
 } from "../types";
-import { runWithHandling } from "@/utils/error-handler";
 
 interface IngredientsState {
   // Data (UI Mirror)
@@ -34,7 +34,7 @@ export const useIngredientsStore = create<IngredientsState>((set, get) => ({
         const data = await ingredientsRepository.getAll();
         set({ ingredients: data, isLoading: false });
       },
-      (err) => set({ error: String(err), isLoading: false })
+      (err) => set({ error: String(err), isLoading: false }),
     );
   },
 
@@ -50,7 +50,7 @@ export const useIngredientsStore = create<IngredientsState>((set, get) => ({
       (err) => {
         set({ error: String(err), isLoading: false });
         throw err;
-      }
+      },
     );
   },
 
@@ -65,7 +65,7 @@ export const useIngredientsStore = create<IngredientsState>((set, get) => ({
       (err) => {
         set({ error: String(err), isLoading: false });
         throw err;
-      }
+      },
     );
   },
 
@@ -80,7 +80,7 @@ export const useIngredientsStore = create<IngredientsState>((set, get) => ({
       (err) => {
         set({ error: String(err), isLoading: false });
         throw err;
-      }
+      },
     );
   },
 
@@ -96,7 +96,7 @@ export const useIngredientsStore = create<IngredientsState>((set, get) => ({
         const data = await ingredientsRepository.search(query);
         set({ ingredients: data, isLoading: false });
       },
-      (err) => set({ error: String(err), isLoading: false })
+      (err) => set({ error: String(err), isLoading: false }),
     );
   },
 }));

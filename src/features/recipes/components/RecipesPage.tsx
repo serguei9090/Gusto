@@ -1,13 +1,13 @@
 import { Plus, X } from "lucide-react";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/hooks/useTranslation";
 import type { Recipe } from "@/types/ingredient.types";
 import { useRecipeStore } from "../store/recipes.store";
 import { RecipeDetailModal } from "./RecipeDetailModal";
-import { RecipeForm } from "./RecipeForm";
+import { RecipeForm, type RecipeFormData } from "./RecipeForm";
 import { RecipeTable } from "./RecipeTable";
-import { useTranslation } from "@/hooks/useTranslation";
 
 export const RecipesPage = () => {
   const {
@@ -55,8 +55,7 @@ export const RecipesPage = () => {
     r.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  // biome-ignore lint/suspicious/noExplicitAny: Form data type
-  const handleCreateOrUpdate = async (data: any) => {
+  const handleCreateOrUpdate = async (data: RecipeFormData) => {
     try {
       if (editingRecipeId) {
         await updateRecipe(editingRecipeId, data);
@@ -86,10 +85,10 @@ export const RecipesPage = () => {
     <div className="h-full flex flex-col space-y-6 p-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t("recipes.title")}</h2>
-          <p className="text-muted-foreground">
-            {t("recipes.subtitle")}
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {t("recipes.title")}
+          </h2>
+          <p className="text-muted-foreground">{t("recipes.subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={() => setIsFormOpen(true)}>
@@ -128,7 +127,9 @@ export const RecipesPage = () => {
           <div className="w-full max-w-4xl bg-background border rounded-lg shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-lg font-semibold">
-                {editingRecipeId ? t("recipes.editRecipe") : t("recipes.addRecipe")}
+                {editingRecipeId
+                  ? t("recipes.editRecipe")
+                  : t("recipes.addRecipe")}
               </h2>
               <Button variant="ghost" size="icon" onClick={handleCloseForm}>
                 <X className="h-4 w-4" />
@@ -137,13 +138,18 @@ export const RecipesPage = () => {
             <div className="p-6 overflow-y-auto flex-1">
               {editingRecipeId && isLoading && !selectedRecipe ? (
                 <div className="flex items-center justify-center h-40">
-                  <p className="text-muted-foreground italic">Loading recipe details...</p>
+                  <p className="text-muted-foreground italic">
+                    Loading recipe details...
+                  </p>
                 </div>
               ) : (
                 <RecipeForm
                   onSubmit={handleCreateOrUpdate}
-                  // biome-ignore lint/suspicious/noExplicitAny: Currency enum mismatch
-                  initialData={(editingRecipeId ? selectedRecipe : undefined) as any}
+                  initialData={
+                    (editingRecipeId
+                      ? selectedRecipe
+                      : undefined) as unknown as Partial<RecipeFormData>
+                  }
                   onCancel={handleCloseForm}
                   isLoading={isLoading}
                 />
@@ -162,4 +168,3 @@ export const RecipesPage = () => {
     </div>
   );
 };
-

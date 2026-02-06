@@ -27,7 +27,7 @@ export function calculateIngredientCost(
   }
 }
 
-import { type Currency } from "./currency";
+import type { Currency } from "./currency";
 
 // ... previous interfaces...
 
@@ -35,7 +35,7 @@ export function calculateRecipeTotal(
   items: CostInputItem[],
   wasteBuffer = 0,
   _recipeCurrency: Currency = "USD",
-  _exchangeRates?: Record<string, number>
+  _exchangeRates?: Record<string, number>,
 ) {
   let subtotal = 0;
   const errors: string[] = [];

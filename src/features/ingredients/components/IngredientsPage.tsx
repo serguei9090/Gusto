@@ -1,9 +1,9 @@
 import { Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSuppliersStore } from "@/features/suppliers/store/suppliers.store";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useIngredientsStore } from "../store/ingredients.store";
 import type { CreateIngredientInput, Ingredient } from "../types";
 import { IngredientForm } from "./IngredientForm";
@@ -61,16 +61,23 @@ export const IngredientsPage = () => {
   };
 
   if (error) {
-    return <div className="p-4 text-destructive">{t("common.messages.error")}: {error}</div>;
+    return (
+      <div className="p-4 text-destructive">
+        {t("common.messages.error")}: {error}
+      </div>
+    );
   }
 
   return (
     <div className="p-6 space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("ingredients.title")}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {t("ingredients.title")}
+          </h1>
           <p className="text-muted-foreground">
-            {t("navigation.inventory")} {/* Using inventory label as proxy or need specific subtext key */}
+            {t("navigation.inventory")}{" "}
+            {/* Using inventory label as proxy or need specific subtext key */}
           </p>
         </div>
         {!isCreating && !editingIngredient && (
@@ -84,7 +91,9 @@ export const IngredientsPage = () => {
       <div className="mt-6">
         {isCreating ? (
           <div className="rounded-lg border bg-card p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-6">{t("ingredients.addIngredient")}</h2>
+            <h2 className="text-xl font-semibold mb-6">
+              {t("ingredients.addIngredient")}
+            </h2>
             <IngredientForm
               onSubmit={handleCreate}
               onCancel={() => setIsCreating(false)}
@@ -93,7 +102,9 @@ export const IngredientsPage = () => {
           </div>
         ) : editingIngredient ? (
           <div className="rounded-lg border bg-card p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-6">{t("ingredients.editIngredient")}</h2>
+            <h2 className="text-xl font-semibold mb-6">
+              {t("ingredients.editIngredient")}
+            </h2>
             <IngredientForm
               defaultValues={editingIngredient}
               onSubmit={handleUpdate}

@@ -5,10 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useIngredientsStore } from "@/features/ingredients/store/ingredients.store";
 import { useInventoryStore } from "@/features/inventory/store/inventory.store";
+import { useTranslation } from "@/hooks/useTranslation";
 import type { Ingredient } from "@/types/ingredient.types";
 import { InventoryTable } from "./InventoryTable";
 import { TransactionModal } from "./TransactionModal";
-import { useTranslation } from "@/hooks/useTranslation";
 
 export const InventoryPage = () => {
   const { ingredients, fetchIngredients } = useIngredientsStore();
@@ -55,27 +55,33 @@ export const InventoryPage = () => {
     <div className="h-full flex flex-col space-y-6 p-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t("inventory.title")}</h2>
-          <p className="text-muted-foreground">
-            {t("inventory.subtitle")}
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {t("inventory.title")}
+          </h2>
+          <p className="text-muted-foreground">{t("inventory.subtitle")}</p>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("inventory.totalItems")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("inventory.totalItems")}
+            </CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{ingredients.length}</div>
-            <p className="text-xs text-muted-foreground">{t("inventory.activeIngredients")}</p>
+            <p className="text-xs text-muted-foreground">
+              {t("inventory.activeIngredients")}
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("inventory.lowStock")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("inventory.lowStock")}
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>

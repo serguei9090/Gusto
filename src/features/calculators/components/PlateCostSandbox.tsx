@@ -1,15 +1,15 @@
+import { Info, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Plus, Trash2, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,

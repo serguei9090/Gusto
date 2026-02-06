@@ -1,20 +1,15 @@
 import { AlertTriangle, ChefHat, Package, Percent } from "lucide-react";
 import { useEffect } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
 import { useDashboardStore } from "@/features/dashboard/store/dashboard.store";
+import { useTranslation } from "@/hooks/useTranslation";
 import { StatCard } from "./StatCard";
 import { TopRecipesCard } from "./TopRecipesCard";
 import { UrgentReordersCard } from "./UrgentReordersCard";
 
 export const DashboardPage = () => {
   const { t } = useTranslation();
-  const {
-    summary,
-    urgentReorders,
-    topRecipes,
-    fetchDashboardData,
-    error,
-  } = useDashboardStore();
+  const { summary, urgentReorders, topRecipes, fetchDashboardData, error } =
+    useDashboardStore();
 
   useEffect(() => {
     fetchDashboardData();
@@ -27,7 +22,9 @@ export const DashboardPage = () => {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">{t("dashboard.title")}</h2>
+        <h2 className="text-3xl font-bold tracking-tight">
+          {t("dashboard.title")}
+        </h2>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

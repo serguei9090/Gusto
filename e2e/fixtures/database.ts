@@ -8,57 +8,57 @@ import { cleanDatabase, seedDatabase } from "./seed-data";
 const DB_PATH = join(__dirname, "test.db");
 
 export interface DatabaseFixture {
-    /**
-     * Execute raw SQL against the test database
-     */
-    exec: (sql: string) => void;
+  /**
+   * Execute raw SQL against the test database
+   */
+  exec: (sql: string) => void;
 
-    /**
-     * Seed the database with sample data
-     */
-    seed: () => void;
+  /**
+   * Seed the database with sample data
+   */
+  seed: () => void;
 
-    /**
-     * Clean all data from the database
-     */
-    clean: () => void;
+  /**
+   * Clean all data from the database
+   */
+  clean: () => void;
 
-    /**
-     * Get direct database instance for advanced operations
-     */
-    db: Database.Database;
+  /**
+   * Get direct database instance for advanced operations
+   */
+  db: Database.Database;
 }
 
 /**
  * Extended Playwright test with database fixture
  */
 export const test = base.extend<{ database: DatabaseFixture }>({
-    database: async ({ }, use) => {
-        // Initialize database
-        const db = new Database(DB_PATH);
+  database: async (_, use) => {
+    // Initialize database
+    const db = new Database(DB_PATH);
 
-        // Load schema
-        const schemaPath = join(__dirname, "schema.sql");
-        const schema = readFileSync(schemaPath, "utf-8");
-        db.exec(schema);
+    // Load schema
+    const schemaPath = join(__dirname, "schema.sql");
+    const schema = readFileSync(schemaPath, "utf-8");
+    db.exec(schema);
 
-        // Clean database before test
-        cleanDatabase(db);
+    // Clean database before test
+    cleanDatabase(db);
 
-        // Seed with initial data
-        seedDatabase(db);
+    // Seed with initial data
+    seedDatabase(db);
 
-        // Provide fixture to test
-        await use({
-            exec: (sql: string) => db.exec(sql),
-            seed: () => seedDatabase(db),
-            clean: () => cleanDatabase(db),
-            db,
-        });
+    // Provide fixture to test
+    await use({
+      exec: (sql: string) => db.exec(sql),
+      seed: () => seedDatabase(db),
+      clean: () => cleanDatabase(db),
+      db,
+    });
 
-        // Cleanup after test
-        db.close();
-    },
+    // Cleanup after test
+    db.close();
+  },
 });
 
 export { expect } from "@playwright/test";

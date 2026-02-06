@@ -22,26 +22,27 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useIngredientsStore } from "@/features/ingredients/store/ingredients.store";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
+  calculateFoodCostPercentage,
   calculateIngredientCost,
   calculateProfitMargin,
-  calculateFoodCostPercentage,
   calculateRecipeTotal,
   calculateSuggestedPrice,
 } from "@/utils/costEngine";
 import {
-  SUPPORTED_CURRENCIES,
-  getCurrencySymbol,
+  type Currency,
   getCurrencyName,
+  getCurrencySymbol,
+  SUPPORTED_CURRENCIES,
 } from "@/utils/currency";
-import { useTranslation } from "@/hooks/useTranslation";
 import {
   recipeCategorySchema,
   recipeFormSchema,
   unitOfMeasureSchema,
 } from "@/utils/validators";
 
-type RecipeFormData = z.infer<typeof recipeFormSchema>;
+export type RecipeFormData = z.infer<typeof recipeFormSchema>;
 
 interface RecipeFormProps {
   onSubmit: (data: RecipeFormData) => Promise<void>;
@@ -74,7 +75,7 @@ export const RecipeForm = ({
     reset,
     formState: { errors },
   } = useForm<RecipeFormData>({
-    // biome-ignore lint/suspicious/noExplicitAny: Resolver type mismatch
+    // biome-ignore lint/suspicious/noExplicitAny: Hook Form resolver type mismatch with strict Zod schemas is a known limitation
     resolver: zodResolver(recipeFormSchema) as any,
     defaultValues: {
       name: "",
@@ -121,15 +122,15 @@ export const RecipeForm = ({
     watchedWasteBuffer,
   );
 
-  const suggestedPrice = calculateSuggestedPrice(
-    totalCost,
-    watchedTargetCost,
-  );
+  const suggestedPrice = calculateSuggestedPrice(totalCost, watchedTargetCost);
 
   // If selling price is empty, use suggested price for margin calculations
   const effectivePrice = watchedSellingPrice || suggestedPrice || 0;
   const currentMargin = calculateProfitMargin(totalCost, effectivePrice);
-  const currentFoodCost = calculateFoodCostPercentage(totalCost, effectivePrice);
+  const currentFoodCost = calculateFoodCostPercentage(
+    totalCost,
+    effectivePrice,
+  );
 
   const handleAddIngredient = (value: string) => {
     const id = Number(value);
@@ -246,14 +247,18 @@ export const RecipeForm = ({
             <div className="space-y-2">
               <Label htmlFor="sellingPrice">
                 {t("recipes.fields.sellingPrice")}
-                <span className="ml-2 text-[10px] text-muted-foreground uppercase opacity-70">(Optional)</span>
+                <span className="ml-2 text-[10px] text-muted-foreground uppercase opacity-70">
+                  (Optional)
+                </span>
               </Label>
               <Input
                 type="number"
                 step="0.01"
                 id="sellingPrice"
                 {...register("sellingPrice", { valueAsNumber: true })}
-                placeholder={suggestedPrice > 0 ? suggestedPrice.toFixed(2) : "0.00"}
+                placeholder={
+                  suggestedPrice > 0 ? suggestedPrice.toFixed(2) : "0.00"
+                }
               />
             </div>
 
@@ -275,7 +280,9 @@ export const RecipeForm = ({
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="targetCost">Target Food Cost %</Label>
-                <span className="text-[10px] font-mono text-muted-foreground">Default: 25%</span>
+                <span className="text-[10px] font-mono text-muted-foreground">
+                  Default: 25%
+                </span>
               </div>
               <div className="flex gap-2">
                 <Input
@@ -285,7 +292,7 @@ export const RecipeForm = ({
                   placeholder="25"
                 />
                 <div className="flex gap-1">
-                  {[20, 25, 30].map(val => (
+                  {[20, 25, 30].map((val) => (
                     <Button
                       key={val}
                       type="button"
@@ -304,7 +311,9 @@ export const RecipeForm = ({
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="wasteBuffer">Waste Buffer %</Label>
-                <span className="text-[10px] font-mono text-muted-foreground">e.g. 5%</span>
+                <span className="text-[10px] font-mono text-muted-foreground">
+                  e.g. 5%
+                </span>
               </div>
               <Input
                 type="number"
@@ -317,25 +326,40 @@ export const RecipeForm = ({
             <div className="mt-6 p-4 bg-muted/30 border border-border/50 rounded-lg space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Subtotal:</span>
-                <span className="font-medium">{getCurrencySymbol(watch("currency") || "USD")}{subtotal.toFixed(2)}</span>
+                <span className="font-medium">
+                  {getCurrencySymbol(watch("currency") || "USD")}
+                  {subtotal.toFixed(2)}
+                </span>
               </div>
 
               {watchedWasteBuffer > 0 && (
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Waste Buffer ({watchedWasteBuffer}%):</span>
-                  <span className="font-medium text-orange-600">+{getCurrencySymbol(watch("currency") || "USD")}{wasteCost.toFixed(2)}</span>
+                  <span className="text-muted-foreground">
+                    Waste Buffer ({watchedWasteBuffer}%):
+                  </span>
+                  <span className="font-medium text-orange-600">
+                    +{getCurrencySymbol(watch("currency") || "USD")}
+                    {wasteCost.toFixed(2)}
+                  </span>
                 </div>
               )}
 
               <div className="h-px bg-border/50 my-2" />
 
               <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground font-bold">True Recipe Cost:</span>
-                <span className="font-bold text-lg">{getCurrencySymbol(watch("currency") || "USD")}{totalCost.toFixed(2)}</span>
+                <span className="text-muted-foreground font-bold">
+                  True Recipe Cost:
+                </span>
+                <span className="font-bold text-lg">
+                  {getCurrencySymbol(watch("currency") || "USD")}
+                  {totalCost.toFixed(2)}
+                </span>
               </div>
 
               <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Suggested Price ({watchedTargetCost}% Cost):</span>
+                <span className="text-muted-foreground">
+                  Suggested Price ({watchedTargetCost}% Cost):
+                </span>
                 <span className="font-semibold text-primary">
                   {getCurrencySymbol(watch("currency") || "USD")}
                   {Number.isFinite(suggestedPrice)
@@ -346,15 +370,21 @@ export const RecipeForm = ({
 
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground text-xs italic">
-                  {watchedSellingPrice ? "Actual Food Cost:" : "Target Food Cost:"}
+                  {watchedSellingPrice
+                    ? "Actual Food Cost:"
+                    : "Target Food Cost:"}
                 </span>
-                <span className={`font-medium ${getMarginColor(100 - currentFoodCost)}`}>
+                <span
+                  className={`font-medium ${getMarginColor(100 - currentFoodCost)}`}
+                >
                   {currentFoodCost.toFixed(1)}%
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground font-medium">
-                  {watchedSellingPrice ? "Net Profit Margin:" : "Target Profit Margin:"}
+                  {watchedSellingPrice
+                    ? "Net Profit Margin:"
+                    : "Target Profit Margin:"}
                 </span>
                 <span className={`font-bold ${getMarginColor(currentMargin)}`}>
                   {currentMargin.toFixed(1)}%
@@ -512,7 +542,7 @@ const CostDisplay = ({
   unit: string;
   basePrice: number;
   baseUnit: string;
-  currency: string;
+  currency: Currency;
 }) => {
   const { cost, error } = calculateIngredientCost(
     quantity,
@@ -526,6 +556,11 @@ const CostDisplay = ({
         !
       </span>
     );
-  // @ts-ignore
-  return <span>{getCurrencySymbol(currency)}{cost.toFixed(2)}</span>;
+
+  return (
+    <span>
+      {getCurrencySymbol(currency)}
+      {cost.toFixed(2)}
+    </span>
+  );
 };

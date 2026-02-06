@@ -30,7 +30,7 @@ interface PrepSheetsState {
   addRecipeToBuilder: (recipeId: number, servings: number) => void;
   updateBuilderServings: (recipeId: number, servings: number) => void;
   removeRecipeFromBuilder: (recipeId: number) => void;
-  setBuilderField: (field: string, value: any) => void;
+  setBuilderField: (field: string, value: string | number | boolean) => void;
   clearBuilder: () => void;
 
   // UI State

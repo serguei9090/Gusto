@@ -5,6 +5,7 @@
 }
 
 .input {
+  /* biome-ignore lint/complexity/noImportantStyles: Override shadcn input padding */
   padding-left: 2.5rem !important;
 }
 

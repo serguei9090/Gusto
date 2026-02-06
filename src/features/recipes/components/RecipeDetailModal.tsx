@@ -170,12 +170,13 @@ export const RecipeDetailModal = ({
                   </CardHeader>
                   <CardContent>
                     <div
-                      className={`text-2xl font-bold ${(selectedRecipe.profitMargin || 0) < 20
-                        ? "text-destructive"
-                        : (selectedRecipe.profitMargin || 0) < 30
-                          ? "text-yellow-700 dark:text-yellow-500"
-                          : "text-green-700 dark:text-green-500"
-                        }`}
+                      className={`text-2xl font-bold ${
+                        (selectedRecipe.profitMargin || 0) < 20
+                          ? "text-destructive"
+                          : (selectedRecipe.profitMargin || 0) < 30
+                            ? "text-yellow-700 dark:text-yellow-500"
+                            : "text-green-700 dark:text-green-500"
+                      }`}
                     >
                       {selectedRecipe.profitMargin?.toFixed(1)}%
                     </div>
@@ -229,26 +230,33 @@ export const RecipeDetailModal = ({
                               $
                               {(
                                 (selectedRecipe.totalCost || 0) /
-                                (1 + (selectedRecipe.wasteBufferPercentage || 0) / 100)
+                                (1 +
+                                  (selectedRecipe.wasteBufferPercentage || 0) /
+                                    100)
                               ).toFixed(2)}
                             </TableCell>
                           </TableRow>
                           <TableRow className="text-orange-600">
                             <TableCell colSpan={3}>
-                              Waste Buffer ({selectedRecipe.wasteBufferPercentage}%)
+                              Waste Buffer (
+                              {selectedRecipe.wasteBufferPercentage}%)
                             </TableCell>
                             <TableCell className="text-right font-bold">
                               +$
                               {(
-                                ((selectedRecipe.totalCost || 0) * (selectedRecipe.wasteBufferPercentage || 0)) /
-                                (100 + (selectedRecipe.wasteBufferPercentage || 0))
+                                ((selectedRecipe.totalCost || 0) *
+                                  (selectedRecipe.wasteBufferPercentage || 0)) /
+                                (100 +
+                                  (selectedRecipe.wasteBufferPercentage || 0))
                               ).toFixed(2)}
                             </TableCell>
                           </TableRow>
                         </>
                       )}
                       <TableRow>
-                        <TableCell colSpan={3} className="font-bold">Total Batch Cost</TableCell>
+                        <TableCell colSpan={3} className="font-bold">
+                          Total Batch Cost
+                        </TableCell>
                         <TableCell className="text-right font-black text-lg">
                           ${selectedRecipe.totalCost?.toFixed(2)}
                         </TableCell>

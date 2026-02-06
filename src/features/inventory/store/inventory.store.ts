@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import { useIngredientsStore } from "@/features/ingredients/store/ingredients.store";
+import type { Ingredient } from "@/types/ingredient.types";
 import { inventoryRepository } from "../services/inventory.repository";
 import type { CreateTransactionInput, InventoryTransaction } from "../types";
 
 interface InventoryStore {
   transactions: InventoryTransaction[];
-  // biome-ignore lint/suspicious/noExplicitAny: Legacy item type
-  lowStockItems: any[];
+  lowStockItems: Ingredient[];
   isLoading: boolean;
   error: string | null;
 
@@ -41,7 +41,8 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   fetchLowStockItems: async () => {
     set({ isLoading: true, error: null });
     try {
-      const lowStockItems = await inventoryRepository.getLowStockItems();
+      const lowStockItems =
+        (await inventoryRepository.getLowStockItems()) as unknown as Ingredient[];
       set({ lowStockItems, isLoading: false });
     } catch (error) {
       console.error("Failed to fetch low stock items:", error);

@@ -1,13 +1,13 @@
-import type { Insertable } from "kysely";
+import type { Insertable, Selectable } from "kysely";
 import type {
   PrepSheet,
   PrepSheetFormData,
   PrepSheetItem,
   PrepSheetRecipe,
-  PrepSheetsTable,
 } from "@/features/prep-sheets/types";
 import { recipesRepository } from "@/features/recipes/services/recipes.repository";
 import { db } from "@/lib/db";
+import type { PrepSheetsTable } from "@/types/db.types";
 import { convertUnit } from "@/utils/conversions";
 
 export type CreatePrepSheetInput = Insertable<PrepSheetsTable>;
@@ -127,7 +127,7 @@ class PrepSheetsRepository {
     return Number(result.insertId);
   }
 
-  private mapToDomain(row: PrepSheetsTable): PrepSheet {
+  private mapToDomain(row: Selectable<PrepSheetsTable>): PrepSheet {
     return {
       id: row.id,
       name: row.name,

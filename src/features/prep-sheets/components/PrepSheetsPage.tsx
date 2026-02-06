@@ -13,9 +13,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePrepSheetsStore } from "@/features/prep-sheets/store/prep-sheets.store";
 import type { PrepSheet } from "@/features/prep-sheets/types";
+import { useTranslation } from "@/hooks/useTranslation";
 import { PrepSheetBuilder } from "./PrepSheetBuilder";
 import { PrepSheetView } from "./PrepSheetView";
-import { useTranslation } from "@/hooks/useTranslation";
 
 export const PrepSheetsPage = () => {
   const {
@@ -74,13 +74,15 @@ export const PrepSheetsPage = () => {
           <h2 className="text-3xl font-bold tracking-tight">
             {t("prepSheets.title")}
           </h2>
-          <p className="text-muted-foreground">
-            {t("prepSheets.subtitle")}
-          </p>
+          <p className="text-muted-foreground">{t("prepSheets.subtitle")}</p>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
         <TabsList>
           <TabsTrigger value="create">{t("prepSheets.createNew")}</TabsTrigger>
           <TabsTrigger value="saved">
@@ -91,10 +93,11 @@ export const PrepSheetsPage = () => {
 
         {notification && (
           <div
-            className={`p-4 rounded-md flex items-center justify-between transition-all animate-in fade-in slide-in-from-top-4 ${notification.type === "success"
+            className={`p-4 rounded-md flex items-center justify-between transition-all animate-in fade-in slide-in-from-top-4 ${
+              notification.type === "success"
                 ? "bg-green-100 text-green-800 border-green-200"
                 : "bg-red-100 text-red-800 border-red-200"
-              } border`}
+            } border`}
           >
             <span>{notification.message}</span>
             <Button
@@ -116,7 +119,9 @@ export const PrepSheetsPage = () => {
           {prepSheets.length === 0 ? (
             <div className="text-center py-12 border rounded-md bg-muted/10">
               <ClipboardList className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
-              <h3 className="text-lg font-medium">{t("prepSheets.noSavedSheets")}</h3>
+              <h3 className="text-lg font-medium">
+                {t("prepSheets.noSavedSheets")}
+              </h3>
               <p className="text-muted-foreground mb-4">
                 {t("prepSheets.generatePrompt")}
               </p>
@@ -130,7 +135,9 @@ export const PrepSheetsPage = () => {
                     <TableHead>{t("common.labels.date")}</TableHead>
                     <TableHead>{t("prepSheets.shift")}</TableHead>
                     <TableHead>{t("prepSheets.recipes")}</TableHead>
-                    <TableHead className="text-right">{t("prepSheets.actions")}</TableHead>
+                    <TableHead className="text-right">
+                      {t("prepSheets.actions")}
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -161,7 +168,8 @@ export const PrepSheetsPage = () => {
                             size="sm"
                             onClick={() => setViewingSheet(sheet)}
                           >
-                            <Eye className="h-4 w-4 mr-1" /> {t("prepSheets.view")}
+                            <Eye className="h-4 w-4 mr-1" />{" "}
+                            {t("prepSheets.view")}
                           </Button>
                           <Button
                             variant="ghost"

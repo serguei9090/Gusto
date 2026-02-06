@@ -1,11 +1,31 @@
+import type { Selectable } from "kysely";
 import { sql } from "kysely";
 import { db } from "@/lib/db";
+import type { RecipesTable } from "@/types/db.types";
 import type {
   CreateRecipeInput,
   Recipe,
+  RecipeCategory,
   RecipeWithIngredients,
+  UnitOfMeasure,
   UpdateRecipeInput,
 } from "@/types/ingredient.types";
+import type { Currency } from "@/utils/currency";
+
+export type RecipeRow = Selectable<RecipesTable>;
+export interface JoinedRecipeIngredientRow {
+  id: number;
+  recipeId: number;
+  ingredientId: number;
+  quantity: number;
+  unit: string;
+  cost: number | null;
+  notes: string | null;
+  ingredientName: string;
+  currentPricePerUnit: number;
+  ingredientUnit: string;
+}
+
 import {
   calculateProfitMargin,
   calculateRecipeTotal,
@@ -54,11 +74,9 @@ export class RecipesRepository {
 
     return {
       ...recipe,
-      ingredients: ingredients.map((ing: any) => ({
+      ingredients: ingredients.map((ing: JoinedRecipeIngredientRow) => ({
         ...ing,
-        // Kysely types might be slightly different than raw SQL result, ensure consistency
-        // biome-ignore lint/suspicious/noExplicitAny: Kysely type mismatch
-        ingredientUnit: ing.ingredientUnit as any,
+        ingredientUnit: ing.ingredientUnit as UnitOfMeasure,
       })),
     };
   }
@@ -74,6 +92,7 @@ export class RecipesRepository {
         prep_time_minutes: data.prepTimeMinutes || null,
         cooking_instructions: data.cookingInstructions || null,
         selling_price: data.sellingPrice || null,
+        currency: "USD", // Default if not provided
         target_cost_percentage: data.targetCostPercentage || null,
         waste_buffer_percentage: data.wasteBufferPercentage || null,
       })
@@ -229,18 +248,17 @@ export class RecipesRepository {
       .execute();
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: Raw DB row type
-  private mapRowToRecipe(row: any): Recipe {
+  private mapRowToRecipe(row: RecipeRow): Recipe {
     return {
       id: row.id,
       name: row.name,
       description: row.description,
-      category: row.category,
+      category: row.category as RecipeCategory,
       servings: row.servings,
       prepTimeMinutes: row.prep_time_minutes,
       cookingInstructions: row.cooking_instructions,
       sellingPrice: row.selling_price,
-      currency: row.currency || 'USD',
+      currency: (row.currency || "USD") as Currency,
       targetCostPercentage: row.target_cost_percentage,
       wasteBufferPercentage: row.waste_buffer_percentage,
       totalCost: row.total_cost || 0,

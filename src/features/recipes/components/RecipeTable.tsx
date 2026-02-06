@@ -39,7 +39,6 @@ export const RecipeTable = ({
     return `${val.toFixed(1)}%`;
   };
 
-
   // Custom color helper for margin text if not using Badge
   const getMarginColor = (val: number | null) => {
     if (val === null || val === undefined) return "text-muted-foreground";
@@ -78,8 +77,12 @@ export const RecipeTable = ({
                 {recipe.category || "-"}
               </TableCell>
               <TableCell>{recipe.servings}</TableCell>
-              <TableCell>{formatCurrency(recipe.totalCost, recipe.currency)}</TableCell>
-              <TableCell>{formatCurrency(recipe.sellingPrice, recipe.currency)}</TableCell>
+              <TableCell>
+                {formatCurrency(recipe.totalCost, recipe.currency)}
+              </TableCell>
+              <TableCell>
+                {formatCurrency(recipe.sellingPrice, recipe.currency)}
+              </TableCell>
               <TableCell>
                 <span className={getMarginColor(recipe.profitMargin)}>
                   {formatPercent(recipe.profitMargin)}

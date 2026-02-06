@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Toaster } from "sonner";
+import { GlobalErrorBarrier } from "@/components/error/GlobalErrorBarrier";
 import type { View } from "@/components/Sidebar";
 import { MainLayout } from "@/components/templates/MainLayout";
 import { CalculatorsPage } from "@/features/calculators";
@@ -66,13 +68,16 @@ function App() {
   };
 
   return (
-    <MainLayout
-      currentView={currentView}
-      onChangeView={setCurrentView}
-      title={getTitle()}
-    >
-      {renderContent()}
-    </MainLayout>
+    <GlobalErrorBarrier>
+      <MainLayout
+        currentView={currentView}
+        onChangeView={setCurrentView}
+        title={getTitle()}
+      >
+        {renderContent()}
+      </MainLayout>
+      <Toaster position="bottom-right" richColors closeButton />
+    </GlobalErrorBarrier>
   );
 }
 

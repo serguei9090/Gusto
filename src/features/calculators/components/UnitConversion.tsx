@@ -8,9 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { UnitSelect } from "./UnitSelect";
-import { SmartNumericInput } from "./SmartNumericInput";
 import { CONVERSION_RATES } from "../lib/unit-utils";
+import { SmartNumericInput } from "./SmartNumericInput";
+import { UnitSelect } from "./UnitSelect";
 
 export const UnitConversion = () => {
   const [purchaseQty, setPurchaseQty] = useState<number>(1);
@@ -54,7 +54,10 @@ export const UnitConversion = () => {
               </div>
               <div className="space-y-2">
                 <Label>Unit</Label>
-                <UnitSelect value={purchaseUnit} onValueChange={setPurchaseUnit} />
+                <UnitSelect
+                  value={purchaseUnit}
+                  onValueChange={setPurchaseUnit}
+                />
               </div>
             </div>
             <div className="space-y-2">
@@ -94,8 +97,9 @@ export const UnitConversion = () => {
                 ${results.recipeCost.toFixed(2)}
               </div>
               <p className="text-xs text-muted-foreground">
-                Bought {purchaseQty} {purchaseUnit} for ${purchasePrice.toFixed(2)}.
-                Each {recipeUnit} costs ${(results.recipeCost / (recipeQty || 1)).toFixed(2)}.
+                Bought {purchaseQty} {purchaseUnit} for $
+                {purchasePrice.toFixed(2)}. Each {recipeUnit} costs $
+                {(results.recipeCost / (recipeQty || 1)).toFixed(2)}.
               </p>
             </div>
           </div>

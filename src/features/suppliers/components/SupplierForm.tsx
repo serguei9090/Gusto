@@ -13,15 +13,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { Supplier } from "@/features/suppliers/types";
+import type { Supplier, SupplierFormData } from "@/features/suppliers/types";
 import { createSupplierSchema } from "@/utils/validators";
 
 interface SupplierFormProps {
   initialData: Supplier | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  // biome-ignore lint/suspicious/noExplicitAny: Form data
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: SupplierFormData) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -31,13 +30,13 @@ export function SupplierForm({
   onOpenChange,
   onSubmit,
   isLoading,
-}: SupplierFormProps) {
+}: Readonly<SupplierFormProps>) {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm({
+  } = useForm<SupplierFormData>({
     resolver: zodResolver(createSupplierSchema),
     defaultValues: {
       name: "",
@@ -96,7 +95,9 @@ export function SupplierForm({
           <div className="grid gap-4 py-2">
             {/* Name */}
             <div className="space-y-2">
-              <Label htmlFor="name">Supplier Name <span className="text-destructive">*</span></Label>
+              <Label htmlFor="name">
+                Supplier Name <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="name"
                 placeholder="e.g. Acme Food Supplies"
@@ -104,7 +105,7 @@ export function SupplierForm({
               />
               {errors.name && (
                 <p className="text-sm text-destructive">
-                  {errors.name.message as string}
+                  {errors.name.message}
                 </p>
               )}
             </div>
@@ -131,7 +132,7 @@ export function SupplierForm({
                 />
                 {errors.email && (
                   <p className="text-sm text-destructive">
-                    {errors.email.message as string}
+                    {errors.email.message}
                   </p>
                 )}
               </div>

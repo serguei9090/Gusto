@@ -47,9 +47,13 @@ export function SupplierTable({
             suppliers.map((supplier) => (
               <TableRow key={supplier.id}>
                 <TableCell>
-                  <div className="font-medium text-primary hover:underline cursor-pointer" onClick={() => onView(supplier)}>
+                  <button
+                    type="button"
+                    className="font-medium text-primary hover:underline cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-sm"
+                    onClick={() => onView(supplier)}
+                  >
                     {supplier.name}
-                  </div>
+                  </button>
                   {supplier.address && (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                       <MapPin className="h-3 w-3" />

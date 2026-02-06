@@ -1,10 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  type LucideIcon,
   Calculator,
   ChefHat,
   ClipboardList,
   LayoutDashboard,
+  type LucideIcon,
   Menu,
   Package,
   Settings,
@@ -104,9 +104,10 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
             type="button"
             className={`
               w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors relative
-              ${currentView === item.id
-                ? "bg-primary/10 text-primary shadow-sm"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              ${
+                currentView === item.id
+                  ? "bg-primary/10 text-primary shadow-sm"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }
               ${isCollapsed ? "justify-center" : ""}
             `}

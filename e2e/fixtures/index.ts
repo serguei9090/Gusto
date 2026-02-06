@@ -1,2 +1,2 @@
-export { test, expect } from "./database";
 export type { DatabaseFixture } from "./database";
+export { expect, test } from "./database";

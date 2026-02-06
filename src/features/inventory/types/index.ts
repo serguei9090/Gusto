@@ -1,7 +1,7 @@
 export type {
   CreateTransactionInput,
   CreateTransactionResult,
-  InventoryTransaction,
   Ingredient,
+  InventoryTransaction,
   TransactionType,
 } from "@/types/ingredient.types";
