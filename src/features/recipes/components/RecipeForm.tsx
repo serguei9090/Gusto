@@ -120,13 +120,16 @@ export const RecipeForm = ({
   useEffect(() => {
     const updateCosts = async () => {
       const items = watchedIngredients.map((field) => {
-        const original = allIngredients.find((i) => i.id === field.ingredientId);
+        const original = allIngredients.find(
+          (i) => i.id === field.ingredientId,
+        );
         return {
           name: original?.name || "Unknown",
           quantity: field.quantity,
           unit: field.unit,
           currentPricePerUnit: field.price || original?.pricePerUnit || 0,
-          ingredientUnit: field.ingredientUnit || original?.unitOfMeasure || "kg",
+          ingredientUnit:
+            field.ingredientUnit || original?.unitOfMeasure || "kg",
           currency: original?.currency || "USD",
         };
       });
@@ -142,12 +145,7 @@ export const RecipeForm = ({
     if (allIngredients.length > 0) {
       updateCosts();
     }
-  }, [
-    watchedIngredients,
-    watchedWasteBuffer,
-    watchedCurrency,
-    allIngredients,
-  ]);
+  }, [watchedIngredients, watchedWasteBuffer, watchedCurrency, allIngredients]);
 
   const { subtotal, wasteCost, totalCost } = costSummary;
 
