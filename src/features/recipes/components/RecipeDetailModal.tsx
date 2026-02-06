@@ -221,9 +221,35 @@ export const RecipeDetailModal = ({
                       ))}
                     </TableBody>
                     <TableFooter className="bg-muted/50 font-medium">
+                      {(selectedRecipe.wasteBufferPercentage || 0) > 0 && (
+                        <>
+                          <TableRow>
+                            <TableCell colSpan={3}>Subtotal</TableCell>
+                            <TableCell className="text-right">
+                              $
+                              {(
+                                (selectedRecipe.totalCost || 0) /
+                                (1 + (selectedRecipe.wasteBufferPercentage || 0) / 100)
+                              ).toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow className="text-orange-600">
+                            <TableCell colSpan={3}>
+                              Waste Buffer ({selectedRecipe.wasteBufferPercentage}%)
+                            </TableCell>
+                            <TableCell className="text-right font-bold">
+                              +$
+                              {(
+                                ((selectedRecipe.totalCost || 0) * (selectedRecipe.wasteBufferPercentage || 0)) /
+                                (100 + (selectedRecipe.wasteBufferPercentage || 0))
+                              ).toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                        </>
+                      )}
                       <TableRow>
-                        <TableCell colSpan={3}>Total Batch Cost</TableCell>
-                        <TableCell className="text-right font-bold">
+                        <TableCell colSpan={3} className="font-bold">Total Batch Cost</TableCell>
+                        <TableCell className="text-right font-black text-lg">
                           ${selectedRecipe.totalCost?.toFixed(2)}
                         </TableCell>
                       </TableRow>

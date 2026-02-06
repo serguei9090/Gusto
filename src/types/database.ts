@@ -24,6 +24,7 @@ export interface RecipeTable {
   cooking_instructions: string | null;
   selling_price: number | null;
   target_cost_percentage: number | null;
+  waste_buffer_percentage: number | null;
   total_cost: number | null;
   profit_margin: number | null;
   created_at: string | null;
@@ -56,13 +57,13 @@ export interface InventoryTransactionTable {
   id: Generated<number>;
   ingredient_id: number;
   transaction_type:
-    | "IN"
-    | "OUT"
-    | "ADJUST"
-    | "audit"
-    | "restock"
-    | "usage"
-    | "waste"; // Matching existing types
+  | "IN"
+  | "OUT"
+  | "ADJUST"
+  | "audit"
+  | "restock"
+  | "usage"
+  | "waste"; // Matching existing types
   quantity: number;
   cost_per_unit: number | null;
   total_cost: number | null;

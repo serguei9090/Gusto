@@ -33,14 +33,14 @@ import { type Currency } from "./currency";
 
 export function calculateRecipeTotal(
   items: CostInputItem[],
+  wasteBuffer = 0,
   _recipeCurrency: Currency = "USD",
   _exchangeRates?: Record<string, number>
 ) {
-  let totalCost = 0;
+  let subtotal = 0;
   const errors: string[] = [];
 
   items.forEach((item) => {
-    // 1. Calculate cost in the INGREDIENT'S unit/currency
     const result = calculateIngredientCost(
       item.quantity,
       item.unit,
@@ -51,29 +51,14 @@ export function calculateRecipeTotal(
     if (result.error) {
       errors.push(`${item.name}: ${result.error}`);
     } else {
-      // 2. Convert that cost to the RECIPE'S currency
-      // We assume the ingredient cost is in the Base Currency unless specified otherwise
-      // Ideally, CostInputItem should have a 'currency' field.
-      // For now, let's assume ingredients are stored in base currency or mixed.
-      // Wait, ingredients DO have a user-selected currency now.
-
-      // We need to know the ingredient's currency to convert it.
-      // I will assume for this step that `CostInputItem` needs to be updated or we check elsewhere.
-      // But looking at types, `CostInputItem` is local here.
-      // Let's defer strict types and assume input handles it, OR update interface.
-
-      // Actually, let's update the interface to include currency to be safe.
-
-      // For now, passing through raw cost.
-      // If we want real conversion:
-      // totalCost += convertCurrency(result.cost, item.currency, recipeCurrency, exchangeRates);
-
-      // Let's do a simple sum for now until Ingredient Store passes currency data down here.
-      totalCost += result.cost;
+      subtotal += result.cost;
     }
   });
 
-  return { totalCost, errors };
+  const wasteCost = (subtotal * wasteBuffer) / 100;
+  const totalCost = subtotal + wasteCost;
+
+  return { subtotal, wasteCost, totalCost, errors };
 }
 
 /**

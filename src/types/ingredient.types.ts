@@ -91,6 +91,7 @@ export interface Recipe {
   sellingPrice: number | null;
   currency: string;
   targetCostPercentage: number | null;
+  wasteBufferPercentage: number | null;
   totalCost: number | null;
   profitMargin: number | null;
   createdAt: string;
@@ -106,6 +107,7 @@ export interface CreateRecipeInput {
   cookingInstructions?: string | null;
   sellingPrice?: number | null;
   targetCostPercentage?: number | null;
+  wasteBufferPercentage?: number | null;
 }
 
 export interface UpdateRecipeInput {
@@ -117,6 +119,7 @@ export interface UpdateRecipeInput {
   cookingInstructions?: string | null;
   sellingPrice?: number | null;
   targetCostPercentage?: number | null;
+  wasteBufferPercentage?: number | null;
 }
 
 export interface RecipeWithIngredients extends Recipe {

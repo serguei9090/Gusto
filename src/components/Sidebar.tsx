@@ -1,4 +1,7 @@
+import { AnimatePresence, motion } from "framer-motion";
 import {
+  type LucideIcon,
+  Calculator,
   ChefHat,
   ClipboardList,
   LayoutDashboard,
@@ -9,10 +12,9 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
-import { useSettingsStore } from "@/features/settings/store/settings.store";
-import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useSettingsStore } from "@/features/settings/store/settings.store";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export type View =
   | "dashboard"
@@ -21,6 +23,7 @@ export type View =
   | "inventory"
   | "suppliers"
   | "prepsheets"
+  | "calculators"
   | "settings";
 
 interface SidebarProps {
@@ -33,13 +36,14 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
   const { modules, moduleOrder } = useSettingsStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const moduleConfig: Record<string, { label: string; icon: any }> = {
+  const moduleConfig: Record<string, { label: string; icon: LucideIcon }> = {
     dashboard: { label: t("navigation.dashboard"), icon: LayoutDashboard },
     ingredients: { label: t("navigation.ingredients"), icon: ShoppingBasket },
     recipes: { label: t("navigation.recipes"), icon: ChefHat },
     inventory: { label: t("navigation.inventory"), icon: Package },
     suppliers: { label: t("navigation.suppliers"), icon: Users },
     prepsheets: { label: t("navigation.prepSheets"), icon: ClipboardList },
+    calculators: { label: t("navigation.calculators"), icon: Calculator },
     settings: { label: t("navigation.settings"), icon: Settings },
   };
 
@@ -47,11 +51,13 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
   const displayItems = [
     ...moduleOrder
       .filter((id) => {
-        const normalizedId = id === "prepSheets" ? "prepsheets" : id;
-        return modules[id] && moduleConfig[normalizedId];
+        const normalizedId = id.toLowerCase();
+        // Use ?? true to show modules by default if not explicitly hidden in settings
+        const isVisible = modules[id] ?? modules[normalizedId] ?? true;
+        return isVisible && moduleConfig[normalizedId];
       })
       .map((id) => {
-        const normalizedId = id === "prepSheets" ? "prepsheets" : id;
+        const normalizedId = id.toLowerCase();
         return { id: normalizedId, ...moduleConfig[normalizedId] };
       }),
     { id: "settings", ...moduleConfig.settings }, // Always append settings at the end
@@ -64,7 +70,9 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className="bg-card border-r flex flex-col h-full shadow-sm overflow-hidden"
     >
-      <div className={`h-16 flex items-center border-b text-primary font-bold text-lg transition-all duration-300 ${isCollapsed ? "justify-center px-0" : "justify-between px-4"}`}>
+      <div
+        className={`h-16 flex items-center border-b text-primary font-bold text-lg transition-all duration-300 ${isCollapsed ? "justify-center px-0" : "justify-between px-4"} `}
+      >
         <AnimatePresence>
           {!isCollapsed && (
             <motion.div

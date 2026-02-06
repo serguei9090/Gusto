@@ -82,6 +82,7 @@ export const createRecipeSchema = z.object({
   sellingPrice: z.preprocess((v) => (v === "" || v === null || (v !== v) ? undefined : v), z.number().optional()),
   currency: z.enum(["USD", "EUR"]).default("USD"),
   targetCostPercentage: z.preprocess((v) => (v === "" || v === null || (v !== v) ? undefined : v), z.number().min(0).max(100).optional()),
+  wasteBufferPercentage: z.preprocess((v) => (v === "" || v === null || (v !== v) ? undefined : v), z.number().min(0).max(100).optional().default(0)),
 });
 
 export const recipeIngredientFormSchema = z.object({

@@ -67,6 +67,7 @@
         "suppliers": "Proveedores",
         "prepSheets": "Hojas de Preparación",
         "reports": "Informes",
+        "calculators": "Calculadoras",
         "settings": "Configuración"
     },
     "settings": {
@@ -94,6 +95,7 @@
             "description": "Habilitar, deshabilitar o reorganizar funciones.",
             "suppliersHelp": "Gestionar proveedores externos.",
             "prepSheetsHelp": "Crear planes de producción.",
+            "calculatorsHelp": "Herramientas de costos y matemáticas.",
             "dragToReorder": "Arrastre para reordenar los elementos.",
             "visible": "Visible",
             "hidden": "Oculto"

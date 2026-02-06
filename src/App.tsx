@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { View } from "@/components/Sidebar";
 import { MainLayout } from "@/components/templates/MainLayout";
+import { CalculatorsPage } from "@/features/calculators";
 import { DashboardPage } from "@/features/dashboard";
 import { IngredientsPage } from "@/features/ingredients";
 import { InventoryPage } from "@/features/inventory";
 import { PrepSheetsPage } from "@/features/prep-sheets";
-import { RecipesPage } from "./features/recipes/components/RecipesPage";
 import { SuppliersPage } from "@/features/suppliers";
-import { SettingsPage } from "./features/settings/SettingsPage";
 import { initDb } from "@/lib/db";
+import { RecipesPage } from "./features/recipes/components/RecipesPage";
+import { SettingsPage } from "./features/settings/SettingsPage";
 
 function App() {
   const [currentView, setCurrentView] = useState<View>("dashboard");
@@ -17,7 +18,6 @@ function App() {
   useEffect(() => {
     initDb();
   }, []);
-
 
   const renderContent = () => {
     switch (currentView) {
@@ -33,6 +33,8 @@ function App() {
         return <SuppliersPage />;
       case "prepsheets":
         return <PrepSheetsPage />;
+      case "calculators":
+        return <CalculatorsPage />;
       case "settings":
         return <SettingsPage />;
       default:
@@ -54,6 +56,8 @@ function App() {
         return "Supplier Directory";
       case "prepsheets":
         return "Prep Sheets";
+      case "calculators":
+        return "Math Helpers & Calculators";
       case "settings":
         return "Settings";
       default:

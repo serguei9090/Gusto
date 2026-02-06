@@ -71,6 +71,7 @@ export const RecipeForm = ({
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<RecipeFormData>({
     // biome-ignore lint/suspicious/noExplicitAny: Resolver type mismatch
@@ -83,6 +84,18 @@ export const RecipeForm = ({
     },
   });
 
+  // Sync form with initialData when it changes (important for async loading)
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        name: "",
+        servings: 1,
+        ingredients: [],
+        ...initialData,
+      });
+    }
+  }, [initialData, reset]);
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "ingredients",
@@ -91,9 +104,10 @@ export const RecipeForm = ({
   const watchedIngredients = watch("ingredients");
   const watchedSellingPrice = watch("sellingPrice");
   const watchedTargetCost = watch("targetCostPercentage") || 25;
+  const watchedWasteBuffer = watch("wasteBufferPercentage") || 0;
 
   // Calculate Total Cost
-  const { totalCost } = calculateRecipeTotal(
+  const { subtotal, wasteCost, totalCost } = calculateRecipeTotal(
     watchedIngredients.map((field) => {
       const original = allIngredients.find((i) => i.id === field.ingredientId);
       return {
@@ -104,6 +118,7 @@ export const RecipeForm = ({
         ingredientUnit: field.ingredientUnit || original?.unitOfMeasure || "kg",
       };
     }),
+    watchedWasteBuffer,
   );
 
   const suggestedPrice = calculateSuggestedPrice(
@@ -286,13 +301,38 @@ export const RecipeForm = ({
               </div>
             </div>
 
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="wasteBuffer">Waste Buffer %</Label>
+                <span className="text-[10px] font-mono text-muted-foreground">e.g. 5%</span>
+              </div>
+              <Input
+                type="number"
+                id="wasteBuffer"
+                {...register("wasteBufferPercentage", { valueAsNumber: true })}
+                placeholder="0"
+              />
+            </div>
+
             <div className="mt-6 p-4 bg-muted/30 border border-border/50 rounded-lg space-y-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Recipe Total Cost:</span>
-                <span className="font-semibold">{getCurrencySymbol(watch("currency") || "USD")}{totalCost.toFixed(2)}</span>
+                <span className="text-muted-foreground">Subtotal:</span>
+                <span className="font-medium">{getCurrencySymbol(watch("currency") || "USD")}{subtotal.toFixed(2)}</span>
               </div>
 
+              {watchedWasteBuffer > 0 && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Waste Buffer ({watchedWasteBuffer}%):</span>
+                  <span className="font-medium text-orange-600">+{getCurrencySymbol(watch("currency") || "USD")}{wasteCost.toFixed(2)}</span>
+                </div>
+              )}
+
               <div className="h-px bg-border/50 my-2" />
+
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground font-bold">True Recipe Cost:</span>
+                <span className="font-bold text-lg">{getCurrencySymbol(watch("currency") || "USD")}{totalCost.toFixed(2)}</span>
+              </div>
 
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">Suggested Price ({watchedTargetCost}% Cost):</span>

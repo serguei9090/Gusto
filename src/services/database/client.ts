@@ -1,4 +1,5 @@
 import Database from "@tauri-apps/plugin-sql";
+import { runMigrations } from "./migrationManager";
 
 // Singleton instance
 let dbInstance: Database | null = null;
@@ -14,49 +15,8 @@ export async function getDatabase(): Promise<Database> {
     // Initialize schema
     await initSchema(dbInstance);
 
-    // Migration: Add currency column to ingredients if it doesn't exist
-    try {
-      await dbInstance.execute("ALTER TABLE ingredients ADD COLUMN currency TEXT DEFAULT 'USD'");
-      console.log("➕ Added 'currency' column to ingredients table");
-    } catch (e) {
-      // Column probably already exists, ignore error
-    }
-
-    // Migration: Add currency column to recipes if it doesn't exist
-    try {
-      await dbInstance.execute("ALTER TABLE recipes ADD COLUMN currency TEXT DEFAULT 'USD'");
-      console.log("➕ Added 'currency' column to recipes table");
-    } catch (e) {
-      // Column probably already exists
-    }
-
-    // Migration: Add account_number to suppliers
-    try {
-      await dbInstance.execute("ALTER TABLE suppliers ADD COLUMN account_number TEXT");
-      console.log("➕ Added 'account_number' column to suppliers table");
-    } catch (e) {
-      // Column probably already exists
-    }
-
-    // Migration: Create prep_sheets table if it doesn't exist
-    try {
-      await dbInstance.execute(`
-        CREATE TABLE IF NOT EXISTS prep_sheets (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          date TEXT NOT NULL,
-          shift TEXT,
-          prep_cook_name TEXT,
-          notes TEXT,
-          recipes_json TEXT NOT NULL,
-          items_json TEXT NOT NULL,
-          created_at TEXT DEFAULT CURRENT_TIMESTAMP
-        )
-      `);
-      console.log("➕ Ensured 'prep_sheets' table exists");
-    } catch (e) {
-      console.error("❌ Failed to create prep_sheets table:", e);
-    }
+    // Run migrations
+    await runMigrations(dbInstance);
 
     return dbInstance;
   } catch (error) {
@@ -122,6 +82,7 @@ async function initSchema(db: Database) {
         selling_price REAL,
         currency TEXT DEFAULT 'USD',
         target_cost_percentage REAL,
+        waste_buffer_percentage REAL DEFAULT 0,
         total_cost REAL,
         profit_margin REAL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,

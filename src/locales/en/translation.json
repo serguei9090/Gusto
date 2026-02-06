@@ -67,6 +67,7 @@
         "suppliers": "Suppliers",
         "prepSheets": "Prep Sheets",
         "reports": "Reports",
+        "calculators": "Calculators",
         "settings": "Settings"
     },
     "settings": {
@@ -94,6 +95,7 @@
             "description": "Enable, disable, or rearrange features.",
             "suppliersHelp": "Manage external suppliers.",
             "prepSheetsHelp": "Create production plans.",
+            "calculatorsHelp": "Kitchen math and pricing tools.",
             "dragToReorder": "Drag to reorder items in the sidebar.",
             "visible": "Visible",
             "hidden": "Hidden"

@@ -13,6 +13,7 @@ export const RecipesPage = () => {
   const {
     recipes,
     fetchRecipes,
+    fetchFullRecipe,
     createRecipe,
     updateRecipe,
     deleteRecipe,
@@ -25,11 +26,13 @@ export const RecipesPage = () => {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [viewingRecipeId, setViewingRecipeId] = useState<number | null>(null);
-  const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+  const [editingRecipeId, setEditingRecipeId] = useState<number | null>(null);
+  const selectedRecipe = useRecipeStore((state) => state.selectedRecipe);
 
   const handleCloseForm = useCallback(() => {
     setIsFormOpen(false);
-    setEditingRecipe(null);
+    setEditingRecipeId(null);
+    useRecipeStore.getState().selectRecipe(null);
   }, []);
 
   useEffect(() => {
@@ -55,8 +58,8 @@ export const RecipesPage = () => {
   // biome-ignore lint/suspicious/noExplicitAny: Form data type
   const handleCreateOrUpdate = async (data: any) => {
     try {
-      if (editingRecipe) {
-        await updateRecipe(editingRecipe.id, data);
+      if (editingRecipeId) {
+        await updateRecipe(editingRecipeId, data);
       } else {
         await createRecipe(data);
       }
@@ -66,9 +69,11 @@ export const RecipesPage = () => {
     }
   };
 
-  const handleEdit = (recipe: Recipe) => {
-    setEditingRecipe(recipe);
+  const handleEdit = async (recipe: Recipe) => {
+    setEditingRecipeId(recipe.id);
     setIsFormOpen(true);
+    // Fetch full recipe details for the form
+    await fetchFullRecipe(recipe.id);
   };
 
   const handleDelete = async (id: number) => {
@@ -123,20 +128,26 @@ export const RecipesPage = () => {
           <div className="w-full max-w-4xl bg-background border rounded-lg shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-lg font-semibold">
-                {editingRecipe ? t("recipes.editRecipe") : t("recipes.addRecipe")}
+                {editingRecipeId ? t("recipes.editRecipe") : t("recipes.addRecipe")}
               </h2>
               <Button variant="ghost" size="icon" onClick={handleCloseForm}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
             <div className="p-6 overflow-y-auto flex-1">
-              <RecipeForm
-                onSubmit={handleCreateOrUpdate}
-                // biome-ignore lint/suspicious/noExplicitAny: Currency enum mismatch
-                initialData={editingRecipe as any || undefined}
-                onCancel={handleCloseForm}
-                isLoading={isLoading}
-              />
+              {editingRecipeId && isLoading && !selectedRecipe ? (
+                <div className="flex items-center justify-center h-40">
+                  <p className="text-muted-foreground italic">Loading recipe details...</p>
+                </div>
+              ) : (
+                <RecipeForm
+                  onSubmit={handleCreateOrUpdate}
+                  // biome-ignore lint/suspicious/noExplicitAny: Currency enum mismatch
+                  initialData={(editingRecipeId ? selectedRecipe : undefined) as any}
+                  onCancel={handleCloseForm}
+                  isLoading={isLoading}
+                />
+              )}
             </div>
           </div>
         </div>

@@ -75,6 +75,7 @@ export class RecipesRepository {
         cooking_instructions: data.cookingInstructions || null,
         selling_price: data.sellingPrice || null,
         target_cost_percentage: data.targetCostPercentage || null,
+        waste_buffer_percentage: data.wasteBufferPercentage || null,
       })
       .returningAll()
       .executeTakeFirstOrThrow();
@@ -119,6 +120,7 @@ export class RecipesRepository {
         cooking_instructions: data.cookingInstructions,
         selling_price: data.sellingPrice,
         target_cost_percentage: data.targetCostPercentage,
+        waste_buffer_percentage: data.wasteBufferPercentage,
         updated_at: sql`CURRENT_TIMESTAMP`,
       })
       .where("id", "=", id)
@@ -127,7 +129,8 @@ export class RecipesRepository {
     if (
       data.sellingPrice !== undefined ||
       data.servings !== undefined ||
-      data.targetCostPercentage !== undefined
+      data.targetCostPercentage !== undefined ||
+      data.wasteBufferPercentage !== undefined
     ) {
       await this.recalculateCosts(id);
     }
@@ -201,6 +204,7 @@ export class RecipesRepository {
         currentPricePerUnit: i.currentPricePerUnit,
         ingredientUnit: i.ingredientUnit as string,
       })),
+      recipe.wasteBufferPercentage || 0,
     );
 
     // 2. Calculate Suggested Price
@@ -238,6 +242,7 @@ export class RecipesRepository {
       sellingPrice: row.selling_price,
       currency: row.currency || 'USD',
       targetCostPercentage: row.target_cost_percentage,
+      wasteBufferPercentage: row.waste_buffer_percentage,
       totalCost: row.total_cost || 0,
       profitMargin: row.profit_margin || 0,
       createdAt: row.created_at,
