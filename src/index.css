@@ -1,137 +1,137 @@
 @import "tailwindcss";
 
 @theme {
-    /* Colors */
-    --color-background: hsl(var(--background));
-    --color-foreground: hsl(var(--foreground));
+  /* Colors */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
 
-    --color-card: hsl(var(--card));
-    --color-card-foreground: hsl(var(--card-foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
 
-    --color-popover: hsl(var(--popover));
-    --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
 
-    --color-primary: hsl(var(--primary));
-    --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
 
-    --color-secondary: hsl(var(--secondary));
-    --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
 
-    --color-muted: hsl(var(--muted));
-    --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
 
-    --color-accent: hsl(var(--accent));
-    --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
 
-    --color-destructive: hsl(var(--destructive));
-    --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
 
-    --color-border: hsl(var(--border));
-    --color-input: hsl(var(--input));
-    --color-ring: hsl(var(--ring));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
 
-    --color-chart-1: hsl(var(--chart-1));
-    --color-chart-2: hsl(var(--chart-2));
-    --color-chart-3: hsl(var(--chart-3));
-    --color-chart-4: hsl(var(--chart-4));
-    --color-chart-5: hsl(var(--chart-5));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
 
-    /* Border Radius */
-    --radius-lg: var(--radius);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-sm: calc(var(--radius) - 4px);
+  /* Border Radius */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
 }
 
 @layer base {
-    :root {
-        /* Light Mode: Clean & Crisp */
-        --background: 0 0% 100%;
-        --foreground: 240 10% 3.9%;
+  :root {
+    /* Light Mode: Clean & Crisp */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
 
-        --card: 0 0% 100%;
-        --card-foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
 
-        --popover: 0 0% 100%;
-        --popover-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
 
-        /* Primary: Fresh Basil (Emerald 500) */
-        --primary: 151 76% 39%;
-        --primary-foreground: 0 0% 98%;
+    /* Primary: Fresh Basil (Emerald 500) */
+    --primary: 151 76% 39%;
+    --primary-foreground: 0 0% 98%;
 
-        --secondary: 240 4.8% 95.9%;
-        --secondary-foreground: 240 5.9% 10%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
 
-        --muted: 240 4.8% 95.9%;
-        --muted-foreground: 240 3.8% 46.1%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
 
-        --accent: 240 4.8% 95.9%;
-        --accent-foreground: 240 5.9% 10%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
 
-        /* Danger: Rose 500 */
-        --destructive: 343 81% 58%;
-        --destructive-foreground: 0 0% 98%;
+    /* Danger: Rose 500 */
+    --destructive: 343 81% 58%;
+    --destructive-foreground: 0 0% 98%;
 
-        --border: 240 5.9% 90%;
-        --input: 240 5.9% 90%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
 
-        /* Focus Ring: Matches Primary */
-        --ring: 151 76% 39%;
+    /* Focus Ring: Matches Primary */
+    --ring: 151 76% 39%;
 
-        --radius: 0.5rem;
+    --radius: 0.5rem;
 
-        /* Chart Colors (For Recharts/Visx) */
-        --chart-1: 151 76% 39%;
-        /* Primary Green */
-        --chart-2: 343 81% 58%;
-        /* Danger Red */
-        --chart-3: 48 96% 53%;
-        /* Warning Amber */
-        --chart-4: 173 58% 39%;
-        /* Teal */
-    }
+    /* Chart Colors (For Recharts/Visx) */
+    --chart-1: 151 76% 39%;
+    /* Primary Green */
+    --chart-2: 343 81% 58%;
+    /* Danger Red */
+    --chart-3: 48 96% 53%;
+    /* Warning Amber */
+    --chart-4: 173 58% 39%;
+    /* Teal */
+  }
 
-    .dark {
-        /* Dark Mode: Deep Zinc & Fresh Basil */
-        --background: 240 10% 3.9%;
-        /* #09090B */
-        --foreground: 0 0% 98%;
+  .dark {
+    /* Dark Mode: Deep Zinc & Fresh Basil */
+    --background: 240 10% 3.9%;
+    /* #09090B */
+    --foreground: 0 0% 98%;
 
-        --card: 240 10% 3.9%;
-        /* Matches BG for flat look, or use 240 3.7% 15.9% for raised */
-        --card-foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    /* Matches BG for flat look, or use 240 3.7% 15.9% for raised */
+    --card-foreground: 0 0% 98%;
 
-        --popover: 240 10% 3.9%;
-        --popover-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
 
-        /* Primary: Fresh Basil (Remains vibrant in dark mode) */
-        --primary: 151 76% 39%;
-        --primary-foreground: 0 0% 98%;
+    /* Primary: Fresh Basil (Remains vibrant in dark mode) */
+    --primary: 151 76% 39%;
+    --primary-foreground: 0 0% 98%;
 
-        --secondary: 240 3.7% 15.9%;
-        --secondary-foreground: 0 0% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
 
-        --muted: 240 3.7% 15.9%;
-        --muted-foreground: 240 5% 64.9%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-        --accent: 240 3.7% 15.9%;
-        --accent-foreground: 0 0% 98%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
 
-        /* Danger: Rose 600 for better contrast on dark */
-        --destructive: 343 81% 50%;
-        --destructive-foreground: 0 0% 98%;
+    /* Danger: Rose 600 for better contrast on dark */
+    --destructive: 343 81% 50%;
+    --destructive-foreground: 0 0% 98%;
 
-        --border: 240 3.7% 15.9%;
-        --input: 240 3.7% 15.9%;
-        --ring: 151 76% 39%;
-    }
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 151 76% 39%;
+  }
 }
 
 @layer base {
-    * {
-        @apply border-border;
-    }
+  * {
+    @apply border-border;
+  }
 
-    body {
-        @apply bg-background text-foreground;
-    }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
