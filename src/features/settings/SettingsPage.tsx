@@ -191,6 +191,56 @@ export const SettingsPage = ({
           </Reorder.Group>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>About RestHelper</CardTitle>
+          <CardDescription>Application information and support</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center py-2 border-b">
+              <span className="text-sm font-medium">Version</span>
+              <span className="text-sm text-muted-foreground">1.0.0</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b">
+              <span className="text-sm font-medium">Build Date</span>
+              <span className="text-sm text-muted-foreground">
+                {new Date().toLocaleDateString()}
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-4">
+            <h4 className="text-sm font-semibold">About This Application</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              RestHelper is a comprehensive restaurant management system designed
+              to streamline operations including recipe costing, inventory
+              tracking, prep sheet management, and multi-currency support. Built
+              with modern technologies to help restaurant professionals manage
+              their business efficiently.
+            </p>
+          </div>
+
+          <div className="space-y-2 pt-4">
+            <h4 className="text-sm font-semibold">Support & Contact</h4>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                For support, feature requests, or bug reports:
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                <li>• Email: support@resthelper.com</li>
+                <li>• Documentation: docs.resthelper.com</li>
+                <li>• GitHub: github.com/resthelper/app</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-4 text-xs text-muted-foreground text-center border-t">
+            © {new Date().getFullYear()} RestHelper. All rights reserved.
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
