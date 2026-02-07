@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Ingredient, TransactionType } from "@/features/inventory/types";
+import { CurrencySelector } from "@/features/settings/components/CurrencySelector";
+import type { Currency } from "@/utils/currency";
 import { createTransactionSchema } from "@/utils/validators";
 
 interface TransactionModalProps {
@@ -54,6 +56,7 @@ export function TransactionModal({
       quantity: 0,
       costPerUnit: ingredient.pricePerUnit || 0,
       totalCost: 0,
+      currency: ingredient.currency || "USD",
       reference: "",
       notes: "",
     },
@@ -68,6 +71,7 @@ export function TransactionModal({
         quantity: 0,
         costPerUnit: ingredient.pricePerUnit || 0,
         totalCost: 0,
+        currency: ingredient.currency || "USD",
         reference: "",
         notes: "",
       });
@@ -146,6 +150,15 @@ export function TransactionModal({
                 type="number"
                 step="0.01"
                 {...register("costPerUnit", { valueAsNumber: true })}
+              />
+            </div>
+
+            {/* Currency Selector */}
+            <div className="space-y-2">
+              <Label htmlFor="currency">Currency</Label>
+              <CurrencySelector
+                value={(watch("currency") as Currency) || "USD"}
+                onChange={(val) => setValue("currency", val as Currency)}
               />
             </div>
 

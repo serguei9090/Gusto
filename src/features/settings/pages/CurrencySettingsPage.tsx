@@ -1,5 +1,6 @@
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,6 +9,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -23,9 +32,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AddCurrencyDialog } from "@/features/settings/components/AddCurrencyDialog";
+import { AddExchangeRateDialog } from "@/features/settings/components/AddExchangeRateDialog";
 import { useCurrencyStore } from "@/features/settings/store/currency.store";
-import { AddCurrencyDialog } from "../components/AddCurrencyDialog";
-import { AddExchangeRateDialog } from "../components/AddExchangeRateDialog";
 
 export function CurrencySettingsPage() {
   const {
@@ -35,12 +44,15 @@ export function CurrencySettingsPage() {
     loadCurrencies,
     loadExchangeRates,
     setBaseCurrency,
+    toggleCurrencyStatus,
+    deleteCurrency,
   } = useCurrencyStore();
 
   const [isAddCurrencyOpen, setIsAddCurrencyOpen] = useState(false);
   const [isAddRateOpen, setIsAddRateOpen] = useState(false);
   const [selectedBaseCurrency, setSelectedBaseCurrency] =
     useState(baseCurrency);
+  const [currencyToDelete, setCurrencyToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     loadCurrencies();
@@ -54,6 +66,22 @@ export function CurrencySettingsPage() {
   const handleBaseCurrencyChange = async (value: string) => {
     setSelectedBaseCurrency(value);
     await setBaseCurrency(value);
+  };
+
+  const handleDeleteCurrency = async () => {
+    if (!currencyToDelete) return;
+    try {
+      await deleteCurrency(currencyToDelete);
+      toast.success(`Currency ${currencyToDelete} deleted successfully`);
+      setCurrencyToDelete(null);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete currency",
+      );
+      // Keep dialog open? No, maybe close and let toast show error.
+      // But user might want to try again? Error is typically "In Use", so trying again won't help.
+      setCurrencyToDelete(null);
+    }
   };
 
   return (
@@ -145,8 +173,22 @@ export function CurrencySettingsPage() {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleCurrencyStatus(currency.code)}
+                    >
                       {currency.isActive ? "Disable" : "Enable"}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => setCurrencyToDelete(currency.code)}
+                      disabled={currency.code === baseCurrency}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete</span>
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -227,6 +269,29 @@ export function CurrencySettingsPage() {
         open={isAddRateOpen}
         onOpenChange={setIsAddRateOpen}
       />
+
+      <Dialog
+        open={!!currencyToDelete}
+        onOpenChange={(open) => !open && setCurrencyToDelete(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Currency</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {currencyToDelete}? This action
+              cannot be undone. References in exchange rates will be removed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCurrencyToDelete(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteCurrency}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

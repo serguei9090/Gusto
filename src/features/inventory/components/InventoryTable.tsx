@@ -1,4 +1,4 @@
-import { AlertCircle, Edit3 } from "lucide-react";
+import { AlertCircle, Edit3, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,15 +10,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Ingredient } from "@/features/inventory/types";
+import { formatCurrencyAmount } from "@/utils/currencyConverter";
 
 interface InventoryTableProps {
   ingredients: Ingredient[];
   onRecordTransaction: (ingredient: Ingredient) => void;
+  onViewHistory: (ingredient: Ingredient) => void;
 }
 
 export function InventoryTable({
   ingredients,
   onRecordTransaction,
+  onViewHistory,
 }: InventoryTableProps) {
   return (
     <div className="rounded-md border">
@@ -29,6 +32,7 @@ export function InventoryTable({
             <TableHead>Category</TableHead>
             <TableHead>Current Stock</TableHead>
             <TableHead>Min Level</TableHead>
+            <TableHead>Total Value</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -67,6 +71,12 @@ export function InventoryTable({
                       : "-"}
                   </TableCell>
                   <TableCell>
+                    {formatCurrencyAmount(
+                      ingredient.currentStock * ingredient.pricePerUnit,
+                      ingredient.currency || "USD",
+                    )}
+                  </TableCell>
+                  <TableCell>
                     {isLow ? (
                       <Badge
                         variant="destructive"
@@ -88,6 +98,15 @@ export function InventoryTable({
                     >
                       <Edit3 className="h-4 w-4" />
                       <span className="sr-only">Update</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onViewHistory(ingredient)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <History className="h-4 w-4" />
+                      <span className="sr-only">History</span>
                     </Button>
                   </TableCell>
                 </TableRow>

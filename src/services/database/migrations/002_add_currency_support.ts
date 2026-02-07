@@ -41,19 +41,19 @@ export const migration = {
       )
     `);
 
-    // Insert default currencies
+    // Insert default currencies (Only USD and EUR active by default)
     await db.execute(`
-      INSERT OR IGNORE INTO currencies (code, name, symbol, decimal_places) VALUES
-      ('USD', 'US Dollar', '$', 2),
-      ('EUR', 'Euro', '€', 2),
-      ('GBP', 'British Pound', '£', 2),
-      ('CAD', 'Canadian Dollar', 'C$', 2),
-      ('AUD', 'Australian Dollar', 'A$', 2),
-      ('JPY', 'Japanese Yen', '¥', 0),
-      ('CNY', 'Chinese Yuan', '¥', 2),
-      ('INR', 'Indian Rupee', '₹', 2),
-      ('MXN', 'Mexican Peso', '$', 2),
-      ('BRL', 'Brazilian Real', 'R$', 2)
+      INSERT OR IGNORE INTO currencies (code, name, symbol, decimal_places, is_active) VALUES
+      ('USD', 'US Dollar', '$', 2, 1),
+      ('EUR', 'Euro', '€', 2, 1),
+      ('GBP', 'British Pound', '£', 2, 0),
+      ('CAD', 'Canadian Dollar', 'C$', 2, 0),
+      ('AUD', 'Australian Dollar', 'A$', 2, 0),
+      ('JPY', 'Japanese Yen', '¥', 0, 0),
+      ('CNY', 'Chinese Yuan', '¥', 2, 0),
+      ('INR', 'Indian Rupee', '₹', 2, 0),
+      ('MXN', 'Mexican Peso', '$', 2, 0),
+      ('BRL', 'Brazilian Real', 'R$', 2, 0)
     `);
 
     // Set default base currency
@@ -66,7 +66,7 @@ export const migration = {
     await db.execute(`
       INSERT OR IGNORE INTO exchange_rates (from_currency, to_currency, rate, effective_date, source) VALUES
       ('USD', 'USD', 1.0, date('now'), 'system'),
-      ('EUR', 'USD', 1.08, date('now'), 'default'),
+      ('EUR', 'USD', 1.0, date('now'), 'default'),
       ('GBP', 'USD', 1.27, date('now'), 'default'),
       ('CAD', 'USD', 0.74, date('now'), 'default'),
       ('AUD', 'USD', 0.66, date('now'), 'default'),

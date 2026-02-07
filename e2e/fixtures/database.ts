@@ -1,8 +1,12 @@
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { test as base } from "@playwright/test";
 import Database from "better-sqlite3";
 import { cleanDatabase, seedDatabase } from "./seed-data";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Path to test database - using a local file in the e2e directory
 const DB_PATH = join(__dirname, "test.db");

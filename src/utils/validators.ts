@@ -119,6 +119,7 @@ export const createTransactionSchema = z.object({
   quantity: z.number(),
   costPerUnit: z.number().positive().nullable().optional(),
   totalCost: z.number().nullable().optional(),
+  currency: z.enum(SUPPORTED_CURRENCIES).optional(),
   reference: z.string().max(100).nullable().optional(),
   notes: z.string().max(500).nullable().optional(),
 });

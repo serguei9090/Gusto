@@ -155,6 +155,7 @@ export interface CreateTransactionInput {
   quantity: number;
   costPerUnit: number | null;
   totalCost: number | null;
+  currency?: string | null;
   reference: string | null;
   notes: string | null;
 }
@@ -171,6 +172,7 @@ export interface InventoryTransaction {
   quantity: number;
   costPerUnit: number | null;
   totalCost: number | null;
+  currency?: string | null;
   reference: string | null;
   notes: string | null;
   createdAt: string;

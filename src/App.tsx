@@ -20,13 +20,14 @@ function App() {
   const { initialize: initializeCurrency } = useCurrencyStore();
 
   // Initialize database and currency store on mount
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Initialize once on mount
   useEffect(() => {
     const init = async () => {
       await initDb();
       await initializeCurrency();
     };
     init();
-  }, [initializeCurrency]);
+  }, []); // Run once on mount
 
   const renderContent = () => {
     switch (currentView) {

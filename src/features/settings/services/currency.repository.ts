@@ -29,7 +29,6 @@ export class CurrencyRepository {
     const result = await db
       .selectFrom("currencies")
       .selectAll()
-      .where("is_active", "=", 1)
       .orderBy("code")
       .execute();
 
@@ -229,6 +228,53 @@ export class CurrencyRepository {
       })
       .where("code", "=", code)
       .execute();
+  }
+
+  /**
+   * Check if currency is used in any records
+   */
+  async checkCurrencyUsage(code: string): Promise<boolean> {
+    const ingredientCount = await db
+      .selectFrom("ingredients")
+      .select(sql<number>`count(*)`.as("count"))
+      .where("currency", "=", code)
+      .executeTakeFirst();
+
+    const recipeCount = await db
+      .selectFrom("recipes")
+      .select(sql<number>`count(*)`.as("count"))
+      .where("currency", "=", code)
+      .executeTakeFirst();
+
+    // Check recipe versions as well to be safe
+    const versionCount = await db
+      .selectFrom("recipe_versions")
+      .select(sql<number>`count(*)`.as("count"))
+      .where("currency", "=", code)
+      .executeTakeFirst();
+
+    const totalUsage =
+      (Number(ingredientCount?.count) || 0) +
+      (Number(recipeCount?.count) || 0) +
+      (Number(versionCount?.count) || 0);
+
+    return totalUsage > 0;
+  }
+
+  /**
+   * Delete a currency and its associated exchange rates
+   */
+  async deleteCurrency(code: string): Promise<void> {
+    // Delete associated exchange rates
+    await db
+      .deleteFrom("exchange_rates")
+      .where((eb) =>
+        eb.or([eb("from_currency", "=", code), eb("to_currency", "=", code)]),
+      )
+      .execute();
+
+    // Delete the currency
+    await db.deleteFrom("currencies").where("code", "=", code).execute();
   }
 }
 

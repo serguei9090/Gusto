@@ -1,6 +1,7 @@
 import { AlertTriangle, ChefHat, Package, Percent } from "lucide-react";
 import { useEffect } from "react";
 import { useDashboardStore } from "@/features/dashboard/store/dashboard.store";
+import { useCurrencyStore } from "@/features/settings/store/currency.store";
 import { useTranslation } from "@/hooks/useTranslation";
 import {
   formatCurrencyAmount,
@@ -12,17 +13,37 @@ import { UrgentReordersCard } from "./UrgentReordersCard";
 
 export const DashboardPage = () => {
   const { t } = useTranslation();
-  const { summary, urgentReorders, topRecipes, fetchDashboardData, error } =
-    useDashboardStore();
+  const {
+    summary,
+    urgentReorders,
+    topRecipes,
+    fetchDashboardData,
+    error,
+    isLoading,
+  } = useDashboardStore();
+
+  // Wait for currency store to finish loading before fetching dashboard data
+  const { currencies, baseCurrency: storeCurrency } = useCurrencyStore();
+  const currenciesLoaded = currencies.length > 0 || storeCurrency !== "USD";
 
   const baseCurrency = getBaseCurrency();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only run when currencies finish loading
   useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+    // Only fetch dashboard data after currencies have loaded
+    if (currenciesLoaded) {
+      fetchDashboardData();
+    }
+  }, [currenciesLoaded]); // Re-fetch when currencies finish loading
 
   if (error) {
     return <div className="p-8 text-destructive">{error}</div>;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="p-8 text-muted-foreground">Loading dashboard...</div>
+    );
   }
 
   return (

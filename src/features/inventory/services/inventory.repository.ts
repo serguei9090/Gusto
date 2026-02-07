@@ -22,6 +22,7 @@ class InventoryRepository {
       totalCost,
       reference,
       notes,
+      currency,
     } = data;
 
     // Calculate delta for stock update
@@ -48,15 +49,28 @@ class InventoryRepository {
       .returningAll()
       .executeTakeFirstOrThrow();
 
-    // 2. Update Ingredient Stock
-    await db
-      .updateTable("ingredients")
-      .set((eb) => ({
-        current_stock: eb("current_stock", "+", delta),
-        last_updated: sql`CURRENT_TIMESTAMP`,
-      }))
-      .where("id", "=", ingredientId)
-      .execute();
+    // 2. Update Ingredient Stock & Price (if purchase)
+    if (transactionType === "purchase" && currency && costPerUnit) {
+      await db
+        .updateTable("ingredients")
+        .set((eb) => ({
+          current_stock: eb("current_stock", "+", delta),
+          price_per_unit: costPerUnit,
+          currency: currency,
+          last_updated: sql`CURRENT_TIMESTAMP`,
+        }))
+        .where("id", "=", ingredientId)
+        .execute();
+    } else {
+      await db
+        .updateTable("ingredients")
+        .set((eb) => ({
+          current_stock: eb("current_stock", "+", delta),
+          last_updated: sql`CURRENT_TIMESTAMP`,
+        }))
+        .where("id", "=", ingredientId)
+        .execute();
+    }
 
     return {
       id: result.id,

@@ -104,3 +104,21 @@ export function calculateSuggestedPrice(
   const price = cost / targetDecimal;
   return Math.round(price * 100) / 100; // Round to 2 decimals
 }
+
+/**
+ * Calculates the new weighted average price when adding new stock at a different price.
+ * Method: Weighted Average Cost (WAC)
+ * Formula: ((Old Stock * Old Price) + (New Stock * New Price)) / (Total Stock)
+ */
+export function calculateWeightedAverage(
+  currentStock: number,
+  currentPrice: number,
+  addedStock: number,
+  addedPrice: number,
+): number {
+  const totalStock = currentStock + addedStock;
+  if (totalStock <= 0) return 0;
+
+  const totalValue = currentStock * currentPrice + addedStock * addedPrice;
+  return totalValue / totalStock;
+}

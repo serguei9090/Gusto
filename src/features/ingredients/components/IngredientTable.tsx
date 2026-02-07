@@ -44,6 +44,9 @@ export const IngredientTable = ({
             <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">
               Stock
             </th>
+            <th className="h-10 px-4 text-left align-middle font-medium text-muted-foreground">
+              Total Value
+            </th>
             <th className="h-10 px-4 text-right align-middle font-medium text-muted-foreground w-[100px]">
               Actions
             </th>
@@ -83,6 +86,12 @@ export const IngredientTable = ({
                       </span>
                     )}
                 </span>
+              </td>
+              <td className="p-4 align-middle font-medium">
+                {formatCurrencyAmount(
+                  ing.currentStock * ing.pricePerUnit,
+                  ing.currency || "USD",
+                )}
               </td>
               <td className="p-4 align-middle text-right">
                 <div className="flex justify-end gap-2">

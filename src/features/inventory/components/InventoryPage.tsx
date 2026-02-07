@@ -7,6 +7,7 @@ import { useIngredientsStore } from "@/features/ingredients/store/ingredients.st
 import { useInventoryStore } from "@/features/inventory/store/inventory.store";
 import { useTranslation } from "@/hooks/useTranslation";
 import type { Ingredient } from "@/types/ingredient.types";
+import { InventoryHistoryModal } from "./InventoryHistoryModal";
 import { InventoryTable } from "./InventoryTable";
 import { TransactionModal } from "./TransactionModal";
 
@@ -25,6 +26,11 @@ export const InventoryPage = () => {
   const [selectedIngredient, setSelectedIngredient] =
     useState<Ingredient | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [historyIngredient, setHistoryIngredient] = useState<Ingredient | null>(
+    null,
+  );
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   useEffect(() => {
     fetchIngredients();
@@ -49,6 +55,11 @@ export const InventoryPage = () => {
   const openTransactionModal = (ingredient: Ingredient) => {
     setSelectedIngredient(ingredient);
     setIsModalOpen(true);
+  };
+
+  const openHistoryModal = (ingredient: Ingredient) => {
+    setHistoryIngredient(ingredient);
+    setIsHistoryOpen(true);
   };
 
   return (
@@ -119,6 +130,7 @@ export const InventoryPage = () => {
         <InventoryTable
           ingredients={filteredIngredients}
           onRecordTransaction={openTransactionModal}
+          onViewHistory={openHistoryModal}
         />
       </div>
 
@@ -132,6 +144,17 @@ export const InventoryPage = () => {
           }}
           onSubmit={handleTransaction}
           isLoading={loadingInv}
+        />
+      )}
+
+      {historyIngredient && (
+        <InventoryHistoryModal
+          ingredient={historyIngredient}
+          open={isHistoryOpen}
+          onOpenChange={(val) => {
+            setIsHistoryOpen(val);
+            if (!val) setHistoryIngredient(null);
+          }}
         />
       )}
     </div>

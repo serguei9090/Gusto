@@ -30,6 +30,7 @@ interface CurrencyState {
   deleteExchangeRate: (id: number) => Promise<void>;
   addCurrency: (currency: Omit<Currency, "isActive">) => Promise<void>;
   toggleCurrencyStatus: (code: string) => Promise<void>;
+  deleteCurrency: (code: string) => Promise<void>;
   initialize: () => Promise<void>;
 }
 
@@ -192,6 +193,33 @@ export const useCurrencyStore = create<CurrencyState>((set, get) => ({
             : "Failed to toggle currency status",
         isLoading: false,
       });
+    }
+  },
+
+  deleteCurrency: async (code: string) => {
+    try {
+      set({ isLoading: true, error: null });
+
+      // Check if currency is in use
+      const isUsed = await currencyRepository.checkCurrencyUsage(code);
+      if (isUsed) {
+        throw new Error(
+          `Cannot delete ${code}: Currency is in use by ingredients or recipes.`,
+        );
+      }
+
+      await currencyRepository.deleteCurrency(code);
+      await get().loadCurrencies();
+      set({ isLoading: false });
+    } catch (error) {
+      console.error(error);
+      set({
+        error:
+          error instanceof Error ? error.message : "Failed to delete currency",
+        isLoading: false,
+      });
+      // Re-throw so component can show toast/alert
+      throw error;
     }
   },
 
