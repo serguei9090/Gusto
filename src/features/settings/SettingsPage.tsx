@@ -214,11 +214,11 @@ export const SettingsPage = ({
           <div className="space-y-2 pt-4">
             <h4 className="text-sm font-semibold">About This Application</h4>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              RestHelper is a comprehensive restaurant management system designed
-              to streamline operations including recipe costing, inventory
-              tracking, prep sheet management, and multi-currency support. Built
-              with modern technologies to help restaurant professionals manage
-              their business efficiently.
+              RestHelper is a comprehensive restaurant management system
+              designed to streamline operations including recipe costing,
+              inventory tracking, prep sheet management, and multi-currency
+              support. Built with modern technologies to help restaurant
+              professionals manage their business efficiently.
             </p>
           </div>
 
