@@ -100,26 +100,27 @@ describe("Cost Engine", () => {
   });
 
   describe("calculateSuggestedPrice", () => {
-    it("should suggest price based on target margin", () => {
-      // If cost is $30 and target margin is 30%, suggested price is $42.86
+    it("should suggest price based on target food cost percentage", () => {
+      // If cost is $30 and target cost is 30%, suggested price is $100
       const suggestedPrice = calculateSuggestedPrice(30, 30);
-      expect(suggestedPrice).toBeCloseTo(42.86, 2);
+      expect(suggestedPrice).toBeCloseTo(100, 2);
     });
 
-    it("should return 0 for 100% margin (impossible)", () => {
+    it("should return break-even price for 100% food cost target", () => {
+      // If cost is $30 and target cost is 100%, price is $30 (no profit)
       const suggestedPrice = calculateSuggestedPrice(30, 100);
-      expect(suggestedPrice).toBe(0);
+      expect(suggestedPrice).toBe(30);
     });
 
-    it("should return 0 for negative margin", () => {
-      const suggestedPrice = calculateSuggestedPrice(30, -10);
-      expect(suggestedPrice).toBe(0);
+    it("should return 0 for non-positive target percentage", () => {
+      expect(calculateSuggestedPrice(30, 0)).toBe(0);
+      expect(calculateSuggestedPrice(30, -10)).toBe(0);
     });
 
-    it("should calculate suggested price for 25% margin", () => {
-      // If cost is $30 and target margin is 25%, suggested price is $40
+    it("should calculate suggested price for 25% food cost target", () => {
+      // If cost is $30 and target cost is 25%, suggested price is $120
       const suggestedPrice = calculateSuggestedPrice(30, 25);
-      expect(suggestedPrice).toBeCloseTo(40, 2);
+      expect(suggestedPrice).toBeCloseTo(120, 2);
     });
   });
 });
