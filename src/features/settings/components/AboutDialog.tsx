@@ -1,4 +1,5 @@
 import { ExternalLink, FileText, Github, Info, Mail } from "lucide-react";
+import logo from "@/assets/images/logo.png";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,13 +29,20 @@ export const AboutDialog = ({ trigger }: AboutDialogProps) => {
         {trigger || (
           <Button variant="outline">
             <Info className="mr-2 h-4 w-4" />
-            About RestHelper
+            About Gusto
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">RestHelper</DialogTitle>
+          <DialogTitle className="text-2xl flex items-center gap-2">
+            <img
+              src={logo}
+              alt="Gusto Logo"
+              className="w-8 h-8 object-contain"
+            />
+            Gusto
+          </DialogTitle>
           <DialogDescription>
             Professional Restaurant Management System
           </DialogDescription>
@@ -64,11 +72,11 @@ export const AboutDialog = ({ trigger }: AboutDialogProps) => {
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-foreground">About</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              RestHelper is a comprehensive restaurant management system
-              designed to streamline operations including recipe costing,
-              inventory tracking, prep sheet management, and multi-currency
-              support. Built with modern technologies to help restaurant
-              professionals manage their business efficiently.
+              Gusto is a comprehensive restaurant management system designed to
+              streamline operations including recipe costing, inventory
+              tracking, prep sheet management, and multi-currency support. Built
+              with modern technologies to help restaurant professionals manage
+              their business efficiently.
             </p>
           </div>
 
@@ -112,15 +120,15 @@ export const AboutDialog = ({ trigger }: AboutDialogProps) => {
             </h3>
             <div className="space-y-2">
               <a
-                href="mailto:support@resthelper.com"
+                href="mailto:support@gusto.app"
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
               >
                 <Mail className="h-4 w-4" />
-                <span>support@resthelper.com</span>
+                <span>support@gusto.app</span>
                 <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
               </a>
               <a
-                href="https://docs.resthelper.com"
+                href="https://docs.gusto.app"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
@@ -130,7 +138,7 @@ export const AboutDialog = ({ trigger }: AboutDialogProps) => {
                 <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
               </a>
               <a
-                href="https://github.com/resthelper/app"
+                href="https://github.com/gusto/app"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
@@ -186,7 +194,7 @@ export const AboutDialog = ({ trigger }: AboutDialogProps) => {
                 </Button>
               </div>
               <p className="text-center pt-2">
-                © {new Date().getFullYear()} RestHelper. All rights reserved.
+                © {new Date().getFullYear()} Gusto. All rights reserved.
               </p>
             </div>
           </div>

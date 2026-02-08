@@ -12,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
+import logo from "@/assets/images/logo.png";
 import { Button } from "@/components/ui/button";
 import { useSettingsStore } from "@/features/settings/store/settings.store";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -81,8 +82,12 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
               exit={{ opacity: 0, width: 0 }}
               className="flex items-center gap-2 overflow-hidden whitespace-nowrap"
             >
-              <ShoppingBasket size={24} className="shrink-0" />
-              <span className="text-sm ml-2">RestHelper</span>
+              <img
+                src={logo}
+                alt="Gusto Logo"
+                className="w-8 h-8 object-contain shrink-0"
+              />
+              <span className="text-sm ml-2 font-bold">Gusto</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -181,7 +186,7 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
               exit={{ opacity: 0 }}
               className="text-[10px] text-muted-foreground text-center"
             >
-              RestHelper v1.0.0
+              Gusto v1.0.0
             </motion.div>
           )}
         </AnimatePresence>
