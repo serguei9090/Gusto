@@ -11,7 +11,7 @@ on:
 jobs:
   check:
     name: Check & Test
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       
@@ -20,7 +20,7 @@ jobs:
           bun-version: latest
           
       - name: Install dependencies
-        run: rm -f bun.lock && bun install
+        run: bun install
         
       - name: Setup Biome
         uses: biomejs/setup-biome@v2

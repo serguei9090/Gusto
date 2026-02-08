@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Resolved Biome `MODULE_NOT_FOUND` error in CI by using the official `setup-biome` action.
+- Switched CI runner to `windows-latest` to resolve native dependency issues (Rollup/Bun) on Linux.
 - Ensured cross-platform compatibility for linting process.
 
 
