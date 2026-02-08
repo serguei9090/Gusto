@@ -199,11 +199,11 @@ export const SettingsPage = ({
           <CardDescription>
             View application information, version details, and support resources
           </CardDescription>
-        </CardHeader>        <CardContent>
+        </CardHeader>{" "}
+        <CardContent>
           <AboutDialog />
         </CardContent>
       </Card>
     </div>
   );
 };
-
