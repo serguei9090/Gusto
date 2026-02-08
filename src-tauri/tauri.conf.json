@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "RestaurantManage",
+  "productName": "Gusto",
   "version": "0.1.0",
-  "identifier": "com.restaurantmanage.app",
+  "identifier": "com.gusto.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "RestaurantManage",
+        "title": "Gusto",
         "width": 1024,
         "height": 768,
         "resizable": true,

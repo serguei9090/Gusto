@@ -12,7 +12,7 @@ export async function getDatabase(): Promise<Database> {
   initPromise = (async () => {
     try {
       // Initial connection
-      const db = await Database.load("sqlite:restaurant.db");
+      const db = await Database.load("sqlite:gusto.db");
       console.log("✅ Database connected via Tauri SQL plugin");
 
       // Initialize schema
