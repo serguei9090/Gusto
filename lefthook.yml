@@ -4,6 +4,7 @@ pre-commit:
     frontend-quality:
       glob: "*.{js,ts,jsx,tsx,json}"
       run: bun x @biomejs/biome check --write {staged_files}
+      stage_fixed: false  # Don't auto-stage fixes - commit will fail so you can review
     typecheck:
       glob: "*.{ts,tsx}"
       run: bun run type-check
