@@ -23,9 +23,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import type { Ingredient, TransactionType } from "@/features/inventory/types";
 import { CurrencySelector } from "@/features/settings/components/CurrencySelector";
+import { useTranslation } from "@/hooks/useTranslation";
 import type { Currency } from "@/utils/currency";
 import { createTransactionSchema } from "@/utils/validators";
-import { useTranslation } from "@/hooks/useTranslation";
 
 interface TransactionModalProps {
   ingredient: Ingredient;
@@ -96,7 +96,10 @@ export function TransactionModal({
           <div className="grid gap-4 py-2">
             {/* Transaction Type */}
             <div className="space-y-2">
-              <Label htmlFor="transactionType" className="flex items-center gap-2">
+              <Label
+                htmlFor="transactionType"
+                className="flex items-center gap-2"
+              >
                 Transaction Type <span className="text-destructive">*</span>
                 <FieldHelp helpText={t("inventory.help.transactionType")} />
               </Label>

@@ -14,8 +14,8 @@ import { FieldHelp } from "@/components/ui/field-help";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useTranslation } from "@/hooks/useTranslation";
 import type { Supplier, SupplierFormData } from "@/features/suppliers/types";
+import { useTranslation } from "@/hooks/useTranslation";
 import { createSupplierSchema } from "@/utils/validators";
 
 interface SupplierFormProps {
@@ -116,7 +116,10 @@ export function SupplierForm({
 
             {/* Contact Person */}
             <div className="space-y-2">
-              <Label htmlFor="contactPerson" className="flex items-center gap-2">
+              <Label
+                htmlFor="contactPerson"
+                className="flex items-center gap-2"
+              >
                 Contact Person
                 <FieldHelp helpText={t("suppliers.help.contactPerson")} />
               </Label>
@@ -175,7 +178,10 @@ export function SupplierForm({
             {/* Payment Terms & Account Number Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="paymentTerms" className="flex items-center gap-2">
+                <Label
+                  htmlFor="paymentTerms"
+                  className="flex items-center gap-2"
+                >
                   Payment Terms
                   <FieldHelp helpText={t("suppliers.help.paymentTerms")} />
                 </Label>

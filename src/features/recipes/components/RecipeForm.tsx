@@ -316,7 +316,9 @@ export const RecipeForm = ({
               <div className="flex justify-between items-center">
                 <Label htmlFor="targetCost" className="flex items-center gap-2">
                   Target Food Cost %
-                  <FieldHelp helpText={t("recipes.help.targetCostPercentage")} />
+                  <FieldHelp
+                    helpText={t("recipes.help.targetCostPercentage")}
+                  />
                 </Label>
                 <span className="text-[10px] font-mono text-muted-foreground">
                   Default: 25%
@@ -348,7 +350,10 @@ export const RecipeForm = ({
 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <Label htmlFor="wasteBuffer" className="flex items-center gap-2">
+                <Label
+                  htmlFor="wasteBuffer"
+                  className="flex items-center gap-2"
+                >
                   Waste Buffer %
                   <FieldHelp helpText={t("recipes.help.wasteBuffer")} />
                 </Label>
