@@ -56,12 +56,18 @@ jobs:
           # Extract content starting from the version header until the next header or end of file
           sed -n "/## \[$VERSION\]/,/^## \[/p" CHANGELOG.md | sed '1d;$d' > RELEASE_NOTES.md
           
+          
           # If RELEASE_NOTES.md is empty (e.g. last entry), try a simpler extraction for the last block
           if [ ! -s RELEASE_NOTES.md ]; then
             sed -n "/## \[$VERSION\]/,/$/p" CHANGELOG.md | sed '1d' > RELEASE_NOTES.md
           fi
           
-          echo "notes_path=RELEASE_NOTES.md" >> $GITHUB_OUTPUT
+          # Output multiline string to GITHUB_OUTPUT
+          {
+            echo 'release_body<<EOF'
+            cat RELEASE_NOTES.md
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
 
       - uses: tauri-apps/tauri-action@v0
         env:
@@ -69,7 +75,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'App v__VERSION__'
-          bodyPath: ${{ steps.release_notes.outputs.notes_path }}
+          releaseBody: ${{ steps.release_notes.outputs.release_body }}
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
