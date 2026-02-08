@@ -1,49 +1,49 @@
-# Pre-commit Workflow
+# Pre-commit Workflow with Auto-Format
 
-## How It Works Now
+## How It Works
 
-The pre-commit hook will **block your commit** if any formatting or linting issues are detected. This ensures all commits contain properly formatted code from the start.
+The pre-commit hook uses Lefthook's `stage_fixed: false` option:
+
+1. **Automatically formats** your staged files
+2. **Does NOT auto-stage** the formatted files  
+3. **Commit fails** because of unstaged changes
+4. **You review, stage, and commit again**
 
 ## Workflow
 
-1. **Make your changes** to the code
-2. **Stage your files**: `git add .`
-3. **Try to commit**: `git commit -m "your message"`
-4. **If the commit fails** due to formatting issues:
-   - The hook will show you what needs to be fixed
-   - Run the formatter manually: `bun x @biomejs/biome check --write .`
-   - Stage the formatted files: `git add .`
-   - Commit again: `git commit -m "your message"`
+```bash
+# 1. Make your changes and stage them
+git add src/MyComponent.tsx
+
+# 2. Try to commit
+git commit -m "Add new feature"
+
+# 🔧 Lefthook runs formatter
+# ✅ Files get formatted
+# ❌ Commit fails - formatted files not staged
+
+# 3. Review what was formatted
+git diff
+
+# 4. Stage the formatted files
+git add .
+
+# 5. Commit again
+git commit -m "Add new feature"
+# ✅ Success! One clean commit with properly formatted code
+```
 
 ## Benefits
 
-- ✅ Only one commit with properly formatted code
-- ✅ No more double commits (unformatted + auto-formatted)
-- ✅ Explicit formatting step helps you see what changed
-- ✅ Cleaner git history
+✅ **Automatic formatting** - No need to remember to format  
+✅ **Prevents double commits** - Only one commit, already formatted  
+✅ **Review changes** - You see what was formatted before committing  
+✅ **Native solution** - Uses Lefthook's built-in feature  
 
-## Manual Formatting Commands
+## Key Setting
 
-Format all files:
-```bash
-bun x @biomejs/biome check --write .
+```yaml
+stage_fixed: false  # This prevents auto-staging formatted files
 ```
 
-Format specific files:
-```bash
-bun x @biomejs/biome check --write src/components/Sidebar.tsx
-```
-
-Check without fixing (what pre-commit does):
-```bash
-bun x @biomejs/biome check --error-on-warnings .
-```
-
-## Type Checking
-
-The pre-commit hook also runs TypeScript type checking. If types fail:
-```bash
-bun run type-check
-```
-
-Fix any type errors before committing.
+This ensures the commit fails if formatting changes were made, giving you a chance to review and stage them explicitly.
