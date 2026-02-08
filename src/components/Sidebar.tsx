@@ -48,21 +48,20 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
     settings: { label: t("navigation.settings"), icon: Settings },
   };
 
-  // Filter and sort items based on order and visibility, ensuring settings is always last
-  const displayItems = [
-    ...moduleOrder
-      .filter((id) => {
-        const normalizedId = id.toLowerCase();
-        // Use ?? true to show modules by default if not explicitly hidden in settings
-        const isVisible = modules[id] ?? modules[normalizedId] ?? true;
-        return isVisible && moduleConfig[normalizedId];
-      })
-      .map((id) => {
-        const normalizedId = id.toLowerCase();
-        return { id: normalizedId, ...moduleConfig[normalizedId] };
-      }),
-    { id: "settings", ...moduleConfig.settings }, // Always append settings at the end
-  ];
+  // Filter and sort items based on order and visibility, excluding settings
+  const displayItems = moduleOrder
+    .filter((id) => {
+      const normalizedId = id.toLowerCase();
+      // Exclude settings from main nav
+      if (normalizedId === "settings") return false;
+      // Use ?? true to show modules by default if not explicitly hidden in settings
+      const isVisible = modules[id] ?? modules[normalizedId] ?? true;
+      return isVisible && moduleConfig[normalizedId];
+    })
+    .map((id) => {
+      const normalizedId = id.toLowerCase();
+      return { id: normalizedId, ...moduleConfig[normalizedId] };
+    });
 
   return (
     <motion.aside
@@ -75,7 +74,7 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
         className={`h-16 flex items-center border-b text-primary font-bold text-lg transition-all duration-300 ${isCollapsed ? "justify-center px-0" : "justify-between px-4"} `}
       >
         <AnimatePresence>
-          {!isCollapsed && (
+          {isCollapsed ? null : (
             <motion.div
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
@@ -105,10 +104,9 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
             type="button"
             className={`
               w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors relative
-              ${
-                currentView === item.id
-                  ? "bg-primary/10 text-primary shadow-sm"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              ${currentView === item.id
+                ? "bg-primary/10 text-primary shadow-sm"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }
               ${isCollapsed ? "justify-center" : ""}
             `}
@@ -116,7 +114,7 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
           >
             <item.icon size={20} className="shrink-0" />
             <AnimatePresence>
-              {!isCollapsed && (
+              {isCollapsed ? null : (
                 <motion.span
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: "auto" }}
@@ -131,17 +129,48 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
         ))}
       </nav>
 
+      {/* Settings Button */}
+      <div className="p-2 border-t">
+        <button
+          onClick={() => onChangeView("settings")}
+          type="button"
+          className={`
+            w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors relative
+            ${currentView === "settings"
+              ? "bg-primary/10 text-primary shadow-sm"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }
+            ${isCollapsed ? "justify-center" : ""}
+          `}
+          title={isCollapsed ? moduleConfig.settings.label : undefined}
+        >
+          <Settings size={20} className="shrink-0" />
+          <AnimatePresence>
+            {isCollapsed ? null : (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
+                className="whitespace-nowrap overflow-hidden"
+              >
+                {moduleConfig.settings.label}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
+      </div>
+
       {/* Version Footer */}
       <div className="p-3 border-t bg-muted/30">
         <AnimatePresence>
-          {!isCollapsed ? (
+          {isCollapsed ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="text-[10px] text-muted-foreground text-center"
             >
-              RestHelper v1.0.0
+              v1.0
             </motion.div>
           ) : (
             <motion.div
@@ -150,7 +179,7 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
               exit={{ opacity: 0 }}
               className="text-[10px] text-muted-foreground text-center"
             >
-              v1.0
+              RestHelper v1.0.0
             </motion.div>
           )}
         </AnimatePresence>
