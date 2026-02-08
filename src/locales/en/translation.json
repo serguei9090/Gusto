@@ -119,6 +119,8 @@
       "name": "Enter a descriptive name for this ingredient. This will be used throughout the system for identification.",
       "category": "Select the primary category this ingredient belongs to. This helps with organization and filtering.",
       "currentPrice": "The current purchase price for this ingredient from your supplier. This is used to calculate recipe costs.",
+      "pricePerUnit": "The cost per single unit of measure. For example, if you buy in bulk but use smaller portions, this helps calculate exact recipe costs.",
+      "currency": "Select the currency for this ingredient's pricing. This will be converted to your base currency for calculations.",
       "unitOfMeasure": "The standard unit you use to measure this ingredient (e.g., kg, lbs, liters, pieces).",
       "currentStock": "The current quantity of this ingredient you have on hand in your inventory.",
       "minStockLevel": "Set a minimum stock level. You'll be alerted when inventory falls below this amount.",
@@ -150,6 +152,16 @@
       "recipeName": "e.g. Margherita Pizza",
       "briefOverview": "Brief overview..."
     },
+    "help": {
+      "name": "Enter a memorable name for this recipe. This will appear on your menu and reports.",
+      "category": "Classify this recipe to help with menu organization (e.g., Appetizer, Main Course, Dessert).",
+      "description": "Provide a brief description of this dish. This can be used for menu descriptions or internal notes.",
+      "servings": "Number of portions this recipe produces. Used to calculate per-serving costs.",
+      "prepTime": "Estimated preparation time in minutes. Helps with kitchen scheduling and labor cost calculations.",
+      "sellingPrice": "The menu price for this dish. Used to calculate profit margins.",
+      "targetCostPercentage": "Your ideal food cost as a percentage of selling price (e.g., 30%). The system will alert you if actual costs exceed this.",
+      "wasteBuffer": "Add a percentage to account for ingredient waste, trimming, or spillage (e.g., 5-10%). This ensures more accurate cost calculations."
+    },
     "sections": {
       "basicInfo": "Basic Information",
       "financials": "Financials",
@@ -169,7 +181,15 @@
     "searchPlaceholder": "Search inventory...",
     "totalItems": "Total Items",
     "activeIngredients": "Active ingredients",
-    "itemsNeedingAttention": "Items needing attention"
+    "itemsNeedingAttention": "Items needing attention",
+    "help": {
+      "transactionType": "Choose the type of stock movement: Purchase adds stock, Usage/Waste subtract stock, and Adjustment sets the exact count.",
+      "quantity": "Enter the amount of stock being added, removed, or set. Use the ingredient's base unit of measure.",
+      "costPerUnit": "The price paid per unit for this transaction. For purchases, this updates the ingredient cost. For usage/waste, it's used for reporting.",
+      "currency": "The currency for this transaction's costs. Multi-currency transactions are automatically converted for reporting.",
+      "reference": "Optional reference number or invoice ID for tracking purposes (e.g., supplier invoice numbers).",
+      "notes": "Additional context about this transaction, such as reasons for adjustments or waste."
+    }
   },
   "suppliers": {
     "title": "Suppliers",
@@ -182,6 +202,14 @@
       "phone": "Phone",
       "address": "Address",
       "paymentTerms": "Payment Terms"
+    },
+    "help": {
+      "name": "Enter the business name of this supplier. This helps you identify them in orders and reports.",
+      "contactPerson": "The primary person to contact at this supplier for orders and inquiries.",
+      "email": "Supplier's email address for order confirmations and communications.",
+      "phone": "Primary phone number to reach this supplier for urgent matters or order questions.",
+      "address": "Physical or mailing address of the supplier. Useful for delivery tracking and records.",
+      "paymentTerms": "Agreed payment arrangement (e.g., Net 30, COD, or credit terms). Helps with cash flow planning."
     },
     "subtitle": "Manage your ingredient sources and contacts.",
     "searchPlaceholder": "Search suppliers...",

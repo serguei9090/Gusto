@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FieldHelp } from "@/components/ui/field-help";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -196,8 +197,9 @@ export const RecipeForm = ({
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">
+              <Label htmlFor="name" className="flex items-center gap-2">
                 Recipe Name <span className="text-destructive">*</span>
+                <FieldHelp helpText={t("recipes.help.name")} />
               </Label>
               <Input
                 id="name"
@@ -213,7 +215,10 @@ export const RecipeForm = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
+                <Label htmlFor="category" className="flex items-center gap-2">
+                  Category
+                  <FieldHelp helpText={t("recipes.help.category")} />
+                </Label>
                 <select
                   {...register("category")}
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -227,8 +232,9 @@ export const RecipeForm = ({
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="servings">
+                <Label htmlFor="servings" className="flex items-center gap-2">
                   Servings <span className="text-destructive">*</span>
+                  <FieldHelp helpText={t("recipes.help.servings")} />
                 </Label>
                 <Input
                   type="number"
@@ -245,7 +251,10 @@ export const RecipeForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="prepTime">Prep Time (mins)</Label>
+              <Label htmlFor="prepTime" className="flex items-center gap-2">
+                Prep Time (mins)
+                <FieldHelp helpText={t("recipes.help.prepTime")} />
+              </Label>
               <Input
                 type="number"
                 id="prepTime"
@@ -254,7 +263,10 @@ export const RecipeForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="flex items-center gap-2">
+                Description
+                <FieldHelp helpText={t("recipes.help.description")} />
+              </Label>
               <Textarea
                 id="description"
                 {...register("description")}
@@ -272,11 +284,12 @@ export const RecipeForm = ({
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="space-y-2">
-              <Label htmlFor="sellingPrice">
+              <Label htmlFor="sellingPrice" className="flex items-center gap-2">
                 {t("recipes.fields.sellingPrice")}
                 <span className="ml-2 text-[10px] text-muted-foreground uppercase opacity-70">
                   (Optional)
                 </span>
+                <FieldHelp helpText={t("recipes.help.sellingPrice")} />
               </Label>
               <Input
                 type="number"
@@ -301,7 +314,10 @@ export const RecipeForm = ({
 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <Label htmlFor="targetCost">Target Food Cost %</Label>
+                <Label htmlFor="targetCost" className="flex items-center gap-2">
+                  Target Food Cost %
+                  <FieldHelp helpText={t("recipes.help.targetCostPercentage")} />
+                </Label>
                 <span className="text-[10px] font-mono text-muted-foreground">
                   Default: 25%
                 </span>
@@ -332,7 +348,10 @@ export const RecipeForm = ({
 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <Label htmlFor="wasteBuffer">Waste Buffer %</Label>
+                <Label htmlFor="wasteBuffer" className="flex items-center gap-2">
+                  Waste Buffer %
+                  <FieldHelp helpText={t("recipes.help.wasteBuffer")} />
+                </Label>
                 <span className="text-[10px] font-mono text-muted-foreground">
                   e.g. 5%
                 </span>

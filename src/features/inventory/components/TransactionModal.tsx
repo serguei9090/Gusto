@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FieldHelp } from "@/components/ui/field-help";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,6 +25,7 @@ import type { Ingredient, TransactionType } from "@/features/inventory/types";
 import { CurrencySelector } from "@/features/settings/components/CurrencySelector";
 import type { Currency } from "@/utils/currency";
 import { createTransactionSchema } from "@/utils/validators";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TransactionModalProps {
   ingredient: Ingredient;
@@ -41,6 +43,7 @@ export function TransactionModal({
   onSubmit,
   isLoading,
 }: TransactionModalProps) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -93,8 +96,9 @@ export function TransactionModal({
           <div className="grid gap-4 py-2">
             {/* Transaction Type */}
             <div className="space-y-2">
-              <Label htmlFor="transactionType">
+              <Label htmlFor="transactionType" className="flex items-center gap-2">
                 Transaction Type <span className="text-destructive">*</span>
+                <FieldHelp helpText={t("inventory.help.transactionType")} />
               </Label>
               <Select
                 onValueChange={(val) =>
@@ -123,9 +127,10 @@ export function TransactionModal({
 
             {/* Quantity */}
             <div className="space-y-2">
-              <Label htmlFor="quantity">
+              <Label htmlFor="quantity" className="flex items-center gap-2">
                 Quantity ({ingredient.unitOfMeasure}){" "}
                 <span className="text-destructive">*</span>
+                <FieldHelp helpText={t("inventory.help.quantity")} />
               </Label>
               <Input
                 id="quantity"
@@ -142,8 +147,9 @@ export function TransactionModal({
 
             {/* Price Per Unit */}
             <div className="space-y-2">
-              <Label htmlFor="costPerUnit">
+              <Label htmlFor="costPerUnit" className="flex items-center gap-2">
                 Price per Unit ($) <span className="text-destructive">*</span>
+                <FieldHelp helpText={t("inventory.help.costPerUnit")} />
               </Label>
               <Input
                 id="costPerUnit"
@@ -155,7 +161,10 @@ export function TransactionModal({
 
             {/* Currency Selector */}
             <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
+              <Label htmlFor="currency" className="flex items-center gap-2">
+                Currency
+                <FieldHelp helpText={t("inventory.help.currency")} />
+              </Label>
               <CurrencySelector
                 value={(watch("currency") as Currency) || "USD"}
                 onChange={(val) => setValue("currency", val as Currency)}
@@ -172,7 +181,10 @@ export function TransactionModal({
 
             {/* Reference */}
             <div className="space-y-2">
-              <Label htmlFor="reference">Reference / Invoice #</Label>
+              <Label htmlFor="reference" className="flex items-center gap-2">
+                Reference / Invoice #
+                <FieldHelp helpText={t("inventory.help.reference")} />
+              </Label>
               <Input
                 id="reference"
                 placeholder="e.g. INV-12345"
@@ -182,7 +194,10 @@ export function TransactionModal({
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes" className="flex items-center gap-2">
+                Notes
+                <FieldHelp helpText={t("inventory.help.notes")} />
+              </Label>
               <Textarea
                 id="notes"
                 placeholder="Reason for adjustment..."

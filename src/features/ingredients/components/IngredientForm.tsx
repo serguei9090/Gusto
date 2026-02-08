@@ -208,9 +208,10 @@ export const IngredientForm = ({
             name="pricePerUnit"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
+                <FormLabel className="flex items-center gap-2">
                   {t("ingredients.fields.pricePerUnit")}{" "}
                   <span className="text-destructive">*</span>
+                  <FieldHelp helpText={t("ingredients.help.pricePerUnit")} />
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -238,7 +239,10 @@ export const IngredientForm = ({
           name="currency"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t("common.labels.currency")}</FormLabel>
+              <FormLabel className="flex items-center gap-2">
+                {t("common.labels.currency")}
+                <FieldHelp helpText={t("ingredients.help.currency")} />
+              </FormLabel>
               <FormControl>
                 <CurrencySelector
                   value={field.value ?? "USD"}

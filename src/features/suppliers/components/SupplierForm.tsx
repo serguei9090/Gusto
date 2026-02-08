@@ -10,9 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FieldHelp } from "@/components/ui/field-help";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "@/hooks/useTranslation";
 import type { Supplier, SupplierFormData } from "@/features/suppliers/types";
 import { createSupplierSchema } from "@/utils/validators";
 
@@ -31,6 +33,7 @@ export function SupplierForm({
   onSubmit,
   isLoading,
 }: Readonly<SupplierFormProps>) {
+  const { t } = useTranslation();
   const {
     register,
     handleSubmit,
@@ -95,8 +98,9 @@ export function SupplierForm({
           <div className="grid gap-4 py-2">
             {/* Name */}
             <div className="space-y-2">
-              <Label htmlFor="name">
+              <Label htmlFor="name" className="flex items-center gap-2">
                 Supplier Name <span className="text-destructive">*</span>
+                <FieldHelp helpText={t("suppliers.help.name")} />
               </Label>
               <Input
                 id="name"
@@ -112,7 +116,10 @@ export function SupplierForm({
 
             {/* Contact Person */}
             <div className="space-y-2">
-              <Label htmlFor="contactPerson">Contact Person</Label>
+              <Label htmlFor="contactPerson" className="flex items-center gap-2">
+                Contact Person
+                <FieldHelp helpText={t("suppliers.help.contactPerson")} />
+              </Label>
               <Input
                 id="contactPerson"
                 placeholder="e.g. John Doe"
@@ -123,7 +130,10 @@ export function SupplierForm({
             {/* Email & Phone Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="flex items-center gap-2">
+                  Email
+                  <FieldHelp helpText={t("suppliers.help.email")} />
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -137,7 +147,10 @@ export function SupplierForm({
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone" className="flex items-center gap-2">
+                  Phone
+                  <FieldHelp helpText={t("suppliers.help.phone")} />
+                </Label>
                 <Input
                   id="phone"
                   placeholder="+1 234 567 890"
@@ -148,7 +161,10 @@ export function SupplierForm({
 
             {/* Address */}
             <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="address" className="flex items-center gap-2">
+                Address
+                <FieldHelp helpText={t("suppliers.help.address")} />
+              </Label>
               <Input
                 id="address"
                 placeholder="Full business address"
@@ -159,7 +175,10 @@ export function SupplierForm({
             {/* Payment Terms & Account Number Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="paymentTerms">Payment Terms</Label>
+                <Label htmlFor="paymentTerms" className="flex items-center gap-2">
+                  Payment Terms
+                  <FieldHelp helpText={t("suppliers.help.paymentTerms")} />
+                </Label>
                 <Input
                   id="paymentTerms"
                   placeholder="e.g. Net 30, COD"
