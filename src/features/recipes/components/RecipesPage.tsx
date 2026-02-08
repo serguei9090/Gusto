@@ -1,6 +1,13 @@
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/hooks/useTranslation";
 import type { Recipe } from "@/types/ingredient.types";
@@ -39,17 +46,16 @@ export const RecipesPage = () => {
     fetchRecipes();
   }, [fetchRecipes]);
 
-  // Handle ESC key to close modals
+  // Handle ESC key to close detail modal (Dialog handles its own ESC)
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        handleCloseForm();
         setViewingRecipeId(null);
       }
     };
     globalThis.addEventListener("keydown", handleEsc);
     return () => globalThis.removeEventListener("keydown", handleEsc);
-  }, [handleCloseForm]);
+  }, []);
 
   const filteredRecipes = recipes.filter((r) =>
     r.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -122,42 +128,40 @@ export const RecipesPage = () => {
         />
       </div>
 
-      {isFormOpen && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-4xl bg-background border rounded-lg shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="p-6 border-b flex items-center justify-between">
-              <h2 className="text-lg font-semibold">
-                {editingRecipeId
-                  ? t("recipes.editRecipe")
-                  : t("recipes.addRecipe")}
-              </h2>
-              <Button variant="ghost" size="icon" onClick={handleCloseForm}>
-                <X className="h-4 w-4" />
-              </Button>
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingRecipeId
+                ? t("recipes.editRecipe")
+                : t("recipes.addRecipe")}
+            </DialogTitle>
+            <DialogDescription>
+              {editingRecipeId
+                ? "Update the recipe details below."
+                : "Fill out the form below to create a new recipe."}
+            </DialogDescription>
+          </DialogHeader>
+          {editingRecipeId && isLoading && !selectedRecipe ? (
+            <div className="flex items-center justify-center h-40">
+              <p className="text-muted-foreground italic">
+                Loading recipe details...
+              </p>
             </div>
-            <div className="p-6 overflow-y-auto flex-1">
-              {editingRecipeId && isLoading && !selectedRecipe ? (
-                <div className="flex items-center justify-center h-40">
-                  <p className="text-muted-foreground italic">
-                    Loading recipe details...
-                  </p>
-                </div>
-              ) : (
-                <RecipeForm
-                  onSubmit={handleCreateOrUpdate}
-                  initialData={
-                    (editingRecipeId
-                      ? selectedRecipe
-                      : undefined) as unknown as Partial<RecipeFormData>
-                  }
-                  onCancel={handleCloseForm}
-                  isLoading={isLoading}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+          ) : (
+            <RecipeForm
+              onSubmit={handleCreateOrUpdate}
+              initialData={
+                (editingRecipeId
+                  ? selectedRecipe
+                  : undefined) as unknown as Partial<RecipeFormData>
+              }
+              onCancel={handleCloseForm}
+              isLoading={isLoading}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {viewingRecipeId && (
         <RecipeDetailModal
