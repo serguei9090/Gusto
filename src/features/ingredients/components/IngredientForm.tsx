@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { FieldHelp } from "@/components/ui/field-help";
 import {
   Form,
   FormControl,
@@ -86,9 +87,10 @@ export const IngredientForm = ({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
+              <FormLabel className="flex items-center gap-2">
                 {t("common.labels.name")}{" "}
                 <span className="text-destructive">*</span>
+                <FieldHelp helpText={t("ingredients.help.name")} />
               </FormLabel>
               <FormControl>
                 <Input
@@ -108,9 +110,10 @@ export const IngredientForm = ({
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
+                <FormLabel className="flex items-center gap-2">
                   {t("common.labels.category")}{" "}
                   <span className="text-destructive">*</span>
+                  <FieldHelp helpText={t("ingredients.help.category")} />
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
@@ -139,9 +142,10 @@ export const IngredientForm = ({
             name="unitOfMeasure"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
+                <FormLabel className="flex items-center gap-2">
                   {t("ingredients.fields.unitOfMeasure")}{" "}
                   <span className="text-destructive">*</span>
+                  <FieldHelp helpText={t("ingredients.help.unitOfMeasure")} />
                 </FormLabel>
                 <Select
                   onValueChange={field.onChange}
@@ -174,9 +178,10 @@ export const IngredientForm = ({
             name="currentPrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
+                <FormLabel className="flex items-center gap-2">
                   {t("ingredients.fields.currentPrice")}{" "}
                   <span className="text-destructive">*</span>
+                  <FieldHelp helpText={t("ingredients.help.currentPrice")} />
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -251,7 +256,10 @@ export const IngredientForm = ({
             name="currentStock"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("ingredients.fields.currentStock")}</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  {t("ingredients.fields.currentStock")}
+                  <FieldHelp helpText={t("ingredients.help.currentStock")} />
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -277,7 +285,10 @@ export const IngredientForm = ({
             name="minStockLevel"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("ingredients.fields.minStockLevel")}</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  {t("ingredients.fields.minStockLevel")}
+                  <FieldHelp helpText={t("ingredients.help.minStockLevel")} />
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -300,7 +311,10 @@ export const IngredientForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="supplierId">{t("ingredients.fields.supplier")}</Label>
+          <Label htmlFor="supplierId" className="flex items-center gap-2">
+            {t("ingredients.fields.supplier")}
+            <FieldHelp helpText={t("ingredients.help.supplier")} />
+          </Label>
           <select
             id="supplierId"
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"

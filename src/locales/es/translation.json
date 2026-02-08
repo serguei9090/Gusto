@@ -115,6 +115,15 @@
       "supplier": "Proveedor",
       "unitOfMeasure": "Unidad de Medida"
     },
+    "help": {
+      "name": "Ingrese un nombre descriptivo para este ingrediente. Este se utilizará en todo el sistema para su identificación.",
+      "category": "Seleccione la categoría principal a la que pertenece este ingrediente. Esto ayuda con la organización y el filtrado.",
+      "currentPrice": "El precio de compra actual de este ingrediente de su proveedor. Esto se utiliza para calcular los costos de las recetas.",
+      "unitOfMeasure": "La unidad estándar que utiliza para medir este ingredient (por ejemplo, kg, lbs, litros, piezas).",
+      "currentStock": "La cantidad actual de este ingrediente que tiene disponible en su inventario.",
+      "minStockLevel": "Establezca un nivel mínimo de stock. Se le alertará cuando el inventario caiga por debajo de esta cantidad.",
+      "supplier": "Seleccione el proveedor principal de este ingrediente. Puede agregar proveedores en la sección de Proveedores."
+    },
     "placeholders": {
       "searchIngredients": "Buscar ingredientes...",
       "ingredientName": "ej. Salsa de Tomate"

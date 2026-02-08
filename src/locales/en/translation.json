@@ -115,6 +115,15 @@
       "supplier": "Supplier",
       "unitOfMeasure": "Unit of Measure"
     },
+    "help": {
+      "name": "Enter a descriptive name for this ingredient. This will be used throughout the system for identification.",
+      "category": "Select the primary category this ingredient belongs to. This helps with organization and filtering.",
+      "currentPrice": "The current purchase price for this ingredient from your supplier. This is used to calculate recipe costs.",
+      "unitOfMeasure": "The standard unit you use to measure this ingredient (e.g., kg, lbs, liters, pieces).",
+      "currentStock": "The current quantity of this ingredient you have on hand in your inventory.",
+      "minStockLevel": "Set a minimum stock level. You'll be alerted when inventory falls below this amount.",
+      "supplier": "Select the primary supplier for this ingredient. You can add suppliers in the Suppliers section."
+    },
     "placeholders": {
       "searchIngredients": "Search ingredients...",
       "ingredientName": "e.g. Tomato Sauce"
