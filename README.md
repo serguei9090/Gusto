@@ -1,20 +1,26 @@
-# RestaurantManage
+# Gusto - Restaurant Manager
 
-A standalone Windows desktop application for restaurant recipe costing and inventory management.
+[![GitHub Release](https://img.shields.io/github/v/release/serguei9090/Gusto?style=flat-square&color=blue)](https://github.com/serguei9090/Gusto/releases)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/serguei9090/Gusto/ci.yml?branch=main&style=flat-square)](https://github.com/serguei9090/Gusto/actions/workflows/ci.yml)
+
+A premium desktop application for restaurant recipe costing, inventory management, and food cost analysis.
+
+## Features
+
+- **Recipe Costing**: Real-time calculation of dish costs, profit margins, and suggested pricing.
+- **Inventory Tracking**: Manage stock levels with weighted average cost (WAC) tracking.
+- **Prep Sheets**: Aggregate ingredient needs across multiple recipes for efficient preparation.
+- **Multi-Currency Support**: Handle ingredient pricing in different currencies (USD, EUR, CUP).
+- **Offline First**: All data is stored locally on your machine for privacy and speed.
 
 ## Tech Stack
 
-- **Desktop Framework**: Tauri 2.x
-- **Frontend**: React 19 + TypeScript (strict mode)
-- **Animation**: Framer Motion
-- **Build Tool**: Vite
-- **Package Manager**: Bun
-- **Database**: SQLite with Tauri SQL Plugin
-- **State Management**: Zustand
-- **Styling**: CSS Modules + CSS Variables
-- **Linting/Formatting**: Biome
-- **Git Hooks**: Lefthook
-- **Testing**: Vitest + Playwright
+- **Framework**: [Tauri 2.x](https://tauri.app/) (Rust backend + Web frontend)
+- **Frontend**: React 19 + TypeScript + Framer Motion
+- **Build Tool**: Vite + Bun
+- **Database**: SQLite (via Tauri SQL Plugin) + Kysely
+- **Styling**: Tailwind CSS 4.0
+- **Quality**: Biome (Linting/Formatting) + Vitest + Playwright
 
 ## Prerequisites
 
@@ -22,7 +28,7 @@ A standalone Windows desktop application for restaurant recipe costing and inven
 - [Rust](https://www.rust-lang.org/) (for Tauri)
 - Windows 10/11
 
-##  Setup
+## Setup & Development
 
 1. **Install dependencies**:
    ```bash
@@ -34,61 +40,28 @@ A standalone Windows desktop application for restaurant recipe costing and inven
    cp .env.example .env
    ```
 
-## Development
+3. **Start development**:
+   ```bash
+   bun run tauri:dev  # Launch desktop app with hot-reload
+   ```
 
+## Workflow & Quality
+
+Before pushing changes, ensure all checks pass:
 ```bash
-# Start development server (hot reload)
-bun run tauri:dev  # Runs App + Backend
-bun run dev        # Runs Frontend only (Browser)
-
-# Type checking
-bun run type-check
-
-# Linting
-bun run lint
-bun run lint:fix
-
-# Format code
-bun run format
+bun run lint        # Code quality check
+bun run type-check  # TypeScript validation
+bun run test:unit   # Unit tests
 ```
 
-## Database Management
+---
 
-Database is automatically initialized on app start using `@tauri-apps/plugin-sql`.
-Schema definition: `src/services/database/client.ts`.
+## Releases
 
-## Build
+To download the latest stable version, visit the [Releases Page](https://github.com/serguei9090/Gusto/releases).
 
-```bash
-# Build production bundle
-bun run build
-```
-
-## Project Structure
-
-```
-src/
-├── components/          # Atomic Design components
-│   ├── atoms/          # Basic elements
-│   ├── molecules/      # Component combinations
-│   ├── organisms/      # Complex sections
-│   ├── templates/      # Page layouts
-│   └── pages/          # Complete pages
-├── services/           # Business logic & data access
-│   └── database/       # SQL Plugin client & schema
-├── store/              # Zustand stores
-├── hooks/              # Custom React hooks
-├── utils/              # Utility functions
-├── types/              # TypeScript types
-└── styles/             # Global styles & design tokens
-```
-
-## Documentation
-
-- **Project Plan**: `docs/plan/PROJECT_PLAN.md`
-- **Rules**: `.agent/rules/*.md`
-- **Skills**: `.agent/skills/*/SKILL.md`
+**Note**: This is a standalone Windows application. Download the `.msi` or `.exe` installer from the assets section of the latest release.
 
 ## License
 
-Private - All Rights Reserved
+Private - All Rights Reserved © 2026

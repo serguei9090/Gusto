@@ -5,7 +5,7 @@ permissions:
 on:
   push:
     tags:
-      - 'v*'
+        - 'v*'
 
 jobs:
   build-tauri:
@@ -46,13 +46,23 @@ jobs:
       - name: install frontend dependencies
         run: bun install
 
+      - name: Extract Release Notes
+        id: release_notes
+        shell: bash
+        run: |
+          # Extract content of the latest version from CHANGELOG.md
+          # This grabs everything between the first '##' header and the next '##' header
+          VERSION="${GITHUB_REF_NAME#v}"
+          sed -n "/## \[$VERSION\]/,/## /p" CHANGELOG.md | sed '$d' > RELEASE_NOTES.md
+          echo "notes_path=RELEASE_NOTES.md" >> $GITHUB_OUTPUT
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: 'App v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
+          bodyPath: ${{ steps.release_notes.outputs.notes_path }}
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}

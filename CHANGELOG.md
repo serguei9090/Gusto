@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2026-02-08
+
+### Improved
+- Automated release notes extraction from CHANGELOG.md.
+- Updated README with badges and project branding.
+- Fixed Linux-specific dependency resolution in CI.
+
+
 ## [1.0.1] - 2026-02-08
 
 ### Fixed
