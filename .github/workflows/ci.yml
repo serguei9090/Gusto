@@ -22,8 +22,13 @@ jobs:
       - name: Install dependencies
         run: rm -f bun.lock && bun install
         
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: latest
+          
       - name: Formatter Check
-        run: bun run lint
+        run: biome check .
         
       - name: Type Check
         run: bun run type-check

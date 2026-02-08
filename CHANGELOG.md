@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] - 2026-02-08
+
+### Fixed
+- Resolved Biome `MODULE_NOT_FOUND` error in CI by using the official `setup-biome` action.
+- Ensured cross-platform compatibility for linting process.
+
+
 ## [1.0.2] - 2026-02-08
 
 ### Improved
