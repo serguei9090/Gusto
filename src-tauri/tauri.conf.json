@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Gusto",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "identifier": "com.gusto.app",
   "build": {
     "frontendDist": "../dist",
