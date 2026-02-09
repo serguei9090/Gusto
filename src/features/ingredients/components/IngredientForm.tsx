@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -22,15 +22,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CurrencySelector } from "@/features/settings/components/CurrencySelector";
+import { useConfigStore } from "@/features/settings/store/config.store";
 import { useCurrencyStore } from "@/features/settings/store/currency.store";
 import { useSuppliersStore } from "@/features/suppliers/store/suppliers.store";
 import { useTranslation } from "@/hooks/useTranslation";
-import {
-  createIngredientSchema,
-  ingredientCategorySchema,
-  unitOfMeasureSchema,
-} from "@/utils/validators";
+import { createIngredientSchema } from "@/utils/validators";
 import type { CreateIngredientInput } from "../types";
+import { UnitSelect } from "./UnitSelect";
 
 // Infer directly from schema to ensure match
 type FormSchema = z.infer<typeof createIngredientSchema>;
@@ -40,6 +38,7 @@ interface IngredientFormProps {
   onSubmit: (data: CreateIngredientInput) => void;
   onCancel?: () => void;
   isLoading?: boolean;
+  isEdit?: boolean;
 }
 
 export const IngredientForm = ({
@@ -47,10 +46,13 @@ export const IngredientForm = ({
   onSubmit,
   onCancel,
   isLoading,
+  isEdit = false,
 }: IngredientFormProps) => {
   const { t } = useTranslation();
   const { suppliers, fetchSuppliers } = useSuppliersStore();
   const { initialize: initializeCurrency } = useCurrencyStore();
+  const { getIngredientCategories } = useConfigStore();
+  const categories = getIngredientCategories();
 
   const form = useForm<FormSchema>({
     // biome-ignore lint/suspicious/noExplicitAny: Hook Form resolver type mismatch with strict Zod schemas is a known limitation
@@ -59,13 +61,56 @@ export const IngredientForm = ({
       name: "",
       currentStock: 0,
       minStockLevel: 0,
-      currentPrice: 0,
-      pricePerUnit: 0,
       currency: "USD",
       notes: "",
+      purchaseUnit: "",
+      conversionRatio: 1,
       ...defaultValues,
+      // Force 2 decimal places for display to avoid high-precision values from DB
+      currentPrice:
+        defaultValues?.currentPrice !== undefined
+          ? Number(defaultValues.currentPrice.toFixed(2))
+          : (defaultValues?.currentPrice ?? 0),
+      pricePerUnit:
+        defaultValues?.pricePerUnit !== undefined
+          ? Number(defaultValues.pricePerUnit.toFixed(2))
+          : (defaultValues?.pricePerUnit ?? 0),
     },
   });
+
+  // State for Pricing Mode: "unit" or "package"
+  const [pricingMode, setPricingMode] = useState<"unit" | "package">(
+    defaultValues?.purchaseUnit ? "package" : "unit",
+  );
+
+  // Auto-calculate Price Per Unit when in Package Mode
+  const currentPrice = form.watch("currentPrice");
+  const conversionRatio = form.watch("conversionRatio");
+
+  useEffect(() => {
+    if (pricingMode === "package") {
+      const price = Number(currentPrice) || 0;
+      const ratio = Number(conversionRatio) || 1;
+      if (ratio > 0) {
+        const calculated = price / ratio;
+        // Avoid infinite loop if value is same
+        if (Math.abs(form.getValues("pricePerUnit") - calculated) > 0.001) {
+          form.setValue("pricePerUnit", Number(calculated.toFixed(2)));
+        }
+      }
+    }
+  }, [currentPrice, conversionRatio, pricingMode, form]);
+
+  // Reset Purchase Unit fields when switching to Unit Mode
+  useEffect(() => {
+    if (pricingMode === "unit") {
+      const currentVal = form.getValues("conversionRatio");
+      if (currentVal !== 1) {
+        form.setValue("conversionRatio", 1);
+        form.setValue("purchaseUnit", "");
+      }
+    }
+  }, [pricingMode, form]);
 
   useEffect(() => {
     if (suppliers.length === 0) fetchSuppliers();
@@ -125,9 +170,13 @@ export const IngredientForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {ingredientCategorySchema.options.map((category) => (
+                    {categories.map((category) => (
                       <SelectItem key={category} value={category}>
-                        {t(`common.categories.${category}`)}
+                        {t(`common.categories.${category}`) !==
+                        `common.categories.${category}`
+                          ? t(`common.categories.${category}`)
+                          : category.charAt(0).toUpperCase() +
+                            category.slice(1)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -147,91 +196,182 @@ export const IngredientForm = ({
                   <span className="text-destructive">*</span>
                   <FieldHelp helpText={t("ingredients.help.unitOfMeasure")} />
                 </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={t("ingredients.fields.unitOfMeasure")}
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {unitOfMeasureSchema.options.map((unit) => (
-                      <SelectItem key={unit} value={unit}>
-                        {unit}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <UnitSelect
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    placeholder={t("ingredients.fields.unitOfMeasure")}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="currentPrice"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  {t("ingredients.fields.currentPrice")}{" "}
-                  <span className="text-destructive">*</span>
-                  <FieldHelp helpText={t("ingredients.help.currentPrice")} />
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === ""
-                          ? 0
-                          : Number.parseFloat(e.target.value),
-                      )
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        {/* Pricing Section */}
+        <div className="space-y-4 border-t pt-4">
+          <div className="flex items-center justify-between">
+            <Label className="text-base font-semibold">
+              Pricing Configuration
+            </Label>
+            <div className="flex bg-muted p-1 rounded-md">
+              <Button
+                type="button"
+                variant={pricingMode === "unit" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setPricingMode("unit")}
+                className="text-xs px-3 h-7"
+              >
+                Per Base Unit
+              </Button>
+              <Button
+                type="button"
+                variant={pricingMode === "package" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setPricingMode("package")}
+                className="text-xs px-3 h-7"
+              >
+                By Package / Bulk
+              </Button>
+            </div>
+          </div>
 
-          <FormField
-            control={form.control}
-            name="pricePerUnit"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  {t("ingredients.fields.pricePerUnit")}{" "}
-                  <span className="text-destructive">*</span>
-                  <FieldHelp helpText={t("ingredients.help.pricePerUnit")} />
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === ""
-                          ? 0
-                          : Number.parseFloat(e.target.value),
-                      )
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {pricingMode === "package" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/30 p-4 rounded-md border border-border/50">
+              <FormField
+                control={form.control}
+                name="purchaseUnit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      Package Name
+                      {/* {t("ingredients.fields.purchaseUnit")} */}
+                      <span className="text-destructive">*</span>
+                      <FieldHelp helpText="e.g. Box, Case, Bag" />
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g. Case of 12"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="conversionRatio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      Items per Package
+                      {/* {t("ingredients.fields.conversionRatio")} */}
+                      <span className="text-destructive">*</span>
+                      <FieldHelp helpText="How many base units are in this package?" />
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.001"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === ""
+                              ? 0
+                              : Number.parseFloat(e.target.value),
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="currentPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      Package Cost
+                      <span className="text-destructive">*</span>
+                      <FieldHelp helpText="Total cost of the package" />
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === ""
+                              ? 0
+                              : Number.parseFloat(e.target.value),
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex flex-col justify-center space-y-2">
+                <Label className="text-xs text-muted-foreground">
+                  Calculated Price Per Unit
+                </Label>
+                <div className="text-lg font-mono font-bold">
+                  ${form.watch("pricePerUnit")?.toFixed(2) || "0.00"} /{" "}
+                  {form.watch("unitOfMeasure") || "unit"}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {pricingMode === "unit" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="pricePerUnit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      {t("ingredients.fields.pricePerUnit")}{" "}
+                      <span className="text-destructive">*</span>
+                      <FieldHelp
+                        helpText={t("ingredients.help.pricePerUnit")}
+                      />
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          field.onChange(
+                            e.target.value === ""
+                              ? 0
+                              : Number.parseFloat(e.target.value),
+                          );
+                          // In unit mode, currentPrice is same as pricePerUnit
+                          form.setValue("currentPrice", Number(e.target.value));
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
         </div>
 
         <FormField
@@ -269,6 +409,7 @@ export const IngredientForm = ({
                     type="number"
                     step="0.01"
                     {...field}
+                    disabled={isEdit}
                     value={field.value ?? ""}
                     onChange={(e) =>
                       field.onChange(

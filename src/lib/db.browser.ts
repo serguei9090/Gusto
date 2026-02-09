@@ -129,7 +129,7 @@ export const mockDb = {
             if (col === "code" && op === "=") {
               mockCurrencies = mockCurrencies.filter((c) => c.code !== val);
             }
-            return { numUpdatedOrDeletedRows: 1n };
+            return { numAffectedRows: 1n };
           },
         }),
         // biome-ignore lint/suspicious/noExplicitAny: Mock implementation

@@ -1,6 +1,6 @@
 import { Reorder } from "framer-motion";
 import { GripVertical, RotateCcw } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,15 +20,19 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "@/hooks/useTranslation";
 import { AboutDialog } from "./components/AboutDialog";
+import { CategoryConfigModal } from "./components/CategoryConfigModal";
+import { UnitConfigModal } from "./components/UnitConfigModal";
 import { useCurrencyStore } from "./store/currency.store";
 import { useSettingsStore } from "./store/settings.store";
 
 interface SettingsPageProps {
   onNavigateToCurrencySettings?: () => void;
+  onNavigateToAppConfig?: () => void;
 }
 
 export const SettingsPage = ({
   onNavigateToCurrencySettings,
+  onNavigateToAppConfig: _onNavigateToAppConfig,
 }: SettingsPageProps) => {
   const { t, changeLanguage, currentLanguage } = useTranslation();
   const { modules, moduleOrder, toggleModule, reorderModules, resetDefaults } =
@@ -36,6 +40,10 @@ export const SettingsPage = ({
 
   const { currencies, baseCurrency, loadCurrencies, setBaseCurrency } =
     useCurrencyStore();
+
+  const [activeModal, setActiveModal] = useState<
+    "units" | "ingredient_category" | "recipe_category" | null
+  >(null);
 
   useEffect(() => {
     loadCurrencies();
@@ -127,16 +135,6 @@ export const SettingsPage = ({
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="flex justify-end">
-              <Button
-                onClick={onNavigateToCurrencySettings}
-                variant="link"
-                className="text-primary p-0 h-auto"
-              >
-                Advanced Currency & Exchange Rate Management →
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -195,11 +193,96 @@ export const SettingsPage = ({
 
       <Card>
         <CardHeader>
+          <CardTitle>{t("settings.config.title")}</CardTitle>
+          <CardDescription>{t("settings.config.description")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-card/50 hover:bg-muted/30 transition-colors">
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold">
+                  {t("settings.config.units")}
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  {t("settings.config.unitsDesc")}
+                </p>
+              </div>
+              <Button
+                onClick={() => setActiveModal("units")}
+                variant="outline"
+                size="sm"
+              >
+                {t("settings.config.manage")}
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-card/50 hover:bg-muted/30 transition-colors">
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold">
+                  {t("settings.config.ingredientCategories")}
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  {t("settings.config.ingredientCategoriesDesc")}
+                </p>
+              </div>
+              <Button
+                onClick={() => setActiveModal("ingredient_category")}
+                variant="outline"
+                size="sm"
+              >
+                {t("settings.config.manage")}
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-card/50 hover:bg-muted/30 transition-colors">
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold">
+                  {t("settings.config.recipeCategories")}
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  {t("settings.config.recipeCategoriesDesc")}
+                </p>
+              </div>
+              <Button
+                onClick={() => setActiveModal("recipe_category")}
+                variant="outline"
+                size="sm"
+              >
+                {t("settings.config.manage")}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <UnitConfigModal
+        isOpen={activeModal === "units"}
+        onClose={() => setActiveModal(null)}
+      />
+
+      <CategoryConfigModal
+        isOpen={activeModal === "ingredient_category"}
+        onClose={() => setActiveModal(null)}
+        type="ingredient_category"
+        title={t("settings.config.ingredientCategories")}
+        description={t("settings.config.ingredientCategoriesDesc")}
+      />
+
+      <CategoryConfigModal
+        isOpen={activeModal === "recipe_category"}
+        onClose={() => setActiveModal(null)}
+        type="recipe_category"
+        title={t("settings.config.recipeCategories")}
+        description={t("settings.config.recipeCategoriesDesc")}
+      />
+
+      <Card>
+        <CardHeader>
           <CardTitle>About RestHelper</CardTitle>
           <CardDescription>
             View application information, version details, and support resources
           </CardDescription>
-        </CardHeader>{" "}
+        </CardHeader>
         <CardContent>
           <AboutDialog />
         </CardContent>

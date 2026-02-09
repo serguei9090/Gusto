@@ -242,7 +242,7 @@ export function CurrencySettingsPage() {
                       {rate.fromCurrency}
                     </TableCell>
                     <TableCell>{rate.toCurrency}</TableCell>
-                    <TableCell>{rate.rate.toFixed(4)}</TableCell>
+                    <TableCell>{rate.rate.toFixed(2)}</TableCell>
                     <TableCell>{rate.effectiveDate}</TableCell>
                     <TableCell>{rate.source || "-"}</TableCell>
                     <TableCell className="text-right">

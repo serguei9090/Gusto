@@ -99,6 +99,21 @@
       "dragToReorder": "Drag to reorder items in the sidebar.",
       "visible": "Visible",
       "hidden": "Hidden"
+    },
+    "config": {
+      "title": "App Configuration",
+      "description": "Manage various lists used throughout the application.",
+      "help": "Customize units of measure, ingredient categories, and recipe categories.",
+      "units": "Units of Measure",
+      "unitsDesc": "Units for ingredients and recipe quantities (e.g., kg, oz).",
+      "ingredientCategories": "Ingredient Categories",
+      "ingredientCategoriesDesc": "Categories for organizing your pantry and stock.",
+      "recipeCategories": "Recipe Categories",
+      "recipeCategoriesDesc": "Categories for organizing your menu and recipe book.",
+      "manage": "Manage",
+      "standardLibrary": "Standard Library",
+      "myUnits": "My Units",
+      "noUnitsEnabled": "No units enabled. Go to Standard Library to add some."
     }
   },
   "ingredients": {
@@ -113,7 +128,9 @@
       "currentStock": "Current Stock",
       "minStockLevel": "Minimum Stock Level",
       "supplier": "Supplier",
-      "unitOfMeasure": "Unit of Measure"
+      "unitOfMeasure": "Unit of Measure",
+      "purchaseUnit": "Purchase Unit",
+      "conversionRatio": "Conversion Ratio"
     },
     "help": {
       "name": "Enter a descriptive name for this ingredient. This will be used throughout the system for identification.",
@@ -124,11 +141,14 @@
       "unitOfMeasure": "The standard unit you use to measure this ingredient (e.g., kg, lbs, liters, pieces).",
       "currentStock": "The current quantity of this ingredient you have on hand in your inventory.",
       "minStockLevel": "Set a minimum stock level. You'll be alerted when inventory falls below this amount.",
-      "supplier": "Select the primary supplier for this ingredient. You can add suppliers in the Suppliers section."
+      "supplier": "Select the primary supplier for this ingredient. You can add suppliers in the Suppliers section.",
+      "purchaseUnit": "The unit in which you purchase this item (e.g., Case, Pack, Bag).",
+      "conversionRatio": "How many base units are in one purchase unit. For example, if you buy a Case of 12 Bottles, the ratio is 12."
     },
     "placeholders": {
       "searchIngredients": "Search ingredients...",
-      "ingredientName": "e.g. Tomato Sauce"
+      "ingredientName": "e.g. Tomato Sauce",
+      "purchaseUnit": "e.g. Case of 12"
     }
   },
   "recipes": {

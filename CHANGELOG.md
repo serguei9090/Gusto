@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.4] - 2026-02-09
+
+### Added
+- **Sub-Recipes**: Implemented complete nested recipe functionality allowing recipes to be used as ingredients.
+- **Recipe Yield System**: Added Batch Yield and Yield Unit for precise production tracking.
+- **Searchable Selectors**: Added Search/Filter box to ingredient/recipe dropdowns in forms.
+- **Dynamic Configuration**: Added drag-and-drop reordering for Units, Ingredient Categories, and Recipe Categories.
+
+### Changed
+- **Unified Validation**: Generalized category and unit schemas to support fully custom user configurations without hardcoded limits.
+- **UI Enhancements**: Added mandatory field indicators (*) and red validation error highlighting.
+
+### Fixed
+- **Recipe Saving Bug**: Resolved issue preventing recipe saving when using custom categories.
+- **Kysely Driver Update**: Fixed deprecation warning for `numUpdatedOrDeletedRows` by switching to `numAffectedRows`.
+- **Duplicate Prevention**: Implemented database-level and store-level checks to prevent duplicate category names.
+
+
 ## [1.0.3] - 2026-02-08
 
 ### Fixed

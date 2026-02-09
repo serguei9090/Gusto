@@ -12,13 +12,14 @@ class DashboardRepository {
     // 1. Fetch all ingredients with their stock, price, and currency
     const ingredients = await db
       .selectFrom("ingredients")
-      .select(["current_stock", "current_price", "currency"])
+      .select(["current_stock", "price_per_unit", "currency"])
+      .where("is_active", "=", 1)
       .execute();
 
     // Calculate total inventory value with conversions
     const { total } = await calculateTotalWithConversions(
       ingredients.map((ing) => ({
-        amount: ing.current_stock * ing.current_price,
+        amount: ing.current_stock * (ing.price_per_unit || 0),
         currency: ing.currency || "USD",
       })),
     );
@@ -29,6 +30,7 @@ class DashboardRepository {
       .select(sql<number>`COUNT(*)`.as("count"))
       .where("min_stock_level", "is not", null)
       .whereRef("current_stock", "<=", "min_stock_level")
+      .where("is_active", "=", 1)
       .executeTakeFirst();
 
     // 3. Recipe Count & Avg Margin
@@ -69,6 +71,7 @@ class DashboardRepository {
       ])
       .where("min_stock_level", "is not", null)
       .whereRef("current_stock", "<=", "min_stock_level")
+      .where("is_active", "=", 1)
       .orderBy("current_stock", "asc") // prioritize lowest absolute stock? or biggest deficit?
       .limit(limit)
       .execute();

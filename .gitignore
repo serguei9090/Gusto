@@ -44,3 +44,4 @@ src-tauri/target
 
 # Misc
 *.tsbuildinfo
+docs

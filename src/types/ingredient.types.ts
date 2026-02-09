@@ -1,30 +1,13 @@
 import type { Currency } from "@/utils/currency";
 // Ingredient Types
-export type IngredientCategory =
-  | "protein"
-  | "vegetable"
-  | "dairy"
-  | "spice"
-  | "grain"
-  | "fruit"
-  | "condiment"
-  | "other";
-
-export type UnitOfMeasure =
-  | "kg"
-  | "g"
-  | "l"
-  | "ml"
-  | "piece"
-  | "cup"
-  | "tbsp"
-  | "tsp";
+// Ingredient Types
+// (Removed redundant IngredientCategory and UnitOfMeasure type aliases)
 
 export interface Ingredient {
   id: number;
   name: string;
-  category: IngredientCategory;
-  unitOfMeasure: UnitOfMeasure;
+  category: string;
+  unitOfMeasure: string;
   currentPrice: number;
   pricePerUnit: number;
   currency: Currency;
@@ -33,12 +16,14 @@ export interface Ingredient {
   currentStock: number;
   lastUpdated: string;
   notes: string | null;
+  purchaseUnit?: string | null;
+  conversionRatio?: number | null;
 }
 
 export interface CreateIngredientInput {
   name: string;
-  category: IngredientCategory;
-  unitOfMeasure: UnitOfMeasure;
+  category: string;
+  unitOfMeasure: string;
   currentPrice: number;
   pricePerUnit: number;
   currency?: Currency;
@@ -46,12 +31,14 @@ export interface CreateIngredientInput {
   minStockLevel?: number | null;
   currentStock?: number;
   notes?: string | null;
+  purchaseUnit?: string | null;
+  conversionRatio?: number | null;
 }
 
 export interface UpdateIngredientInput {
   name?: string;
-  category?: IngredientCategory;
-  unitOfMeasure?: UnitOfMeasure;
+  category?: string;
+  unitOfMeasure?: string;
   currentPrice?: number;
   pricePerUnit?: number;
   currency?: Currency;
@@ -59,6 +46,8 @@ export interface UpdateIngredientInput {
   minStockLevel?: number | null;
   currentStock?: number;
   notes?: string | null;
+  purchaseUnit?: string | null;
+  conversionRatio?: number | null;
 }
 
 // Supplier Types
@@ -76,20 +65,16 @@ export interface Supplier {
 }
 
 // Recipe Types
-export type RecipeCategory =
-  | "appetizer"
-  | "main"
-  | "dessert"
-  | "beverage"
-  | "side"
-  | "other";
+// (Removed redundant RecipeCategory type alias)
 
 export interface Recipe {
   id: number;
   name: string;
   description: string | null;
-  category: RecipeCategory | null;
+  category: string | null;
   servings: number;
+  yieldAmount?: number | null;
+  yieldUnit?: string | null;
   prepTimeMinutes: number | null;
   cookingInstructions: string | null;
   sellingPrice: number | null;
@@ -103,40 +88,59 @@ export interface Recipe {
   isExperiment?: boolean;
   parentRecipeId?: number;
   experimentName?: string;
+  allergens?: string[];
+  dietaryRestrictions?: string[];
+  calories?: number | null;
 }
 
 export interface CreateRecipeInput {
   name: string;
   description?: string | null;
-  category?: RecipeCategory | null;
+  category?: string | null;
   servings: number;
+  yieldAmount?: number | null;
+  yieldUnit?: string | null;
   prepTimeMinutes?: number | null;
   cookingInstructions?: string | null;
   sellingPrice?: number | null;
   targetCostPercentage?: number | null;
   wasteBufferPercentage?: number | null;
+  allergens?: string[];
+  dietaryRestrictions?: string[];
+  calories?: number | null;
 }
 
 export interface UpdateRecipeInput {
   name?: string;
   description?: string | null;
-  category?: RecipeCategory | null;
+  category?: string | null;
   servings?: number;
+  yieldAmount?: number | null;
+  yieldUnit?: string | null;
   prepTimeMinutes?: number | null;
   cookingInstructions?: string | null;
   sellingPrice?: number | null;
   targetCostPercentage?: number | null;
   wasteBufferPercentage?: number | null;
   changeNotes?: string;
-  ingredients?: { ingredientId: number; quantity: number; unit: string }[];
+  ingredients?: {
+    ingredientId: number | null;
+    subRecipeId?: number | null;
+    quantity: number;
+    unit: string;
+  }[];
+  allergens?: string[];
+  dietaryRestrictions?: string[];
+  calories?: number | null;
 }
 
 export interface RecipeWithIngredients extends Recipe {
   ingredients: (RecipeIngredient & {
     ingredientName: string;
     currentPricePerUnit: number; // For real-time cost comparison
-    ingredientUnit: UnitOfMeasure; // Base unit of the ingredient
+    ingredientUnit: string; // Base unit of the ingredient/recipe
     currency: string;
+    isSubRecipe?: boolean;
   })[];
 }
 
@@ -144,9 +148,10 @@ export interface RecipeWithIngredients extends Recipe {
 export interface RecipeIngredient {
   id: number;
   recipeId: number;
-  ingredientId: number;
+  ingredientId: number | null;
+  subRecipeId: number | null;
   quantity: number;
-  unit: string; // The unit used in the recipe (e.g. "g" vs "kg")
+  unit: string; // The unit used in the recipe
   cost: number | null; // Calculated cost snapshot
   notes: string | null;
 }

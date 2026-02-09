@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { ArrowDownLeft, ArrowUpRight, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -73,6 +74,7 @@ export function InventoryHistoryModal({
                 <TableHead>Type</TableHead>
                 <TableHead>Quantity</TableHead>
                 <TableHead>Cost/Unit</TableHead>
+                <TableHead>Total Value</TableHead>
                 <TableHead>Reference</TableHead>
               </TableRow>
             </TableHeader>
@@ -95,29 +97,74 @@ export function InventoryHistoryModal({
                     <TableCell>
                       {format(new Date(tx.createdAt), "MMM d, yyyy HH:mm")}
                     </TableCell>
-                    <TableCell className="capitalize">
-                      {tx.transactionType}
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {tx.transactionType === "purchase" && (
+                          <div
+                            className="p-1 rounded-full bg-green-100 text-green-700"
+                            title="Purchase"
+                          >
+                            <ArrowUpRight className="h-4 w-4" />
+                          </div>
+                        )}
+                        {(tx.transactionType === "usage" ||
+                          tx.transactionType === "waste") && (
+                          <div
+                            className="p-1 rounded-full bg-red-100 text-red-700"
+                            title={tx.transactionType}
+                          >
+                            <ArrowDownLeft className="h-4 w-4" />
+                          </div>
+                        )}
+                        {tx.transactionType === "adjustment" && (
+                          <div
+                            className="p-1 rounded-full bg-blue-100 text-blue-700"
+                            title="Stock Count"
+                          >
+                            <RefreshCw className="h-4 w-4" />
+                          </div>
+                        )}
+                        <span className="capitalize">
+                          {tx.transactionType === "adjustment"
+                            ? "Stock Count"
+                            : tx.transactionType}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <span
                         className={
                           tx.transactionType === "usage" ||
-                          tx.transactionType === "waste"
-                            ? "text-destructive"
-                            : "text-green-600"
+                          tx.transactionType === "waste" ||
+                          (tx.transactionType === "adjustment" &&
+                            tx.quantity < 0)
+                            ? "text-destructive font-medium"
+                            : "text-green-600 font-medium"
                         }
                       >
-                        {tx.transactionType === "usage" ||
-                        tx.transactionType === "waste"
-                          ? "-"
-                          : "+"}
-                        {tx.quantity} {ingredient.unitOfMeasure}
+                        {tx.transactionType === "adjustment"
+                          ? "" // Stock Count just shows the value
+                          : tx.transactionType === "usage" ||
+                              tx.transactionType === "waste" ||
+                              tx.quantity < 0
+                            ? ""
+                            : "+"}
+                        {Number(tx.quantity.toFixed(2))}{" "}
+                        {ingredient.unitOfMeasure}
                       </span>
                     </TableCell>
                     <TableCell>
                       {tx.costPerUnit
                         ? formatCurrencyAmount(
                             tx.costPerUnit,
+                            ingredient.currency || "USD",
+                          )
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {tx.totalCost !== null
+                        ? formatCurrencyAmount(
+                            tx.totalCost,
                             ingredient.currency || "USD",
                           )
                         : "-"}

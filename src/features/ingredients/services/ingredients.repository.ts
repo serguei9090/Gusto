@@ -23,13 +23,20 @@ export class IngredientsRepository {
       name: data.name,
       category: data.category,
       unit_of_measure: data.unitOfMeasure,
-      current_price: data.currentPrice || 0,
-      price_per_unit: data.pricePerUnit || 0,
+      current_price: data.currentPrice
+        ? Number(data.currentPrice.toFixed(2))
+        : 0,
+      price_per_unit: data.pricePerUnit
+        ? Number(data.pricePerUnit.toFixed(2))
+        : 0,
       currency: data.currency || "USD",
       supplier_id: data.supplierId || null,
       min_stock_level: data.minStockLevel || 0,
       current_stock: data.currentStock || 0,
       notes: data.notes || null,
+      purchase_unit: data.purchaseUnit || null,
+      conversion_ratio: data.conversionRatio || 1,
+      is_active: data.isActive === false ? 0 : 1,
     };
 
     try {
@@ -52,8 +59,22 @@ export class IngredientsRepository {
 
       logger.debug("IngredientsRepository.create: Insert successful", result);
 
-      // We still need to fetch full object or just assume it matches what we sent + defaults.
-      // fetching is safer for defaults like last_updated.
+      // 1. Record initial stock transaction if stock > 0
+      if (data.currentStock && data.currentStock > 0) {
+        await db
+          .insertInto("inventory_transactions")
+          .values({
+            ingredient_id: result.id,
+            transaction_type: "purchase", // Use purchase for initial stock to establish cost basis
+            quantity: data.currentStock,
+            cost_per_unit: data.pricePerUnit || 0,
+            total_cost: (data.currentStock || 0) * (data.pricePerUnit || 0),
+            notes: "Initial stock on creation",
+          })
+          .execute();
+      }
+
+      // 2. Fetch full object
       return this.getById(result.id) as Promise<Ingredient>;
     } catch (error) {
       logger.error("IngredientsRepository.create: DB Error", error);
@@ -75,6 +96,7 @@ export class IngredientsRepository {
     const rows = await db
       .selectFrom("ingredients")
       .selectAll()
+      .where("is_active", "=", 1)
       .orderBy("name", "asc")
       .execute();
 
@@ -95,9 +117,9 @@ export class IngredientsRepository {
     if (data.unitOfMeasure !== undefined)
       updateData.unit_of_measure = data.unitOfMeasure;
     if (data.currentPrice !== undefined)
-      updateData.current_price = data.currentPrice;
+      updateData.current_price = Number(data.currentPrice.toFixed(2));
     if (data.pricePerUnit !== undefined)
-      updateData.price_per_unit = data.pricePerUnit;
+      updateData.price_per_unit = Number(data.pricePerUnit.toFixed(2));
     if (data.currency !== undefined) updateData.currency = data.currency;
     if (data.supplierId !== undefined) updateData.supplier_id = data.supplierId;
     if (data.minStockLevel !== undefined)
@@ -105,6 +127,12 @@ export class IngredientsRepository {
     if (data.currentStock !== undefined)
       updateData.current_stock = data.currentStock;
     if (data.notes !== undefined) updateData.notes = data.notes;
+    if (data.purchaseUnit !== undefined)
+      updateData.purchase_unit = data.purchaseUnit;
+    if (data.conversionRatio !== undefined)
+      updateData.conversion_ratio = data.conversionRatio;
+    if (data.isActive !== undefined)
+      updateData.is_active = data.isActive ? 1 : 0;
 
     const result = await db
       .updateTable("ingredients")
@@ -127,11 +155,22 @@ export class IngredientsRepository {
     return Number(result.numDeletedRows) > 0;
   }
 
+  async archive(id: number): Promise<boolean> {
+    const result = await db
+      .updateTable("ingredients")
+      .set({ is_active: 0 })
+      .where("id", "=", id)
+      .executeTakeFirst();
+
+    return Number(result.numUpdatedRows) > 0;
+  }
+
   async search(query: string): Promise<Ingredient[]> {
     const rows = await db
       .selectFrom("ingredients")
       .selectAll()
       .where("name", "like", `%${query}%`)
+      .where("is_active", "=", 1)
       .orderBy("name", "asc")
       .execute();
 
@@ -147,6 +186,7 @@ export class IngredientsRepository {
         eb.and([
           eb("min_stock_level", "is not", null),
           eb("current_stock", "<", eb.ref("min_stock_level")),
+          eb("is_active", "=", 1),
         ]),
       )
       .execute();
@@ -168,6 +208,9 @@ export class IngredientsRepository {
       currentStock: row.current_stock,
       lastUpdated: row.last_updated,
       notes: row.notes,
+      purchaseUnit: row.purchase_unit,
+      conversionRatio: row.conversion_ratio,
+      isActive: Boolean(row.is_active),
     };
   }
 }

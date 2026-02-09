@@ -19,7 +19,7 @@ This report identifies critical functional gaps in the current "Gusto" (Restaura
 
 ### 2.2 Recipe Costing & Engineering
 *   **Gap:** **Sub-Recipes (Nested Recipes).** The inability to use a "Base Sauce" or "Dough" recipe as an ingredient in another recipe.
-*   **Gap:** **Allergen & Nutritional Tracking.** No metadata fields for dietary restrictions (GF, Vegan, Nut-free) or calorie counts.
+*   **Gap:** **Allergen & Nutritional Tracking.** **[COMPLETED]** Metadata fields for dietary restrictions (GF, Vegan, Nut-free) and calorie counts are implemented and displayed.
 *   **Gap:** **Yield Testing Workflows.** No specific tool to record the results of yield tests (e.g., "5kg of raw beef yields 3.2kg of cooked sliced beef").
 
 ### 2.3 Supplier & Purchasing
@@ -70,7 +70,7 @@ This report identifies critical functional gaps in the current "Gusto" (Restaura
 | :--- | :--- | :--- |
 | **Connectivity** | Lack of Cloud Sync for multi-device (Desktop + Mobile) environments. | 🔴 High |
 | **Automation** | No automated exchange rate updates for multi-currency operations. | 🟡 Medium |
-| **Audit** | No granular "History Log" showing which user changed a recipe price. | 🟡 Medium |
+| **Audit** | **[COMPLETED]** Granular "History Log" implemented (Recipe Versioning & Diff View). | 🟢 Done |
 | **Customization** | No custom field support for ingredients (e.g., "Brand Name", "UPC"). | 🟢 Low |
 
 ---

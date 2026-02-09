@@ -35,38 +35,7 @@ class PrepSheetsRepository {
 
       // Aggregate ingredients
       for (const ing of recipe.ingredients) {
-        const scaledQty = ing.quantity * scaleFactor;
-        const existing = ingredientMap.get(ing.ingredientId);
-
-        if (existing) {
-          try {
-            // Try to convert to existing unit
-            const converted = convertUnit(scaledQty, ing.unit, existing.unit);
-            existing.totalQuantity += converted;
-            existing.recipeBreakdown.push({
-              recipeName: recipe.name,
-              qty: scaledQty,
-            });
-          } catch {
-            existing.recipeBreakdown.push({
-              recipeName: `${recipe.name} (${ing.unit})`,
-              qty: scaledQty,
-            });
-          }
-        } else {
-          ingredientMap.set(ing.ingredientId, {
-            ingredientId: ing.ingredientId,
-            ingredientName: ing.ingredientName || "Unknown Ingredient",
-            totalQuantity: scaledQty,
-            unit: ing.unit,
-            recipeBreakdown: [
-              {
-                recipeName: recipe.name,
-                qty: scaledQty,
-              },
-            ],
-          });
-        }
+        this.aggregateIngredient(ing, recipe.name, scaleFactor, ingredientMap);
       }
     }
 
@@ -82,6 +51,54 @@ class PrepSheetsRepository {
       recipes: recipeSelections,
       createdAt: new Date().toISOString(),
     };
+  }
+
+  private aggregateIngredient(
+    ing: {
+      ingredientId: number | null;
+      quantity: number;
+      unit: string;
+      ingredientName: string;
+    },
+    recipeName: string,
+    scaleFactor: number,
+    ingredientMap: Map<number, PrepSheetItem>,
+  ) {
+    if (!ing.ingredientId) return;
+
+    const ingredientId = ing.ingredientId;
+    const scaledQty = ing.quantity * scaleFactor;
+    const existing = ingredientMap.get(ingredientId);
+
+    if (existing) {
+      try {
+        // Try to convert to existing unit
+        const converted = convertUnit(scaledQty, ing.unit, existing.unit);
+        existing.totalQuantity += converted;
+        existing.recipeBreakdown.push({
+          recipeName: recipeName,
+          qty: scaledQty,
+        });
+      } catch {
+        existing.recipeBreakdown.push({
+          recipeName: `${recipeName} (${ing.unit})`,
+          qty: scaledQty,
+        });
+      }
+    } else {
+      ingredientMap.set(ingredientId, {
+        ingredientId: ingredientId,
+        ingredientName: ing.ingredientName || "Unknown Ingredient",
+        totalQuantity: scaledQty,
+        unit: ing.unit,
+        recipeBreakdown: [
+          {
+            recipeName: recipeName,
+            qty: scaledQty,
+          },
+        ],
+      });
+    }
   }
 
   async getAll(): Promise<PrepSheet[]> {

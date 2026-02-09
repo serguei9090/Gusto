@@ -13,9 +13,9 @@ import type { Ingredient } from "@/features/inventory/types";
 import { formatCurrencyAmount } from "@/utils/currencyConverter";
 
 interface InventoryTableProps {
-  ingredients: Ingredient[];
-  onRecordTransaction: (ingredient: Ingredient) => void;
-  onViewHistory: (ingredient: Ingredient) => void;
+  readonly ingredients: Ingredient[];
+  readonly onRecordTransaction: (ingredient: Ingredient) => void;
+  readonly onViewHistory: (ingredient: Ingredient) => void;
 }
 
 export function InventoryTable({
@@ -32,6 +32,7 @@ export function InventoryTable({
             <TableHead>Category</TableHead>
             <TableHead>Current Stock</TableHead>
             <TableHead>Min Level</TableHead>
+            <TableHead>Avg Cost / Unit</TableHead>
             <TableHead>Total Value</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -62,13 +63,24 @@ export function InventoryTable({
                     <span
                       className={isLow ? "text-destructive font-medium" : ""}
                     >
-                      {ingredient.currentStock} {ingredient.unitOfMeasure}
+                      {Number(ingredient.currentStock.toFixed(2))}{" "}
+                      {ingredient.unitOfMeasure}
                     </span>
                   </TableCell>
                   <TableCell>
-                    {ingredient.minStockLevel
-                      ? `${ingredient.minStockLevel} ${ingredient.unitOfMeasure}`
+                    {ingredient.minStockLevel !== null &&
+                    ingredient.minStockLevel !== undefined
+                      ? `${Number(ingredient.minStockLevel.toFixed(2))} ${ingredient.unitOfMeasure}`
                       : "-"}
+                  </TableCell>
+                  <TableCell>
+                    {formatCurrencyAmount(
+                      ingredient.pricePerUnit,
+                      ingredient.currency || "USD",
+                    )}
+                    <span className="text-muted-foreground text-xs ml-1">
+                      / {ingredient.unitOfMeasure}
+                    </span>
                   </TableCell>
                   <TableCell>
                     {formatCurrencyAmount(

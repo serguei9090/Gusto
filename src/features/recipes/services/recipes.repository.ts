@@ -5,9 +5,7 @@ import type { RecipesTable } from "@/types/db.types";
 import type {
   CreateRecipeInput,
   Recipe,
-  RecipeCategory,
   RecipeWithIngredients,
-  UnitOfMeasure,
   UpdateRecipeInput,
 } from "@/types/ingredient.types";
 import type { Currency } from "@/utils/currency";
@@ -16,7 +14,8 @@ export type RecipeRow = Selectable<RecipesTable>;
 export interface JoinedRecipeIngredientRow {
   id: number;
   recipeId: number;
-  ingredientId: number;
+  ingredientId: number | null;
+  subRecipeId: number | null;
   quantity: number;
   unit: string;
   cost: number | null;
@@ -25,6 +24,7 @@ export interface JoinedRecipeIngredientRow {
   currentPricePerUnit: number;
   ingredientUnit: string;
   currency: string;
+  isSubRecipe: number; // 1 or 0
 }
 
 import {
@@ -54,31 +54,42 @@ export class RecipesRepository {
 
     const recipe = this.mapRowToRecipe(recipeRow);
 
-    // Join to get full ingredient details
+    // Get ingredients
     const ingredients = await db
       .selectFrom("recipe_ingredients as ri")
-      .innerJoin("ingredients as i", "ri.ingredient_id", "i.id")
+      .leftJoin("ingredients as i", "ri.ingredient_id", "i.id")
+      .leftJoin("recipes as r", "ri.sub_recipe_id", "r.id")
       .select([
         "ri.id",
         "ri.recipe_id as recipeId",
         "ri.ingredient_id as ingredientId",
+        "ri.sub_recipe_id as subRecipeId",
         "ri.quantity",
         "ri.unit",
         "ri.cost",
         "ri.notes",
-        "i.name as ingredientName",
-        "i.price_per_unit as currentPricePerUnit",
-        "i.unit_of_measure as ingredientUnit",
-        "i.currency",
+        sql<string>`COALESCE(i.name, r.name)`.as("ingredientName"),
+        sql<number>`CASE 
+          WHEN ri.sub_recipe_id IS NOT NULL THEN (r.total_cost / COALESCE(r.yield_amount, r.servings))
+          ELSE i.price_per_unit 
+        END`.as("currentPricePerUnit"),
+        sql<string>`COALESCE(i.unit_of_measure, r.yield_unit, 'piece')`.as(
+          "ingredientUnit",
+        ),
+        sql<string>`COALESCE(i.currency, r.currency, 'USD')`.as("currency"),
+        sql<number>`CASE WHEN ri.sub_recipe_id IS NOT NULL THEN 1 ELSE 0 END`.as(
+          "isSubRecipe",
+        ),
       ])
       .where("ri.recipe_id", "=", id)
       .execute();
 
     return {
       ...recipe,
-      ingredients: ingredients.map((ing: JoinedRecipeIngredientRow) => ({
+      ingredients: ingredients.map((ing) => ({
         ...ing,
-        ingredientUnit: ing.ingredientUnit as UnitOfMeasure,
+        ingredientUnit: ing.ingredientUnit,
+        isSubRecipe: ing.isSubRecipe === 1,
       })),
     };
   }
@@ -91,6 +102,8 @@ export class RecipesRepository {
         description: data.description || null,
         category: data.category || null,
         servings: data.servings,
+        yield_amount: data.yieldAmount || null,
+        yield_unit: data.yieldUnit || null,
         prep_time_minutes: data.prepTimeMinutes || null,
         cooking_instructions: data.cookingInstructions || null,
         selling_price: data.sellingPrice || null,
@@ -98,6 +111,11 @@ export class RecipesRepository {
         target_cost_percentage: data.targetCostPercentage || null,
         waste_buffer_percentage: data.wasteBufferPercentage || null,
         is_experiment: 0,
+        allergens: data.allergens ? JSON.stringify(data.allergens) : null,
+        dietary_restrictions: data.dietaryRestrictions
+          ? JSON.stringify(data.dietaryRestrictions)
+          : null,
+        calories: data.calories || null,
       })
       .returningAll()
       .executeTakeFirstOrThrow();
@@ -107,10 +125,14 @@ export class RecipesRepository {
 
   async createFull(
     data: CreateRecipeInput & {
-      ingredients: { ingredientId: number; quantity: number; unit: string }[];
+      ingredients: {
+        ingredientId: number | null;
+        subRecipeId?: number | null;
+        quantity: number;
+        unit: string;
+      }[];
     },
   ): Promise<Recipe> {
-    // Transaction manually handled if we want atomicity, but for now we follow the pattern
     const recipe = await this.create(data);
 
     for (const ing of data.ingredients) {
@@ -119,13 +141,15 @@ export class RecipesRepository {
         ing.ingredientId,
         ing.quantity,
         ing.unit,
+        ing.subRecipeId,
       );
     }
 
-    // Return potentially updated recipe (if costs calculated)
     const updated = await this.getById(recipe.id);
-    // biome-ignore lint/style/noNonNullAssertion: Updated recipe exists
-    return updated!;
+    if (!updated) {
+      throw new Error("Failed to retrieve updated recipe");
+    }
+    return updated;
   }
 
   async update(id: number, data: UpdateRecipeInput): Promise<void> {
@@ -138,11 +162,18 @@ export class RecipesRepository {
         description: data.description,
         category: data.category,
         servings: data.servings,
+        yield_amount: data.yieldAmount,
+        yield_unit: data.yieldUnit,
         prep_time_minutes: data.prepTimeMinutes,
         cooking_instructions: data.cookingInstructions,
         selling_price: data.sellingPrice,
         target_cost_percentage: data.targetCostPercentage,
         waste_buffer_percentage: data.wasteBufferPercentage,
+        allergens: data.allergens ? JSON.stringify(data.allergens) : undefined,
+        dietary_restrictions: data.dietaryRestrictions
+          ? JSON.stringify(data.dietaryRestrictions)
+          : undefined,
+        calories: data.calories,
         updated_at: sql`CURRENT_TIMESTAMP`,
       })
       .where("id", "=", id)
@@ -162,6 +193,7 @@ export class RecipesRepository {
             data.ingredients.map((ing) => ({
               recipe_id: id,
               ingredient_id: ing.ingredientId,
+              sub_recipe_id: ing.subRecipeId || null,
               quantity: ing.quantity,
               unit: ing.unit,
             })),
@@ -189,15 +221,17 @@ export class RecipesRepository {
 
   async addIngredient(
     recipeId: number,
-    ingredientId: number,
+    ingredientId: number | null,
     quantity: number,
     unit: string,
+    subRecipeId: number | null = null,
   ): Promise<void> {
     await db
       .insertInto("recipe_ingredients")
       .values({
         recipe_id: recipeId,
         ingredient_id: ingredientId,
+        sub_recipe_id: subRecipeId,
         quantity,
         unit,
       })
@@ -309,6 +343,13 @@ export class RecipesRepository {
         is_experiment: 1,
         parent_recipe_id: parentRecipeId,
         experiment_name: experimentName,
+        allergens: parentRecipe.allergens
+          ? JSON.stringify(parentRecipe.allergens)
+          : null,
+        dietary_restrictions: parentRecipe.dietaryRestrictions
+          ? JSON.stringify(parentRecipe.dietaryRestrictions)
+          : null,
+        calories: parentRecipe.calories,
       })
       .returningAll()
       .executeTakeFirstOrThrow();
@@ -386,6 +427,9 @@ export class RecipesRepository {
         quantity: ing.quantity,
         unit: ing.unit,
       })),
+      allergens: experiment.allergens,
+      dietaryRestrictions: experiment.dietaryRestrictions,
+      calories: experiment.calories,
     });
   }
 
@@ -394,8 +438,10 @@ export class RecipesRepository {
       id: row.id,
       name: row.name,
       description: row.description,
-      category: row.category as RecipeCategory,
+      category: row.category as string,
       servings: row.servings,
+      yieldAmount: row.yield_amount,
+      yieldUnit: row.yield_unit,
       prepTimeMinutes: row.prep_time_minutes,
       cookingInstructions: row.cooking_instructions,
       sellingPrice: row.selling_price,
@@ -409,6 +455,11 @@ export class RecipesRepository {
       isExperiment: row.is_experiment === 1,
       parentRecipeId: row.parent_recipe_id || undefined,
       experimentName: row.experiment_name || undefined,
+      allergens: row.allergens ? JSON.parse(row.allergens) : [],
+      dietaryRestrictions: row.dietary_restrictions
+        ? JSON.parse(row.dietary_restrictions)
+        : [],
+      calories: row.calories,
     };
   }
 }

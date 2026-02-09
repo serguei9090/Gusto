@@ -19,11 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIngredientsStore } from "@/features/ingredients/store/ingredients.store";
-import type {
-  RecipeCategory,
-  RecipeWithIngredients,
-  UnitOfMeasure,
-} from "@/types/ingredient.types";
+import type { RecipeWithIngredients } from "@/types/ingredient.types";
 import { calculateSuggestedPrice } from "@/utils/costEngine";
 import type { Currency } from "@/utils/currency";
 import {
@@ -167,7 +163,7 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
       id: version.recipeId, // Use recipeId, not version.id (which is version primary key)
       name: version.name,
       description: version.description,
-      category: version.category as RecipeCategory,
+      category: version.category as string,
       servings: version.servings,
       prepTimeMinutes: version.prepTimeMinutes,
       cookingInstructions: version.cookingInstructions,
@@ -187,6 +183,7 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
           id: snap.id || 0, // Snapshot ID
           recipeId: version.recipeId,
           ingredientId: snap.ingredient_id,
+          subRecipeId: snap.sub_recipe_id,
           quantity: snap.quantity,
           unit: snap.unit,
           cost: snap.cost,
@@ -195,8 +192,7 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
             originalIngredient?.name ||
             `Unknown Ingredient (${snap.ingredient_id})`,
           currentPricePerUnit: originalIngredient?.pricePerUnit || 0,
-          ingredientUnit: (originalIngredient?.unitOfMeasure ||
-            "kg") as UnitOfMeasure,
+          ingredientUnit: (originalIngredient?.unitOfMeasure || "kg") as string,
           currency: originalIngredient?.currency || "USD",
         };
       }),

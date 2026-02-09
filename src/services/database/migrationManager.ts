@@ -208,6 +208,232 @@ export const migrations: Migration[] = [
       `);
     },
   },
+  {
+    id: "20240209_add_allergen_and_nutritional_tracking",
+    up: async (db) => {
+      const ignoreDuplicate = (e: unknown) => {
+        if (String(e).includes("duplicate column name")) return;
+        throw e;
+      };
+
+      // Add columns to recipes table
+      await db
+        .execute("ALTER TABLE recipes ADD COLUMN allergens TEXT")
+        .catch(ignoreDuplicate);
+      await db
+        .execute("ALTER TABLE recipes ADD COLUMN dietary_restrictions TEXT")
+        .catch(ignoreDuplicate);
+      await db
+        .execute("ALTER TABLE recipes ADD COLUMN calories INTEGER")
+        .catch(ignoreDuplicate);
+
+      // Add columns to recipe_versions table
+      await db
+        .execute("ALTER TABLE recipe_versions ADD COLUMN allergens TEXT")
+        .catch(ignoreDuplicate);
+      await db
+        .execute(
+          "ALTER TABLE recipe_versions ADD COLUMN dietary_restrictions TEXT",
+        )
+        .catch(ignoreDuplicate);
+      await db
+        .execute("ALTER TABLE recipe_versions ADD COLUMN calories INTEGER")
+        .catch(ignoreDuplicate);
+    },
+  },
+  {
+    id: "20240209_add_unit_reconciliation_to_ingredients",
+    up: async (db) => {
+      const ignoreDuplicate = (e: unknown) => {
+        if (String(e).includes("duplicate column name")) return;
+        throw e;
+      };
+
+      await db
+        .execute("ALTER TABLE ingredients ADD COLUMN purchase_unit TEXT")
+        .catch(ignoreDuplicate);
+      await db
+        .execute(
+          "ALTER TABLE ingredients ADD COLUMN conversion_ratio REAL DEFAULT 1",
+        )
+        .catch(ignoreDuplicate);
+    },
+  },
+  {
+    id: "20240209_add_recipe_experiments",
+    up: async (db) => {
+      const ignoreDuplicate = (e: unknown) => {
+        if (String(e).includes("duplicate column name")) return;
+        throw e;
+      };
+
+      await db
+        .execute(
+          "ALTER TABLE recipes ADD COLUMN is_experiment INTEGER DEFAULT 0",
+        )
+        .catch(ignoreDuplicate);
+      await db
+        .execute("ALTER TABLE recipes ADD COLUMN parent_recipe_id INTEGER")
+        .catch(ignoreDuplicate);
+      await db
+        .execute("ALTER TABLE recipes ADD COLUMN experiment_name TEXT")
+        .catch(ignoreDuplicate);
+    },
+  },
+  {
+    id: "20240209_add_dynamic_configuration",
+    up: async (db) => {
+      // Create configuration table
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS configuration_items (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          type TEXT NOT NULL,
+          name TEXT NOT NULL,
+          is_default INTEGER DEFAULT 0,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(type, name)
+        )
+      `);
+
+      // Seed Ingredient Categories
+      const ingredientCategories = [
+        "protein",
+        "vegetable",
+        "dairy",
+        "spice",
+        "grain",
+        "fruit",
+        "condiment",
+        "other",
+      ];
+      for (const cat of ingredientCategories) {
+        await db.execute(
+          "INSERT OR IGNORE INTO configuration_items (type, name, is_default) VALUES ('ingredient_category', $1, 1)",
+          [cat],
+        );
+      }
+
+      // Seed Units of Measure
+      const units = ["kg", "g", "l", "ml", "piece", "cup", "tbsp", "tsp", "lb"];
+      for (const unit of units) {
+        await db.execute(
+          "INSERT OR IGNORE INTO configuration_items (type, name, is_default) VALUES ('unit', $1, 1)",
+          [unit],
+        );
+      }
+
+      // Seed Recipe Categories
+      const recipeCategories = [
+        "appetizer",
+        "main",
+        "dessert",
+        "beverage",
+        "side",
+        "other",
+      ];
+      for (const cat of recipeCategories) {
+        await db.execute(
+          "INSERT OR IGNORE INTO configuration_items (type, name, is_default) VALUES ('recipe_category', $1, 1)",
+          [cat],
+        );
+      }
+    },
+  },
+  {
+    id: "20240209_remove_stock_triggers",
+    up: async (db) => {
+      await db.execute("DROP TRIGGER IF EXISTS update_stock_after_purchase");
+      await db.execute("DROP TRIGGER IF EXISTS update_stock_after_usage");
+      await db.execute("DROP TRIGGER IF EXISTS update_stock_after_adjustment");
+    },
+  },
+  {
+    id: "20260209_add_is_active_to_ingredients",
+    up: async (db) => {
+      const ignoreDuplicate = (e: unknown) => {
+        if (String(e).includes("duplicate column name")) return;
+        throw e;
+      };
+      await db
+        .execute(
+          "ALTER TABLE ingredients ADD COLUMN is_active INTEGER DEFAULT 1",
+        )
+        .catch(ignoreDuplicate);
+    },
+  },
+  {
+    id: "20240209_add_config_order",
+    up: async (db) => {
+      const ignoreDuplicate = (e: unknown) => {
+        if (String(e).includes("duplicate column name")) return;
+        throw e;
+      };
+      await db
+        .execute(
+          "ALTER TABLE configuration_items ADD COLUMN order_index INTEGER",
+        )
+        .catch(ignoreDuplicate);
+    },
+  },
+  {
+    id: "20260210_add_sub_recipes",
+    up: async (db) => {
+      // 1. Recreate recipe_ingredients to support sub-recipes and make ingredient_id optional
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS recipe_ingredients_new (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          recipe_id INTEGER NOT NULL,
+          ingredient_id INTEGER,
+          sub_recipe_id INTEGER,
+          quantity REAL NOT NULL,
+          unit TEXT NOT NULL,
+          cost REAL,
+          notes TEXT,
+          FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
+          FOREIGN KEY (ingredient_id) REFERENCES ingredients(id),
+          FOREIGN KEY (sub_recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
+        )
+      `);
+
+      // Check if table exists before copying (migration safety)
+      const tableExists = await db.select<Array<{ name: string }>>(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='recipe_ingredients'",
+      );
+
+      if (tableExists.length > 0) {
+        await db.execute(`
+          INSERT INTO recipe_ingredients_new (id, recipe_id, ingredient_id, quantity, unit, cost, notes)
+          SELECT id, recipe_id, ingredient_id, quantity, unit, cost, notes FROM recipe_ingredients
+        `);
+        await db.execute("DROP TABLE recipe_ingredients");
+      }
+
+      await db.execute(
+        "ALTER TABLE recipe_ingredients_new RENAME TO recipe_ingredients",
+      );
+
+      // 2. Add yield tracking to recipes for better sub-recipe costing
+      const ignoreDuplicate = (e: unknown) => {
+        if (String(e).includes("duplicate column name")) return;
+        throw e;
+      };
+
+      await db
+        .execute("ALTER TABLE recipes ADD COLUMN yield_amount REAL")
+        .catch(ignoreDuplicate);
+      await db
+        .execute("ALTER TABLE recipes ADD COLUMN yield_unit TEXT")
+        .catch(ignoreDuplicate);
+
+      // Sync recipe_versions as well (just add the columns, snapshot logic will handle the rest)
+      await db
+        .execute("ALTER TABLE recipe_versions ADD COLUMN yield_amount REAL")
+        .catch(ignoreDuplicate);
+      await db
+        .execute("ALTER TABLE recipe_versions ADD COLUMN yield_unit TEXT")
+        .catch(ignoreDuplicate);
+    },
+  },
 ];
 
 async function applyMigration(

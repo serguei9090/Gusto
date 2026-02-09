@@ -75,6 +75,8 @@ export const VersionDiffView = ({
 
   const formatValue = (value: unknown): string => {
     if (value === null || value === undefined) return "-";
+    if (Array.isArray(value))
+      return value.length > 0 ? value.join(", ") : "None";
     if (typeof value === "number") return value.toFixed(2);
     if (typeof value === "string") return value || "-";
     return String(value);

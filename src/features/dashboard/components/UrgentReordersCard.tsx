@@ -36,13 +36,13 @@ export function UrgentReordersCard({ items }: UrgentReordersCardProps) {
                   <p className="text-xs text-muted-foreground">
                     Stock:{" "}
                     <span className="text-destructive font-semibold">
-                      {item.currentStock}
+                      {Number(item.currentStock.toFixed(2))}
                     </span>{" "}
-                    / {item.minStockLevel} {item.unit}
+                    / {Number(item.minStockLevel.toFixed(2))} {item.unit}
                   </p>
                 </div>
                 <Badge variant="destructive">
-                  -{item.deficit} {item.unit}
+                  -{Number(item.deficit.toFixed(2))} {item.unit}
                 </Badge>
               </div>
             ))}

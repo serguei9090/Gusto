@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Trash2 } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,8 +22,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { UnitSelect } from "@/features/ingredients/components/UnitSelect";
 import { useIngredientsStore } from "@/features/ingredients/store/ingredients.store";
+import { useRecipeStore } from "@/features/recipes/store/recipes.store";
 import { CurrencySelector } from "@/features/settings/components/CurrencySelector";
+import { useConfigStore } from "@/features/settings/store/config.store";
 import { useCurrencyStore } from "@/features/settings/store/currency.store";
 import { useTranslation } from "@/hooks/useTranslation";
 import {
@@ -34,20 +37,40 @@ import {
   calculateSuggestedPrice,
 } from "@/utils/costEngine";
 import { type Currency, getCurrencySymbol } from "@/utils/currency";
-
-import {
-  recipeCategorySchema,
-  recipeFormSchema,
-  unitOfMeasureSchema,
-} from "@/utils/validators";
+import { recipeFormSchema } from "@/utils/validators";
 
 export type RecipeFormData = z.infer<typeof recipeFormSchema>;
+const ALLERGEN_OPTIONS = [
+  "Peanuts",
+  "Tree Nuts",
+  "Milk",
+  "Egg",
+  "Wheat",
+  "Soy",
+  "Fish",
+  "Shellfish",
+  "Sesame",
+  "Mustard",
+  "Sulfites",
+];
+const DIETARY_OPTIONS = [
+  "Gluten-Free",
+  "Vegan",
+  "Vegetarian",
+  "Dairy-Free",
+  "Low-Carb",
+  "Keto",
+  "Paleo",
+  "Halal",
+  "Kosher",
+];
 
 interface RecipeFormProps {
   onSubmit: (data: RecipeFormData) => Promise<void>;
   initialData?: Partial<RecipeFormData>;
   onCancel: () => void;
   isLoading?: boolean;
+  recipeId?: number;
 }
 
 export const RecipeForm = ({
@@ -55,17 +78,38 @@ export const RecipeForm = ({
   initialData,
   onCancel,
   isLoading,
+  recipeId,
 }: RecipeFormProps) => {
   const { t } = useTranslation();
   const { ingredients: allIngredients, fetchIngredients } =
     useIngredientsStore();
+  const { recipes: allRecipes, fetchRecipes } = useRecipeStore();
   const { initialize: initializeCurrency } = useCurrencyStore();
+  const { getRecipeCategories } = useConfigStore();
+  const categories = getRecipeCategories();
+  const [componentSearch, setComponentSearch] = useState("");
 
-  // Load ingredients and currencies if empty
+  const filteredIngredients = allIngredients.filter((ing) =>
+    ing.name.toLowerCase().includes(componentSearch.toLowerCase()),
+  );
+  const filteredRecipes = allRecipes.filter(
+    (r) =>
+      r.id !== recipeId &&
+      r.name.toLowerCase().includes(componentSearch.toLowerCase()),
+  );
+
+  // Load ingredients, recipes and currencies if empty
   useEffect(() => {
     if (allIngredients.length === 0) fetchIngredients();
+    if (allRecipes.length === 0) fetchRecipes();
     initializeCurrency();
-  }, [allIngredients.length, fetchIngredients, initializeCurrency]);
+  }, [
+    allIngredients.length,
+    allRecipes.length,
+    fetchIngredients,
+    fetchRecipes,
+    initializeCurrency,
+  ]);
 
   const {
     register,
@@ -121,11 +165,24 @@ export const RecipeForm = ({
   useEffect(() => {
     const updateCosts = async () => {
       const items = watchedIngredients.map((field) => {
+        if (field.isSubRecipe) {
+          const original = allRecipes.find((r) => r.id === field.subRecipeId);
+          return {
+            name: original?.name || "Unknown Recipe",
+            quantity: field.quantity,
+            unit: field.unit,
+            currentPricePerUnit:
+              (original?.totalCost || 0) /
+              (original?.yieldAmount || original?.servings || 1),
+            ingredientUnit: original?.yieldUnit || "piece",
+            currency: original?.currency || "USD",
+          };
+        }
         const original = allIngredients.find(
           (i) => i.id === field.ingredientId,
         );
         return {
-          name: original?.name || "Unknown",
+          name: original?.name || "Unknown Ingredient",
           quantity: field.quantity,
           unit: field.unit,
           currentPricePerUnit: field.price || original?.pricePerUnit || 0,
@@ -143,10 +200,16 @@ export const RecipeForm = ({
       setCostSummary(result);
     };
 
-    if (allIngredients.length > 0) {
+    if (allIngredients.length > 0 || allRecipes.length > 0) {
       updateCosts();
     }
-  }, [watchedIngredients, watchedWasteBuffer, watchedCurrency, allIngredients]);
+  }, [
+    watchedIngredients,
+    watchedWasteBuffer,
+    watchedCurrency,
+    allIngredients,
+    allRecipes,
+  ]);
 
   const { subtotal, wasteCost, totalCost } = costSummary;
 
@@ -161,19 +224,40 @@ export const RecipeForm = ({
   );
 
   const handleAddIngredient = (value: string) => {
-    const id = Number(value);
+    const [type, idStr] = value.split(":");
+    const id = Number(idStr);
     if (!id) return;
 
-    const original = allIngredients.find((i) => i.id === id);
-    if (original) {
-      append({
-        ingredientId: original.id,
-        quantity: 1,
-        unit: original.unitOfMeasure,
-        name: original.name,
-        price: original.pricePerUnit,
-        ingredientUnit: original.unitOfMeasure,
-      });
+    if (type === "recipe") {
+      const original = allRecipes.find((r) => r.id === id);
+      if (original) {
+        append({
+          ingredientId: null,
+          subRecipeId: original.id,
+          isSubRecipe: true,
+          quantity: 1,
+          unit: original.yieldUnit || "piece",
+          name: original.name,
+          price:
+            (original.totalCost || 0) /
+            (original.yieldAmount || original.servings || 1),
+          ingredientUnit: original.yieldUnit || "piece",
+        });
+      }
+    } else {
+      const original = allIngredients.find((i) => i.id === id);
+      if (original) {
+        append({
+          ingredientId: original.id,
+          subRecipeId: null,
+          isSubRecipe: false,
+          quantity: 1,
+          unit: original.unitOfMeasure,
+          name: original.name,
+          price: original.pricePerUnit,
+          ingredientUnit: original.unitOfMeasure,
+        });
+      }
     }
   };
 
@@ -205,6 +289,7 @@ export const RecipeForm = ({
                 id="name"
                 {...register("name")}
                 placeholder="e.g. Beef Burger"
+                aria-invalid={!!errors.name}
               />
               {errors.name && (
                 <p className="text-sm text-destructive">
@@ -216,17 +301,21 @@ export const RecipeForm = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="category" className="flex items-center gap-2">
-                  Category
+                  Category <span className="text-destructive">*</span>
                   <FieldHelp helpText={t("recipes.help.category")} />
                 </Label>
                 <select
                   {...register("category")}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive"
+                  aria-invalid={!!errors.category}
                 >
                   <option value="">Select...</option>
-                  {recipeCategorySchema.options.map((cat) => (
+                  {categories.map((cat) => (
                     <option key={cat} value={cat}>
-                      {cat}
+                      {t(`common.categories.${cat}`) !==
+                      `common.categories.${cat}`
+                        ? t(`common.categories.${cat}`)
+                        : cat.charAt(0).toUpperCase() + cat.slice(1)}
                     </option>
                   ))}
                 </select>
@@ -241,6 +330,7 @@ export const RecipeForm = ({
                   id="servings"
                   {...register("servings", { valueAsNumber: true })}
                   min={1}
+                  aria-invalid={!!errors.servings}
                 />
                 {errors.servings && (
                   <p className="text-sm text-destructive">
@@ -252,13 +342,14 @@ export const RecipeForm = ({
 
             <div className="space-y-2">
               <Label htmlFor="prepTime" className="flex items-center gap-2">
-                Prep Time (mins)
+                Prep Time (mins) <span className="text-destructive">*</span>
                 <FieldHelp helpText={t("recipes.help.prepTime")} />
               </Label>
               <Input
                 type="number"
                 id="prepTime"
                 {...register("prepTimeMinutes", { valueAsNumber: true })}
+                aria-invalid={!!errors.prepTimeMinutes}
               />
             </div>
 
@@ -272,6 +363,56 @@ export const RecipeForm = ({
                 {...register("description")}
                 placeholder="Brief overview..."
                 className="min-h-[80px]"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="yieldAmount"
+                  className="flex items-center gap-2"
+                >
+                  Batch Yield
+                  <FieldHelp helpText="The total quantity this recipe produces (e.g. 5 for 5kg)." />
+                </Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  id="yieldAmount"
+                  {...register("yieldAmount", { valueAsNumber: true })}
+                  placeholder="e.g. 5"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="yieldUnit" className="flex items-center gap-2">
+                  Yield Unit
+                  <FieldHelp helpText="The unit for the batch yield (e.g. kg, L, pieces)." />
+                </Label>
+                <Controller
+                  control={control}
+                  name="yieldUnit"
+                  render={({ field }) => (
+                    <UnitSelect
+                      value={field.value || ""}
+                      onValueChange={field.onChange}
+                      placeholder="e.g. kg"
+                      className="h-9"
+                    />
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="calories" className="flex items-center gap-2">
+                Calories (kcal)
+                <FieldHelp helpText="Estimated calorie count per serving." />
+              </Label>
+              <Input
+                type="number"
+                id="calories"
+                {...register("calories", { valueAsNumber: true })}
+                placeholder="0"
               />
             </div>
           </CardContent>
@@ -306,9 +447,7 @@ export const RecipeForm = ({
               <Label htmlFor="currency">{t("common.labels.currency")}</Label>
               <CurrencySelector
                 value={watch("currency") ?? "USD"}
-                onChange={(value) =>
-                  setValue("currency", value as "USD" | "EUR" | "CUP")
-                }
+                onChange={(value) => setValue("currency", value)}
               />
             </div>
 
@@ -439,6 +578,94 @@ export const RecipeForm = ({
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Allergen & Dietary Information</CardTitle>
+            <CardDescription>
+              Mark dietary restrictions and common allergens.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">Common Allergens</Label>
+              <div className="flex flex-wrap gap-2">
+                {ALLERGEN_OPTIONS.map((allergen) => {
+                  const currentAllergens = watch("allergens") || [];
+                  const isSelected = currentAllergens.includes(allergen);
+                  return (
+                    <Button
+                      key={allergen}
+                      type="button"
+                      variant={isSelected ? "default" : "outline"}
+                      size="sm"
+                      className={`h-7 px-3 text-xs ${
+                        isSelected
+                          ? "bg-red-100 text-red-700 border-red-200 hover:bg-red-200"
+                          : ""
+                      }`}
+                      onClick={() => {
+                        if (isSelected) {
+                          setValue(
+                            "allergens",
+                            currentAllergens.filter((a) => a !== allergen),
+                          );
+                        } else {
+                          setValue("allergens", [
+                            ...currentAllergens,
+                            allergen,
+                          ]);
+                        }
+                      }}
+                    >
+                      {allergen}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">
+                Dietary Restrictions
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {DIETARY_OPTIONS.map((diet) => {
+                  const currentDiets = watch("dietaryRestrictions") || [];
+                  const isSelected = currentDiets.includes(diet);
+                  return (
+                    <Button
+                      key={diet}
+                      type="button"
+                      variant={isSelected ? "default" : "outline"}
+                      size="sm"
+                      className={`h-7 px-3 text-xs ${
+                        isSelected
+                          ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
+                          : ""
+                      }`}
+                      onClick={() => {
+                        if (isSelected) {
+                          setValue(
+                            "dietaryRestrictions",
+                            currentDiets.filter((d) => d !== diet),
+                          );
+                        } else {
+                          setValue("dietaryRestrictions", [
+                            ...currentDiets,
+                            diet,
+                          ]);
+                        }
+                      }}
+                    >
+                      {diet}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
@@ -447,16 +674,56 @@ export const RecipeForm = ({
             <CardTitle>Ingredients</CardTitle>
             <CardDescription>Components of the recipe.</CardDescription>
           </div>
-          <Select onValueChange={handleAddIngredient}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="+ Add Ingredient" />
+          <Select
+            onValueChange={handleAddIngredient}
+            onOpenChange={(open) => !open && setComponentSearch("")}
+          >
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="+ Add Component" />
             </SelectTrigger>
             <SelectContent>
-              {allIngredients.map((ing) => (
-                <SelectItem key={ing.id} value={ing.id.toString()}>
-                  {ing.name} ({ing.unitOfMeasure})
-                </SelectItem>
-              ))}
+              <div className="p-2 border-b sticky top-0 bg-popover z-20">
+                <div className="relative">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search components..."
+                    className="pl-8 h-8"
+                    value={componentSearch}
+                    onChange={(e) => setComponentSearch(e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  />
+                </div>
+              </div>
+              {filteredIngredients.length > 0 && (
+                <>
+                  <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase bg-muted/50">
+                    Ingredients
+                  </div>
+                  {filteredIngredients.map((ing) => (
+                    <SelectItem key={ing.id} value={`ingredient:${ing.id}`}>
+                      {ing.name} ({ing.unitOfMeasure})
+                    </SelectItem>
+                  ))}
+                </>
+              )}
+              {filteredRecipes.length > 0 && (
+                <>
+                  <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase bg-muted/50 mt-2">
+                    Sub-Recipes
+                  </div>
+                  {filteredRecipes.map((r) => (
+                    <SelectItem key={r.id} value={`recipe:${r.id}`}>
+                      {r.name} ({r.yieldUnit || "piece"})
+                    </SelectItem>
+                  ))}
+                </>
+              )}
+              {filteredIngredients.length === 0 &&
+                filteredRecipes.length === 0 && (
+                  <div className="p-4 text-center text-xs text-muted-foreground">
+                    No matches found
+                  </div>
+                )}
             </SelectContent>
           </Select>
         </CardHeader>
@@ -487,7 +754,14 @@ export const RecipeForm = ({
                     className="border-b last:border-0 hover:bg-muted/30"
                   >
                     <td className="p-4 align-middle">
-                      {field.name || "Loading..."}
+                      <div className="flex flex-col">
+                        <span>{field.name || "Loading..."}</span>
+                        {watchedIngredients[index]?.isSubRecipe && (
+                          <span className="text-[10px] text-primary font-bold uppercase tracking-wider">
+                            Sub-Recipe
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4 align-middle">
                       <Input
@@ -500,16 +774,17 @@ export const RecipeForm = ({
                       />
                     </td>
                     <td className="p-4 align-middle">
-                      <select
-                        {...register(`ingredients.${index}.unit`)}
-                        className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
-                      >
-                        {unitOfMeasureSchema.options.map((u) => (
-                          <option key={u} value={u}>
-                            {u}
-                          </option>
-                        ))}
-                      </select>
+                      <Controller
+                        control={control}
+                        name={`ingredients.${index}.unit`}
+                        render={({ field }) => (
+                          <UnitSelect
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            className="h-8 w-full text-xs"
+                          />
+                        )}
+                      />
                     </td>
                     <td className="p-4 align-middle text-right font-mono">
                       <CostDisplay

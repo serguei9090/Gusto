@@ -1,4 +1,4 @@
-import { Clock, Users } from "lucide-react";
+import { AlertTriangle, Clock, Info, ShieldCheck, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -57,7 +57,9 @@ export const RecipeOverview = ({ recipe }: RecipeOverviewProps) => {
             <span>
               Yield:{" "}
               <span className="font-medium text-foreground print:text-black">
-                {recipe.servings} servings
+                {recipe.yieldAmount
+                  ? `${recipe.yieldAmount} ${recipe.yieldUnit}`
+                  : `${recipe.servings} servings`}
               </span>
             </span>
           </div>
@@ -79,6 +81,34 @@ export const RecipeOverview = ({ recipe }: RecipeOverviewProps) => {
             {recipe.description}
           </p>
         )}
+
+        {/* Dietary & Allergen Badges */}
+        <div className="flex flex-wrap gap-2 pt-2">
+          {recipe.dietaryRestrictions &&
+            recipe.dietaryRestrictions.length > 0 &&
+            recipe.dietaryRestrictions.map((diet) => (
+              <Badge
+                key={diet}
+                variant="secondary"
+                className="bg-green-100 text-green-700 border-green-200 hover:bg-green-100 flex items-center gap-1"
+              >
+                <ShieldCheck className="h-3 w-3" />
+                {diet}
+              </Badge>
+            ))}
+          {recipe.allergens &&
+            recipe.allergens.length > 0 &&
+            recipe.allergens.map((allergen) => (
+              <Badge
+                key={allergen}
+                variant="secondary"
+                className="bg-red-100 text-red-700 border-red-200 hover:bg-red-100 flex items-center gap-1"
+              >
+                <AlertTriangle className="h-3 w-3" />
+                {allergen}
+              </Badge>
+            ))}
+        </div>
       </div>
 
       {/* Cost Summary Cards */}
@@ -124,6 +154,25 @@ export const RecipeOverview = ({ recipe }: RecipeOverviewProps) => {
             </div>
           </CardContent>
         </Card>
+        {recipe.calories && (
+          <Card className="bg-blue-50/50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                <Info className="h-3.5 w-3.5" />
+                Calories
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-900 dark:text-blue-300">
+                {recipe.calories}{" "}
+                <span className="text-sm font-normal">kcal</span>
+              </div>
+              <p className="text-[10px] text-blue-600/70 dark:text-blue-400/50">
+                per serving
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Ingredients Table */}
@@ -145,7 +194,14 @@ export const RecipeOverview = ({ recipe }: RecipeOverviewProps) => {
               {recipe.ingredients.map((ing) => (
                 <TableRow key={ing.id} className="print:border-b-gray-200">
                   <TableCell className="font-medium">
-                    {ing.ingredientName}
+                    <div className="flex flex-col">
+                      <span>{ing.ingredientName}</span>
+                      {ing.isSubRecipe && (
+                        <span className="text-[10px] text-primary font-bold uppercase tracking-wider">
+                          Sub-Recipe
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     {ing.quantity} {ing.unit}

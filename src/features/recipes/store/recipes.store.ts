@@ -2,7 +2,6 @@ import { create } from "zustand";
 import type {
   CreateRecipeInput,
   Recipe,
-  RecipeCategory,
   RecipeWithIngredients,
   UpdateRecipeInput,
 } from "@/types/ingredient.types";
@@ -16,21 +15,26 @@ interface RecipeStore {
   isLoading: boolean;
   error: string | null;
   searchQuery: string;
-  categoryFilter: RecipeCategory | "all";
+  categoryFilter: string | "all";
 
   // Actions
   fetchRecipes: () => Promise<void>;
   fetchFullRecipe: (id: number) => Promise<void>;
   createRecipe: (
     data: CreateRecipeInput & {
-      ingredients?: { ingredientId: number; quantity: number; unit: string }[];
+      ingredients?: {
+        ingredientId: number | null;
+        subRecipeId?: number | null;
+        quantity: number;
+        unit: string;
+      }[];
     },
   ) => Promise<Recipe>;
   updateRecipe: (id: number, data: UpdateRecipeInput) => Promise<void>;
   deleteRecipe: (id: number) => Promise<void>;
   selectRecipe: (recipe: RecipeWithIngredients | null) => void;
   setSearchQuery: (query: string) => void;
-  setCategoryFilter: (category: RecipeCategory | "all") => void;
+  setCategoryFilter: (category: string | "all") => void;
   createExperiment: (
     recipeId: number,
     experimentName: string,
@@ -166,7 +170,7 @@ export const useRecipeStore = create<RecipeStore>((set, _get) => ({
   selectRecipe: (recipe: RecipeWithIngredients | null) =>
     set({ selectedRecipe: recipe }),
   setSearchQuery: (query: string) => set({ searchQuery: query }),
-  setCategoryFilter: (category: RecipeCategory | "all") =>
+  setCategoryFilter: (category: string | "all") =>
     set({ categoryFilter: category }),
 
   createExperiment: async (recipeId: number, experimentName: string) => {

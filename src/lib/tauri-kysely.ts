@@ -119,7 +119,7 @@ class TauriSqliteConnection implements DatabaseConnection {
           : undefined;
 
         return {
-          numUpdatedOrDeletedRows: rowsAffected,
+          numAffectedRows: rowsAffected,
           numInsertedOrUpdatedRows: rowsAffected,
           insertId,
           rows: [],

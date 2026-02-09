@@ -99,6 +99,21 @@
       "dragToReorder": "Arrastre para reordenar los elementos.",
       "visible": "Visible",
       "hidden": "Oculto"
+    },
+    "config": {
+      "title": "Configuración de la Aplicación",
+      "description": "Gestione varias listas utilizadas en la aplicación.",
+      "help": "Personalice unidades de medida, categorías de ingredientes y categorías de recetas.",
+      "units": "Unidades de Medida",
+      "unitsDesc": "Unidades para ingredientes y cantidades de recetas (ej. kg, oz).",
+      "ingredientCategories": "Categorías de Ingredientes",
+      "ingredientCategoriesDesc": "Categorías para organizar su despensa y stock.",
+      "recipeCategories": "Categorías de Recetas",
+      "recipeCategoriesDesc": "Categorías para organizar su menú y libro de recetas.",
+      "manage": "Gestionar",
+      "standardLibrary": "Biblioteca Estándar",
+      "myUnits": "Mis Unidades",
+      "noUnitsEnabled": "No hay unidades habilitadas. Vaya a la Biblioteca Estándar para agregar algunas."
     }
   },
   "ingredients": {
@@ -113,7 +128,9 @@
       "currentStock": "Stock Actual",
       "minStockLevel": "Nivel Mínimo de Stock",
       "supplier": "Proveedor",
-      "unitOfMeasure": "Unidad de Medida"
+      "unitOfMeasure": "Unidad de Medida",
+      "purchaseUnit": "Unidad de Compra",
+      "conversionRatio": "Ratio de Conversión"
     },
     "help": {
       "name": "Ingrese un nombre descriptivo para este ingrediente. Este se utilizará en todo el sistema para su identificación.",
@@ -124,11 +141,14 @@
       "unitOfMeasure": "La unidad estándar que utiliza para medir este ingredient (por ejemplo, kg, lbs, litros, piezas).",
       "currentStock": "La cantidad actual de este ingrediente que tiene disponible en su inventario.",
       "minStockLevel": "Establezca un nivel mínimo de stock. Se le alertará cuando el inventario caiga por debajo de esta cantidad.",
-      "supplier": "Seleccione el proveedor principal de este ingrediente. Puede agregar proveedores en la sección de Proveedores."
+      "supplier": "Seleccione el proveedor principal de este ingrediente. Puede agregar proveedores en la sección de Proveedores.",
+      "purchaseUnit": "La unidad en la que compra este artículo (ej. Caja, Paquete, Saco).",
+      "conversionRatio": "Cuántas unidades base hay en una unidad de compra. Por ejemplo, si compra una caja de 12 botellas, el ratio es 12."
     },
     "placeholders": {
       "searchIngredients": "Buscar ingredientes...",
-      "ingredientName": "ej. Salsa de Tomate"
+      "ingredientName": "ej. Salsa de Tomate",
+      "purchaseUnit": "ej. Caja de 12"
     }
   },
   "recipes": {

@@ -1,4 +1,4 @@
-import { Edit2, Eye, Trash2 } from "lucide-react";
+import { AlertTriangle, Edit2, Eye, ShieldCheck, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -43,6 +43,19 @@ export const RecipeTable = ({
     return "text-green-600 font-medium";
   };
 
+  const getDietaryLabel = (diet: string) => {
+    switch (diet) {
+      case "Gluten-Free":
+        return "GF";
+      case "Vegan":
+        return "V";
+      case "Vegetarian":
+        return "VG";
+      default:
+        return diet.substring(0, 3).toUpperCase();
+    }
+  };
+
   if (recipes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground border rounded-lg bg-card">
@@ -79,6 +92,33 @@ export const RecipeTable = ({
                       />
                     )}
                   </span>
+                  <div className="flex flex-wrap gap-1">
+                    {recipe.dietaryRestrictions?.map((diet) => (
+                      <span
+                        key={diet}
+                        className="inline-flex h-4 items-center gap-0.5 rounded-full bg-green-100 px-1.5 text-[9px] font-bold text-green-700 border border-green-200"
+                        title={diet}
+                      >
+                        <ShieldCheck className="h-2 w-2" />
+                        {getDietaryLabel(diet)}
+                      </span>
+                    ))}
+                    {recipe.allergens?.map((allergen) => (
+                      <span
+                        key={allergen}
+                        className="inline-flex h-4 items-center gap-0.5 rounded-full bg-red-100 px-1.5 text-[9px] font-bold text-red-700 border border-red-200"
+                        title={`Contains ${allergen}`}
+                      >
+                        <AlertTriangle className="h-2 w-2" />
+                        {allergen.substring(0, 3).toUpperCase()}
+                      </span>
+                    ))}
+                    {recipe.calories && (
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        {recipe.calories} kcal
+                      </span>
+                    )}
+                  </div>
                 </div>
               </TableCell>
               <TableCell className="capitalize">

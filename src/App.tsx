@@ -8,6 +8,7 @@ import { DashboardPage } from "@/features/dashboard";
 import { IngredientsPage } from "@/features/ingredients";
 import { InventoryPage } from "@/features/inventory";
 import { PrepSheetsPage } from "@/features/prep-sheets";
+import { useConfigStore } from "@/features/settings/store/config.store";
 import { useCurrencyStore } from "@/features/settings/store/currency.store";
 import { SuppliersPage } from "@/features/suppliers";
 import { initDb } from "@/lib/db";
@@ -25,6 +26,7 @@ function App() {
     const init = async () => {
       await initDb();
       await initializeCurrency();
+      await useConfigStore.getState().loadConfig();
     };
     init();
   }, []); // Run once on mount

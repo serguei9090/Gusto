@@ -49,16 +49,45 @@ class InventoryRepository {
       .returningAll()
       .executeTakeFirstOrThrow();
 
-    // 2. Update Ingredient Stock & Price (if purchase)
+    // 2. Update Ingredient Stock & Price
     if (transactionType === "purchase" && currency && costPerUnit) {
+      // Fetch current state to calculate Weighted Average Cost (WAC)
+      const ingredient = await db
+        .selectFrom("ingredients")
+        .select(["current_stock", "price_per_unit"])
+        .where("id", "=", ingredientId)
+        .executeTakeFirstOrThrow();
+
+      const oldStock = ingredient.current_stock || 0;
+      const oldPrice = ingredient.price_per_unit || 0;
+      const newStock = oldStock + delta;
+
+      // WAC Formula: ((Old Stock * Old Price) + (New Quantity * New Price)) / New Total Stock
+      // If newStock is 0 or less (shouldn't happen on purchase but safety first), use the new costPerUnit
+      const calculatedWac =
+        newStock > 0
+          ? (oldStock * oldPrice + quantity * costPerUnit) / newStock
+          : costPerUnit;
+      const newWacPrice = Number(calculatedWac.toFixed(2));
+
       await db
         .updateTable("ingredients")
-        .set((eb) => ({
-          current_stock: eb("current_stock", "+", delta),
-          price_per_unit: costPerUnit,
+        .set({
+          current_stock: newStock,
+          price_per_unit: newWacPrice,
           currency: currency,
           last_updated: sql`CURRENT_TIMESTAMP`,
-        }))
+        })
+        .where("id", "=", ingredientId)
+        .execute();
+    } else if (transactionType === "adjustment") {
+      // Adjustment overwrites the current stock with the counted value
+      await db
+        .updateTable("ingredients")
+        .set({
+          current_stock: quantity,
+          last_updated: sql`CURRENT_TIMESTAMP`,
+        })
         .where("id", "=", ingredientId)
         .execute();
     } else {

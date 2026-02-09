@@ -1,5 +1,7 @@
+import type { Selectable } from "kysely";
 import { sql } from "kysely";
 import { db } from "@/lib/db";
+import type { RecipeVersionsTable } from "@/types/db.types";
 
 export interface RecipeVersion {
   id: number;
@@ -9,6 +11,8 @@ export interface RecipeVersion {
   description: string | null;
   category: string | null;
   servings: number;
+  yieldAmount: number | null;
+  yieldUnit: string | null;
   prepTimeMinutes: number | null;
   cookingInstructions: string | null;
   sellingPrice: number | null;
@@ -19,7 +23,8 @@ export interface RecipeVersion {
   profitMargin: number | null;
   ingredientsSnapshot: Array<{
     id: number;
-    ingredient_id: number;
+    ingredient_id: number | null;
+    sub_recipe_id: number | null;
     quantity: number;
     unit: string;
     cost: number | null;
@@ -28,6 +33,9 @@ export interface RecipeVersion {
   changeReason: string | null;
   changeNotes: string | null;
   createdBy: string | null;
+  allergens?: string[];
+  dietaryRestrictions?: string[];
+  calories?: number | null;
   createdAt: string;
   isCurrent: boolean;
 }
@@ -55,12 +63,14 @@ export interface DetailedVersionDiff {
 }
 
 export interface IngredientDiff {
-  ingredientId: number;
+  ingredientId: number | null;
+  subRecipeId: number | null;
   ingredientName: string;
   changeType: "added" | "removed" | "modified" | "unchanged";
   quantityChange?: { old: number; new: number };
   costChange?: { old: number | null; new: number | null };
   unitChange?: { old: string; new: string };
+  isSubRecipe?: boolean;
 }
 
 /**
@@ -119,6 +129,8 @@ export class RecipeVersionRepository {
         description: recipe.description,
         category: recipe.category,
         servings: recipe.servings,
+        yield_amount: recipe.yield_amount,
+        yield_unit: recipe.yield_unit,
         prep_time_minutes: recipe.prep_time_minutes,
         cooking_instructions: recipe.cooking_instructions,
         selling_price: recipe.selling_price,
@@ -131,6 +143,9 @@ export class RecipeVersionRepository {
         change_reason: changeReason || null,
         change_notes: changeNotes || null,
         created_by: createdBy || null,
+        allergens: recipe.allergens,
+        dietary_restrictions: recipe.dietary_restrictions,
+        calories: recipe.calories,
         is_current: 1,
       })
       .returningAll()
@@ -218,6 +233,8 @@ export class RecipeVersionRepository {
         description: targetVersion.description,
         category: targetVersion.category,
         servings: targetVersion.servings,
+        yield_amount: targetVersion.yieldAmount,
+        yield_unit: targetVersion.yieldUnit,
         prep_time_minutes: targetVersion.prepTimeMinutes,
         cooking_instructions: targetVersion.cookingInstructions,
         selling_price: targetVersion.sellingPrice,
@@ -226,6 +243,13 @@ export class RecipeVersionRepository {
         waste_buffer_percentage: targetVersion.wasteBufferPercentage,
         total_cost: targetVersion.totalCost,
         profit_margin: targetVersion.profitMargin,
+        allergens: targetVersion.allergens
+          ? JSON.stringify(targetVersion.allergens)
+          : null,
+        dietary_restrictions: targetVersion.dietaryRestrictions
+          ? JSON.stringify(targetVersion.dietaryRestrictions)
+          : null,
+        calories: targetVersion.calories,
       })
       .where("id", "=", recipeId)
       .execute();
@@ -244,6 +268,7 @@ export class RecipeVersionRepository {
           targetVersion.ingredientsSnapshot.map((ing) => ({
             recipe_id: recipeId,
             ingredient_id: ing.ingredient_id,
+            sub_recipe_id: ing.sub_recipe_id,
             quantity: ing.quantity,
             unit: ing.unit,
             cost: ing.cost,
@@ -317,6 +342,8 @@ export class RecipeVersionRepository {
       "description",
       "category",
       "servings",
+      "yieldAmount",
+      "yieldUnit",
       "prepTimeMinutes",
       "cookingInstructions",
       "sellingPrice",
@@ -383,6 +410,7 @@ export class RecipeVersionRepository {
       { key: "wasteBufferPercentage", name: "Waste Buffer %" },
       { key: "totalCost", name: "Total Cost" },
       { key: "profitMargin", name: "Profit Margin %" },
+      { key: "calories", name: "Calories" },
     ];
 
     const textFields: Array<{
@@ -394,6 +422,8 @@ export class RecipeVersionRepository {
       { key: "category", name: "Category" },
       { key: "currency", name: "Currency" },
       { key: "cookingInstructions", name: "Cooking Instructions" },
+      { key: "allergens", name: "Allergens" },
+      { key: "dietaryRestrictions", name: "Dietary Restrictions" },
     ];
 
     // Process numeric fields with percentage change
@@ -464,7 +494,10 @@ export class RecipeVersionRepository {
 
         ingredientDiff.push({
           ingredientId: oldIng.ingredient_id,
-          ingredientName: `Ingredient ${oldIng.ingredient_id}`,
+          subRecipeId: oldIng.sub_recipe_id,
+          ingredientName: oldIng.ingredient_id
+            ? `Ingredient ${oldIng.ingredient_id}`
+            : `Sub-Recipe ${oldIng.sub_recipe_id}`,
           changeType: isModified ? "modified" : "unchanged",
           quantityChange: isModified
             ? { old: oldIng.quantity, new: newIng.quantity }
@@ -475,6 +508,7 @@ export class RecipeVersionRepository {
           unitChange: isModified
             ? { old: oldIng.unit, new: newIng.unit }
             : undefined,
+          isSubRecipe: !!oldIng.sub_recipe_id,
         });
       }
     }
@@ -489,7 +523,10 @@ export class RecipeVersionRepository {
       const matchIndex = v2Pool.findIndex(
         (newIng, idx) =>
           !matchedIndicesV2.has(idx) &&
-          newIng.ingredient_id === oldIng.ingredient_id,
+          ((oldIng.ingredient_id &&
+            newIng.ingredient_id === oldIng.ingredient_id) ||
+            (oldIng.sub_recipe_id &&
+              newIng.sub_recipe_id === oldIng.sub_recipe_id)),
       );
 
       if (matchIndex !== -1) {
@@ -506,7 +543,10 @@ export class RecipeVersionRepository {
 
         ingredientDiff.push({
           ingredientId: oldIng.ingredient_id,
-          ingredientName: `Ingredient ${oldIng.ingredient_id}`,
+          subRecipeId: oldIng.sub_recipe_id,
+          ingredientName: oldIng.ingredient_id
+            ? `Ingredient ${oldIng.ingredient_id}`
+            : `Sub-Recipe ${oldIng.sub_recipe_id}`,
           changeType: isModified ? "modified" : "unchanged",
           quantityChange: isModified
             ? { old: oldIng.quantity, new: newIng.quantity }
@@ -517,6 +557,7 @@ export class RecipeVersionRepository {
           unitChange: isModified
             ? { old: oldIng.unit, new: newIng.unit }
             : undefined,
+          isSubRecipe: !!oldIng.sub_recipe_id,
         });
       }
     }
@@ -528,11 +569,15 @@ export class RecipeVersionRepository {
         const oldIng = v1Pool[i];
         ingredientDiff.push({
           ingredientId: oldIng.ingredient_id,
-          ingredientName: `Ingredient ${oldIng.ingredient_id}`,
+          subRecipeId: oldIng.sub_recipe_id,
+          ingredientName: oldIng.ingredient_id
+            ? `Ingredient ${oldIng.ingredient_id}`
+            : `Sub-Recipe ${oldIng.sub_recipe_id}`,
           changeType: "removed",
           quantityChange: { old: oldIng.quantity, new: 0 },
           costChange: { old: oldIng.cost, new: null },
           unitChange: { old: oldIng.unit, new: "" },
+          isSubRecipe: !!oldIng.sub_recipe_id,
         });
       }
     }
@@ -543,11 +588,15 @@ export class RecipeVersionRepository {
         const newIng = v2Pool[i];
         ingredientDiff.push({
           ingredientId: newIng.ingredient_id,
-          ingredientName: `Ingredient ${newIng.ingredient_id}`,
+          subRecipeId: newIng.sub_recipe_id,
+          ingredientName: newIng.ingredient_id
+            ? `Ingredient ${newIng.ingredient_id}`
+            : `Sub-Recipe ${newIng.sub_recipe_id}`,
           changeType: "added",
           quantityChange: { old: 0, new: newIng.quantity },
           costChange: { old: null, new: newIng.cost },
           unitChange: { old: "", new: newIng.unit },
+          isSubRecipe: !!newIng.sub_recipe_id,
         });
       }
     }
@@ -667,29 +716,9 @@ export class RecipeVersionRepository {
   /**
    * Map database row to RecipeVersion
    */
-  private mapToRecipeVersion(row: {
-    id: number;
-    recipe_id: number;
-    version_number: number;
-    name: string;
-    description: string | null;
-    category: string | null;
-    servings: number;
-    prep_time_minutes: number | null;
-    cooking_instructions: string | null;
-    selling_price: number | null;
-    currency: string;
-    target_cost_percentage: number | null;
-    waste_buffer_percentage: number | null;
-    total_cost: number | null;
-    profit_margin: number | null;
-    ingredients_snapshot: string;
-    change_reason: string | null;
-    change_notes: string | null;
-    created_by: string | null;
-    created_at: string;
-    is_current: number;
-  }): RecipeVersion {
+  private mapToRecipeVersion(
+    row: Selectable<RecipeVersionsTable>,
+  ): RecipeVersion {
     return {
       id: row.id,
       recipeId: row.recipe_id,
@@ -698,6 +727,8 @@ export class RecipeVersionRepository {
       description: row.description,
       category: row.category,
       servings: row.servings,
+      yieldAmount: row.yield_amount,
+      yieldUnit: row.yield_unit,
       prepTimeMinutes: row.prep_time_minutes,
       cookingInstructions: row.cooking_instructions,
       sellingPrice: row.selling_price,
@@ -710,6 +741,11 @@ export class RecipeVersionRepository {
       changeReason: row.change_reason,
       changeNotes: row.change_notes,
       createdBy: row.created_by,
+      allergens: row.allergens ? JSON.parse(row.allergens) : [],
+      dietaryRestrictions: row.dietary_restrictions
+        ? JSON.parse(row.dietary_restrictions)
+        : [],
+      calories: row.calories,
       createdAt: row.created_at,
       isCurrent: row.is_current === 1,
     };

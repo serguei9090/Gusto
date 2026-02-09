@@ -74,6 +74,8 @@ async function initSchema(db: Database) {
         current_stock REAL DEFAULT 0,
         last_updated TEXT DEFAULT CURRENT_TIMESTAMP,
         notes TEXT,
+        purchase_unit TEXT,
+        conversion_ratio REAL DEFAULT 1,
         FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
       )
     `);
@@ -93,6 +95,14 @@ async function initSchema(db: Database) {
         waste_buffer_percentage REAL DEFAULT 0,
         total_cost REAL,
         profit_margin REAL,
+        current_version INTEGER DEFAULT 1,
+        last_version_date TEXT,
+        is_experiment INTEGER DEFAULT 0,
+        parent_recipe_id INTEGER,
+        experiment_name TEXT,
+        allergens TEXT,
+        dietary_restrictions TEXT,
+        calories INTEGER,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
@@ -153,58 +163,7 @@ async function initSchema(db: Database) {
       )
     `);
 
-    // Migration: Add Triggers for automatic stock management
-    if (dbInstance) {
-      const db = dbInstance;
-      try {
-        // Purchase increases stock
-        await db.execute(`
-          CREATE TRIGGER IF NOT EXISTS update_stock_after_purchase
-          AFTER INSERT ON inventory_transactions
-          FOR EACH ROW
-          WHEN NEW.transaction_type = 'purchase'
-          BEGIN
-            UPDATE ingredients 
-            SET current_stock = current_stock + NEW.quantity,
-                last_updated = CURRENT_TIMESTAMP
-            WHERE id = NEW.ingredient_id;
-          END;
-        `);
-
-        // Usage/Waste decreases stock
-        await db.execute(`
-          CREATE TRIGGER IF NOT EXISTS update_stock_after_usage
-          AFTER INSERT ON inventory_transactions
-          FOR EACH ROW
-          WHEN NEW.transaction_type IN ('usage', 'waste')
-          BEGIN
-            UPDATE ingredients 
-            SET current_stock = current_stock - NEW.quantity,
-                last_updated = CURRENT_TIMESTAMP
-            WHERE id = NEW.ingredient_id;
-          END;
-        `);
-
-        // Adjustment directly sets a delta (if we want to use quantity as delta)
-        await db.execute(`
-          CREATE TRIGGER IF NOT EXISTS update_stock_after_adjustment
-          AFTER INSERT ON inventory_transactions
-          FOR EACH ROW
-          WHEN NEW.transaction_type = 'adjustment'
-          BEGIN
-            UPDATE ingredients 
-            SET current_stock = current_stock + NEW.quantity,
-                last_updated = CURRENT_TIMESTAMP
-            WHERE id = NEW.ingredient_id;
-          END;
-        `);
-
-        console.log("⚡ Stock management triggers initialized");
-      } catch (e) {
-        console.error("❌ Failed to initialize triggers:", e);
-      }
-    }
-
+    // triggers removed - stock management handled in repository
     console.log("✅ Database schema initialized");
   }
 }

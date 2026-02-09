@@ -1,4 +1,4 @@
-import { Calculator, ChevronRight, Info } from "lucide-react";
+import { ArrowRightLeft, Calculator, ChevronRight, Info } from "lucide-react";
 import { useState } from "react";
 import {
   Select,
@@ -12,6 +12,7 @@ import { LaborCosting } from "./components/LaborCosting";
 import { PlateCostSandbox } from "./components/PlateCostSandbox";
 // Import sub-calculators
 import { PricingCalculator } from "./components/PricingCalculator";
+import { SimpleUnitConversion } from "./components/SimpleUnitConversion";
 import { UnitConversion } from "./components/UnitConversion";
 import { YieldCalculator } from "./components/YieldCalculator";
 
@@ -49,6 +50,11 @@ export const CalculatorsPage = () => {
       name: "Labor-Inclusive Prime Cost",
       icon: <Calculator className="h-4 w-4" />,
     },
+    {
+      id: "simple_conversion",
+      name: "Simple Unit Converter",
+      icon: <ArrowRightLeft className="h-4 w-4" />,
+    },
   ];
 
   const renderCalculator = () => {
@@ -65,6 +71,8 @@ export const CalculatorsPage = () => {
         return <UnitConversion />;
       case "labor":
         return <LaborCosting />;
+      case "simple_conversion":
+        return <SimpleUnitConversion />;
       default:
         return <PricingCalculator />;
     }

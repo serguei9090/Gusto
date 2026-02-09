@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/hooks/useTranslation";
-import type { Recipe } from "@/types/ingredient.types";
+import type { Recipe, UpdateRecipeInput } from "@/types/ingredient.types";
 import { useRecipeStore } from "../store/recipes.store";
 import { BulkRollbackDialog } from "./BulkRollbackDialog";
 import { RecipeDetailModal } from "./RecipeDetailModal";
@@ -64,10 +64,22 @@ export const RecipesPage = () => {
 
   const handleCreateOrUpdate = async (data: RecipeFormData) => {
     try {
+      // Clean data to match store expectations (remove UI-only fields from ingredients)
+      const cleanData = {
+        ...data,
+        ingredients: data.ingredients.map((ing) => ({
+          ingredientId: ing.ingredientId,
+          subRecipeId: ing.subRecipeId,
+          quantity: ing.quantity,
+          unit: ing.unit,
+        })),
+      };
+
       if (editingRecipeId) {
-        await updateRecipe(editingRecipeId, data);
+        await updateRecipe(editingRecipeId, cleanData as UpdateRecipeInput);
       } else {
-        await createRecipe(data);
+        // Use type intersection to match store requirements without using 'any'
+        await createRecipe(cleanData as Parameters<typeof createRecipe>[0]);
       }
       handleCloseForm();
     } catch (err) {
@@ -153,6 +165,7 @@ export const RecipesPage = () => {
           ) : (
             <RecipeForm
               onSubmit={handleCreateOrUpdate}
+              recipeId={editingRecipeId || undefined}
               initialData={
                 editingRecipeId && selectedRecipe
                   ? ({
@@ -177,6 +190,8 @@ export const RecipesPage = () => {
                         name: ing.ingredientName,
                         price: ing.currentPricePerUnit,
                         ingredientUnit: ing.ingredientUnit,
+                        subRecipeId: ing.subRecipeId,
+                        isSubRecipe: !!ing.subRecipeId,
                       })),
                     } as Partial<RecipeFormData>)
                   : undefined

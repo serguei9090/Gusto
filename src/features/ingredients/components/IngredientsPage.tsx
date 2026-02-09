@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -26,7 +27,7 @@ export const IngredientsPage = () => {
     fetchIngredients,
     createIngredient,
     updateIngredient,
-    deleteIngredient,
+    archiveIngredient,
     searchIngredients,
   } = useIngredientsStore();
 
@@ -36,6 +37,9 @@ export const IngredientsPage = () => {
   const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(
     null,
   );
+  const [ingredientToDelete, setIngredientToDelete] =
+    useState<Ingredient | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -68,9 +72,23 @@ export const IngredientsPage = () => {
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm(t("common.messages.confirmDelete"))) {
-      await deleteIngredient(id);
+  /*
+   * Replaced hard delete with archive to preserve recipe history
+   * and avoid FK constraint errors.
+   */
+  const handleDelete = (id: number) => {
+    const ingredient = ingredients.find((i) => i.id === id);
+    if (ingredient) {
+      setIngredientToDelete(ingredient);
+      setIsDeleteConfirmOpen(true);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (ingredientToDelete) {
+      await archiveIngredient(ingredientToDelete.id);
+      setIsDeleteConfirmOpen(false);
+      setIngredientToDelete(null);
     }
   };
 
@@ -140,7 +158,36 @@ export const IngredientsPage = () => {
             onSubmit={handleCreateOrUpdate}
             onCancel={handleCloseForm}
             isLoading={isLoading}
+            isEdit={!!editingIngredient}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Archive Ingredient</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to archive "{ingredientToDelete?.name}"? It
+              will be removed from the master list but will remain in existing
+              recipes.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setIsDeleteConfirmOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isLoading}
+            >
+              {isLoading ? "Archiving..." : "Archive"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

@@ -13,6 +13,9 @@ export interface IngredientsTable {
   current_stock: number;
   last_updated: Generated<string>;
   notes: string | null;
+  purchase_unit: string | null;
+  conversion_ratio: number | null;
+  is_active: number; // 1 or 0
 }
 
 export interface RecipesTable {
@@ -21,6 +24,8 @@ export interface RecipesTable {
   description: string | null;
   category: string | null;
   servings: number;
+  yield_amount: number | null;
+  yield_unit: string | null;
   prep_time_minutes: number | null;
   cooking_instructions: string | null;
   selling_price: number | null;
@@ -34,6 +39,9 @@ export interface RecipesTable {
   is_experiment: number;
   parent_recipe_id: number | null;
   experiment_name: string | null;
+  allergens: string | null;
+  dietary_restrictions: string | null;
+  calories: number | null;
   created_at: Generated<string>;
   updated_at: Generated<string>;
 }
@@ -41,7 +49,8 @@ export interface RecipesTable {
 export interface RecipeIngredientsTable {
   id: Generated<number>;
   recipe_id: number;
-  ingredient_id: number;
+  ingredient_id: number | null;
+  sub_recipe_id: number | null;
   quantity: number;
   unit: string;
   cost: number | null;
@@ -119,6 +128,8 @@ export interface RecipeVersionsTable {
   description: string | null;
   category: string | null;
   servings: number;
+  yield_amount: number | null;
+  yield_unit: string | null;
   prep_time_minutes: number | null;
   cooking_instructions: string | null;
   selling_price: number | null;
@@ -131,8 +142,20 @@ export interface RecipeVersionsTable {
   change_reason: string | null;
   change_notes: string | null;
   created_by: string | null;
+  allergens: string | null;
+  dietary_restrictions: string | null;
+  calories: number | null;
   created_at: Generated<string>;
   is_current: number; // 1 or 0
+}
+
+export interface ConfigurationItemsTable {
+  id: Generated<number>;
+  type: string;
+  name: string;
+  is_default: number; // 1 or 0
+  created_at: Generated<string>;
+  order_index: number | null;
 }
 
 export interface Database {
@@ -146,4 +169,5 @@ export interface Database {
   exchange_rates: ExchangeRatesTable;
   app_settings: AppSettingsTable;
   recipe_versions: RecipeVersionsTable;
+  configuration_items: ConfigurationItemsTable;
 }

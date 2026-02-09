@@ -1,29 +1,10 @@
 import { z } from "zod";
-import { SUPPORTED_CURRENCIES } from "./currency";
 
-// Ingredient Category Enum
-export const ingredientCategorySchema = z.enum([
-  "protein",
-  "vegetable",
-  "dairy",
-  "spice",
-  "grain",
-  "fruit",
-  "condiment",
-  "other",
-]);
+// Ingredient Category
+export const ingredientCategorySchema = z.string();
 
-// Unit of Measure Enum
-export const unitOfMeasureSchema = z.enum([
-  "kg",
-  "g",
-  "l",
-  "ml",
-  "piece",
-  "cup",
-  "tbsp",
-  "tsp",
-]);
+// Unit of Measure
+export const unitOfMeasureSchema = z.string().min(1, "Unit is required");
 
 // Create Ingredient Schema
 export const createIngredientSchema = z.object({
@@ -32,25 +13,20 @@ export const createIngredientSchema = z.object({
   unitOfMeasure: unitOfMeasureSchema,
   currentPrice: z.number().positive("Price must be positive"),
   pricePerUnit: z.number().positive("Price per unit must be positive"),
-  currency: z.enum(SUPPORTED_CURRENCIES).default("USD"),
+  currency: z.string().length(3).default("USD"),
   supplierId: z.number().int().positive().nullable().optional(),
   minStockLevel: z.number().nonnegative().nullable().optional(),
   currentStock: z.number().nonnegative().default(0),
   notes: z.string().max(500).nullable().optional(),
+  purchaseUnit: z.string().max(50).nullable().optional(),
+  conversionRatio: z.number().positive().nullable().optional(),
 });
 
 // Update Ingredient Schema (all fields optional)
 export const updateIngredientSchema = createIngredientSchema.partial();
 
-// Recipe Category Enum
-export const recipeCategorySchema = z.enum([
-  "appetizer",
-  "main",
-  "dessert",
-  "beverage",
-  "side",
-  "other",
-]);
+// Recipe Category
+export const recipeCategorySchema = z.string().min(1, "Category is required");
 
 // Transaction Type Enum
 export const transactionTypeSchema = z.enum([
@@ -79,15 +55,15 @@ export const createSupplierSchema = z.object({
 export const createRecipeSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   description: z.string().max(1000).nullable().optional(),
-  category: recipeCategorySchema.nullable().optional(),
+  category: recipeCategorySchema,
   servings: z.number().int().positive("Servings must be positive"),
-  prepTimeMinutes: z.number().int().nonnegative().nullable().optional(),
+  prepTimeMinutes: z.number().int().nonnegative(),
   cookingInstructions: z.string().nullable().optional(),
   sellingPrice: z.preprocess(
     (v) => (v === "" || v === null || Number.isNaN(v) ? undefined : v),
     z.number().optional(),
   ),
-  currency: z.enum(SUPPORTED_CURRENCIES).default("USD"),
+  currency: z.string().length(3).default("USD"),
   targetCostPercentage: z.preprocess(
     (v) => (v === "" || v === null || Number.isNaN(v) ? undefined : v),
     z.number().min(0).max(100).optional(),
@@ -96,16 +72,29 @@ export const createRecipeSchema = z.object({
     (v) => (v === "" || v === null || Number.isNaN(v) ? undefined : v),
     z.number().min(0).max(100).optional().default(0),
   ),
+  allergens: z.array(z.string()).optional().default([]),
+  dietaryRestrictions: z.array(z.string()).optional().default([]),
+  calories: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? undefined : v),
+    z.number().int().nonnegative().optional(),
+  ),
+  yieldAmount: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? undefined : v),
+    z.number().positive().optional(),
+  ),
+  yieldUnit: z.string().max(50).nullable().optional(),
 });
 
 export const recipeIngredientFormSchema = z.object({
-  ingredientId: z.number().int().positive("Ingredient required"),
+  ingredientId: z.number().int().positive().nullable(),
+  subRecipeId: z.number().int().positive().nullable().optional(),
   quantity: z.number().positive("Quantity must be positive"),
   unit: z.string().min(1, "Unit required"),
   // UI Helpers
   name: z.string().optional(),
   price: z.number().optional(),
   ingredientUnit: z.string().optional(),
+  isSubRecipe: z.boolean().optional().default(false),
 });
 
 export const recipeFormSchema = createRecipeSchema.extend({
@@ -119,7 +108,7 @@ export const createTransactionSchema = z.object({
   quantity: z.number(),
   costPerUnit: z.number().positive().nullable().optional(),
   totalCost: z.number().nullable().optional(),
-  currency: z.enum(SUPPORTED_CURRENCIES).optional(),
+  currency: z.string().length(3).optional(),
   reference: z.string().max(100).nullable().optional(),
   notes: z.string().max(500).nullable().optional(),
 });

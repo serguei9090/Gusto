@@ -18,6 +18,7 @@ interface IngredientsState {
   createIngredient: (data: CreateIngredientInput) => Promise<void>;
   updateIngredient: (id: number, data: UpdateIngredientInput) => Promise<void>;
   deleteIngredient: (id: number) => Promise<void>;
+  archiveIngredient: (id: number) => Promise<void>;
   searchIngredients: (query: string) => Promise<void>;
 }
 
@@ -75,6 +76,21 @@ export const useIngredientsStore = create<IngredientsState>((set, get) => ({
       "deleteIngredient",
       async () => {
         await ingredientsRepository.delete(id);
+        await get().fetchIngredients();
+      },
+      (err) => {
+        set({ error: String(err), isLoading: false });
+        throw err;
+      },
+    );
+  },
+
+  archiveIngredient: async (id) => {
+    set({ isLoading: true, error: null });
+    await runWithHandling(
+      "archiveIngredient",
+      async () => {
+        await ingredientsRepository.archive(id);
         await get().fetchIngredients();
       },
       (err) => {

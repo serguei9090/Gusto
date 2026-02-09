@@ -33,6 +33,9 @@ export interface Ingredient {
   currentStock: number;
   lastUpdated: string;
   notes: string | null;
+  purchaseUnit?: string | null;
+  conversionRatio?: number | null;
+  isActive: boolean;
 }
 
 export interface CreateIngredientInput {
@@ -46,6 +49,9 @@ export interface CreateIngredientInput {
   minStockLevel?: number | null;
   currentStock?: number;
   notes?: string | null;
+  purchaseUnit?: string | null;
+  conversionRatio?: number | null;
+  isActive?: boolean;
 }
 
 export interface UpdateIngredientInput {
@@ -59,4 +65,7 @@ export interface UpdateIngredientInput {
   minStockLevel?: number | null;
   currentStock?: number;
   notes?: string | null;
+  purchaseUnit?: string | null;
+  conversionRatio?: number | null;
+  isActive?: boolean;
 }

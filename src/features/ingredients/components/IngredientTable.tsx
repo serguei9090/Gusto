@@ -78,7 +78,7 @@ export const IngredientTable = ({
               </td>
               <td className="p-4 align-middle">
                 <span className="flex items-center gap-2">
-                  {ing.currentStock} {ing.unitOfMeasure}
+                  {Number(ing.currentStock.toFixed(2))} {ing.unitOfMeasure}
                   {ing.minStockLevel &&
                     ing.currentStock <= ing.minStockLevel && (
                       <span title="Low Stock">

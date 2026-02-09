@@ -11,12 +11,14 @@ interface UnitSelectProps {
   value: string;
   onValueChange: (value: string) => void;
   className?: string;
+  category?: string;
 }
 
 export const UnitSelect = ({
   value,
   onValueChange,
   className,
+  category,
 }: UnitSelectProps) => {
   return (
     <Select value={value} onValueChange={onValueChange}>
@@ -24,18 +26,24 @@ export const UnitSelect = ({
         <SelectValue placeholder="Unit" />
       </SelectTrigger>
       <SelectContent>
-        {Object.entries(UNIT_TYPES).map(([type, units]) => (
-          <div key={type}>
-            <div className="px-2 py-1 text-xs font-bold text-muted-foreground uppercase bg-muted/30">
-              {type}
-            </div>
-            {units.map((u) => (
+        {category && UNIT_TYPES[category]
+          ? UNIT_TYPES[category].map((u) => (
               <SelectItem key={u} value={u}>
                 {u}
               </SelectItem>
+            ))
+          : Object.entries(UNIT_TYPES).map(([type, units]) => (
+              <div key={type}>
+                <div className="px-2 py-1 text-xs font-bold text-muted-foreground uppercase bg-muted/30">
+                  {type}
+                </div>
+                {units.map((u) => (
+                  <SelectItem key={u} value={u}>
+                    {u}
+                  </SelectItem>
+                ))}
+              </div>
             ))}
-          </div>
-        ))}
       </SelectContent>
     </Select>
   );
