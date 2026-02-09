@@ -97,6 +97,7 @@ export class RecipesRepository {
         currency: "USD", // Default if not provided
         target_cost_percentage: data.targetCostPercentage || null,
         waste_buffer_percentage: data.wasteBufferPercentage || null,
+        is_experiment: 0,
       })
       .returningAll()
       .executeTakeFirstOrThrow();
@@ -275,6 +276,119 @@ export class RecipesRepository {
       .execute();
   }
 
+  // --- Experiment Management ---
+
+  /**
+   * Create an experiment (variant) from an existing recipe
+   */
+  async createExperiment(
+    parentRecipeId: number,
+    experimentName: string,
+  ): Promise<Recipe> {
+    const parentRecipe = await this.getById(parentRecipeId);
+    if (!parentRecipe) {
+      throw new Error(`Parent recipe ${parentRecipeId} not found`);
+    }
+
+    // Create a copy of the recipe as an experiment
+    const experimentRecipe = await db
+      .insertInto("recipes")
+      .values({
+        name: `${parentRecipe.name} - ${experimentName}`,
+        description: parentRecipe.description,
+        category: parentRecipe.category,
+        servings: parentRecipe.servings,
+        prep_time_minutes: parentRecipe.prepTimeMinutes,
+        cooking_instructions: parentRecipe.cookingInstructions,
+        selling_price: parentRecipe.sellingPrice,
+        currency: parentRecipe.currency,
+        target_cost_percentage: parentRecipe.targetCostPercentage,
+        waste_buffer_percentage: parentRecipe.wasteBufferPercentage,
+        total_cost: parentRecipe.totalCost,
+        profit_margin: parentRecipe.profitMargin,
+        is_experiment: 1,
+        parent_recipe_id: parentRecipeId,
+        experiment_name: experimentName,
+      })
+      .returningAll()
+      .executeTakeFirstOrThrow();
+
+    // Copy ingredients
+    if (parentRecipe.ingredients && parentRecipe.ingredients.length > 0) {
+      await db
+        .insertInto("recipe_ingredients")
+        .values(
+          parentRecipe.ingredients.map((ing) => ({
+            recipe_id: experimentRecipe.id,
+            ingredient_id: ing.ingredientId,
+            quantity: ing.quantity,
+            unit: ing.unit,
+            cost: ing.cost,
+            notes: ing.notes,
+          })),
+        )
+        .execute();
+    }
+
+    return this.mapRowToRecipe(experimentRecipe);
+  }
+
+  /**
+   * Get all experiments for a parent recipe
+   */
+  async getExperiments(parentRecipeId: number): Promise<Recipe[]> {
+    const rows = await db
+      .selectFrom("recipes")
+      .selectAll()
+      .where("parent_recipe_id", "=", parentRecipeId)
+      .where("is_experiment", "=", 1)
+      .orderBy("created_at", "desc")
+      .execute();
+
+    return rows.map(this.mapRowToRecipe);
+  }
+
+  /**
+   * Apply experiment changes to the parent recipe
+   */
+  async applyExperimentToParent(experimentId: number): Promise<void> {
+    const experiment = await this.getById(experimentId);
+    if (!experiment) {
+      throw new Error(`Experiment ${experimentId} not found`);
+    }
+
+    // Get parent recipe ID from the experiment row
+    const experimentRow = await db
+      .selectFrom("recipes")
+      .select(["parent_recipe_id", "is_experiment"])
+      .where("id", "=", experimentId)
+      .executeTakeFirst();
+
+    if (!experimentRow?.is_experiment || !experimentRow.parent_recipe_id) {
+      throw new Error("Recipe is not an experiment or has no parent");
+    }
+
+    const parentId = experimentRow.parent_recipe_id;
+
+    // Update parent with experiment data
+    await this.update(parentId, {
+      name: experiment.name.replace(/ - .*$/, ""), // Remove experiment suffix
+      description: experiment.description,
+      category: experiment.category,
+      servings: experiment.servings,
+      prepTimeMinutes: experiment.prepTimeMinutes,
+      cookingInstructions: experiment.cookingInstructions,
+      sellingPrice: experiment.sellingPrice,
+      targetCostPercentage: experiment.targetCostPercentage,
+      wasteBufferPercentage: experiment.wasteBufferPercentage,
+      ingredients: experiment.ingredients?.map((ing) => ({
+        ingredientId: ing.ingredientId,
+        quantity: ing.quantity,
+        unit: ing.unit,
+      })),
+    });
+  }
+
   private mapRowToRecipe(row: RecipeRow): Recipe {
     return {
       id: row.id,
@@ -292,6 +406,9 @@ export class RecipesRepository {
       profitMargin: row.profit_margin || 0,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      isExperiment: row.is_experiment === 1,
+      parentRecipeId: row.parent_recipe_id || undefined,
+      experimentName: row.experiment_name || undefined,
     };
   }
 }

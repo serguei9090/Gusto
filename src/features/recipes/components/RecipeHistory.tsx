@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Eye, History, RotateCcw } from "lucide-react";
+import { Download, Eye, GitCompare, History, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -26,11 +27,14 @@ import type {
 import { calculateSuggestedPrice } from "@/utils/costEngine";
 import type { Currency } from "@/utils/currency";
 import {
+  type DetailedVersionDiff,
+  type IngredientDiff,
   type RecipeVersion,
   recipeVersionRepository,
 } from "../services/recipeVersion.repository";
 import { useRecipeStore } from "../store/recipes.store";
 import { RecipeOverview } from "./RecipeOverview";
+import { VersionDiffView } from "./VersionDiffView";
 
 interface RecipeHistoryProps {
   recipeId: number;
@@ -45,6 +49,15 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
   const [viewingVersion, setViewingVersion] = useState<RecipeVersion | null>(
     null,
   );
+  const [selectedVersions, setSelectedVersions] = useState<Set<number>>(
+    new Set(),
+  );
+  const [comparingVersions, setComparingVersions] = useState<{
+    version1: number;
+    version2: number;
+    recipeDiff: DetailedVersionDiff[];
+    ingredientDiff: IngredientDiff[];
+  } | null>(null);
 
   const loadHistory = useCallback(async () => {
     setLoading(true);
@@ -84,6 +97,66 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
     } catch (error) {
       console.error("Failed to rollback", error);
       alert("Failed to rollback to version");
+    }
+  };
+
+  const handleCompare = async () => {
+    const versions = Array.from(selectedVersions).sort((a, b) => a - b);
+    if (versions.length !== 2) return;
+
+    try {
+      const diff = await recipeVersionRepository.compareVersionsDetailed(
+        recipeId,
+        versions[0],
+        versions[1],
+      );
+      setComparingVersions({
+        version1: versions[0],
+        version2: versions[1],
+        ...diff,
+      });
+      setSelectedVersions(new Set()); // Clear selection after compare
+    } catch (error) {
+      console.error("Failed to compare versions", error);
+      alert("Failed to compare versions");
+    }
+  };
+
+  const toggleVersionSelection = (versionNumber: number) => {
+    setSelectedVersions((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(versionNumber)) {
+        newSet.delete(versionNumber);
+      } else {
+        newSet.add(versionNumber);
+      }
+      return newSet;
+    });
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const csv = await recipeVersionRepository.exportHistoryToCSV(recipeId);
+
+      // Get recipe name for filename
+      const recipeName = versions[0]?.name || "recipe";
+      const fileName = `${recipeName.toLowerCase().replace(/\s+/g, "-")}-history.csv`;
+
+      // Create blob and download
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", fileName);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to export history", error);
+      alert("Failed to export history");
     }
   };
 
@@ -143,8 +216,24 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
     );
   }
 
+  const selectedCount = selectedVersions.size;
+
   return (
     <>
+      {/* Action Buttons */}
+      <div className="mb-4 flex justify-between items-center">
+        <Button onClick={handleExportCSV} variant="outline" size="sm">
+          <Download className="h-4 w-4 mr-2" />
+          Export History
+        </Button>
+
+        {selectedCount === 2 && (
+          <Button onClick={handleCompare} variant="default" size="sm">
+            <GitCompare className="h-4 w-4 mr-2" />
+            Compare Selected
+          </Button>
+        )}
+      </div>
       <ScrollArea className="h-[400px] pr-4">
         <div className="space-y-4">
           {versions.map((version) => (
@@ -154,19 +243,33 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
             >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      Version {version.versionNumber}
-                      {version.isCurrent && (
-                        <Badge variant="default" className="text-xs">
-                          Current
-                        </Badge>
-                      )}
-                    </CardTitle>
-                    <CardDescription>
-                      {format(new Date(version.createdAt), "PPP p")}
-                      {version.createdBy && ` by ${version.createdBy}`}
-                    </CardDescription>
+                  <div className="flex items-center gap-2">
+                    {/* Checkbox for comparison */}
+                    <Checkbox
+                      checked={selectedVersions.has(version.versionNumber)}
+                      onCheckedChange={() =>
+                        toggleVersionSelection(version.versionNumber)
+                      }
+                      disabled={
+                        selectedCount === 2 &&
+                        !selectedVersions.has(version.versionNumber)
+                      }
+                      aria-label={`Select version ${version.versionNumber}`}
+                    />
+                    <div>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        Version {version.versionNumber}
+                        {version.isCurrent && (
+                          <Badge variant="default" className="text-xs">
+                            Current
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      <CardDescription>
+                        {format(new Date(version.createdAt), "PPP p")}
+                        {version.createdBy && ` by ${version.createdBy}`}
+                      </CardDescription>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -234,7 +337,7 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
           ))}
         </div>
       </ScrollArea>
-
+      {/* Version Detail Dialog */}{" "}
       <Dialog
         open={!!viewingVersion}
         onOpenChange={(open) => !open && setViewingVersion(null)}
@@ -247,6 +350,25 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
           </DialogHeader>
           {viewingVersion && (
             <RecipeOverview recipe={mapVersionToRecipe(viewingVersion)} />
+          )}
+        </DialogContent>
+      </Dialog>
+      {/* Version Comparison Dialog */}
+      <Dialog
+        open={!!comparingVersions}
+        onOpenChange={(open) => !open && setComparingVersions(null)}
+      >
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto z-[200]">
+          <DialogHeader>
+            <DialogTitle>Version Comparison</DialogTitle>
+          </DialogHeader>
+          {comparingVersions && (
+            <VersionDiffView
+              version1Number={comparingVersions.version1}
+              version2Number={comparingVersions.version2}
+              recipeDiff={comparingVersions.recipeDiff}
+              ingredientDiff={comparingVersions.ingredientDiff}
+            />
           )}
         </DialogContent>
       </Dialog>

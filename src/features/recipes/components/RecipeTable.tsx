@@ -11,6 +11,7 @@ import {
 import type { Recipe } from "@/types/ingredient.types";
 import { calculateSuggestedPrice } from "@/utils/costEngine";
 import { formatCurrencyAmount } from "@/utils/currencyConverter";
+import { ExperimentBadge } from "./ExperimentBadge";
 
 interface RecipeTableProps {
   recipes: Recipe[];
@@ -67,7 +68,19 @@ export const RecipeTable = ({
         <TableBody>
           {recipes.map((recipe) => (
             <TableRow key={recipe.id}>
-              <TableCell className="font-medium">{recipe.name}</TableCell>
+              <TableCell className="font-medium">
+                <div className="flex flex-col gap-1">
+                  <span className="flex items-center gap-2">
+                    {recipe.name}
+                    {recipe.isExperiment && (
+                      <ExperimentBadge
+                        experimentName={recipe.experimentName}
+                        className="text-[10px] h-4"
+                      />
+                    )}
+                  </span>
+                </div>
+              </TableCell>
               <TableCell className="capitalize">
                 {recipe.category || "-"}
               </TableCell>

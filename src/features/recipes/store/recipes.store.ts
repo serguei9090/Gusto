@@ -31,6 +31,12 @@ interface RecipeStore {
   selectRecipe: (recipe: RecipeWithIngredients | null) => void;
   setSearchQuery: (query: string) => void;
   setCategoryFilter: (category: RecipeCategory | "all") => void;
+  createExperiment: (
+    recipeId: number,
+    experimentName: string,
+  ) => Promise<Recipe>;
+  applyExperimentToParent: (experimentId: number) => Promise<void>;
+  bulkRollback: (date: string, reason?: string) => Promise<number>;
 }
 
 export const useRecipeStore = create<RecipeStore>((set, _get) => ({
@@ -157,7 +163,94 @@ export const useRecipeStore = create<RecipeStore>((set, _get) => ({
     }
   },
 
-  selectRecipe: (recipe) => set({ selectedRecipe: recipe }),
-  setSearchQuery: (query) => set({ searchQuery: query }),
-  setCategoryFilter: (category) => set({ categoryFilter: category }),
+  selectRecipe: (recipe: RecipeWithIngredients | null) =>
+    set({ selectedRecipe: recipe }),
+  setSearchQuery: (query: string) => set({ searchQuery: query }),
+  setCategoryFilter: (category: RecipeCategory | "all") =>
+    set({ categoryFilter: category }),
+
+  createExperiment: async (recipeId: number, experimentName: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const newRecipe = await recipesRepository.createExperiment(
+        recipeId,
+        experimentName,
+      );
+      set((state) => ({
+        recipes: [...state.recipes, newRecipe],
+        isLoading: false,
+      }));
+      return newRecipe;
+    } catch (error) {
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to create experiment",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  applyExperimentToParent: async (experimentId: number) => {
+    set({ isLoading: true, error: null });
+    try {
+      await recipesRepository.applyExperimentToParent(experimentId);
+
+      // Re-fetch all since parent was updated
+      const recipes = await recipesRepository.getAll();
+
+      // If the parent was selected, refresh its details (unlikely in this context but for safety)
+      const selected = _get().selectedRecipe;
+      const updatedSelected =
+        selected && recipes.some((r) => r.id === selected.id)
+          ? await recipesRepository.getById(selected.id)
+          : selected;
+
+      set({
+        recipes,
+        selectedRecipe: updatedSelected,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to apply experiment to original",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
+
+  bulkRollback: async (date: string, reason?: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const count = await recipeVersionRepository.bulkRollbackToDate(
+        date,
+        reason,
+      );
+
+      // Refresh all recipes
+      const recipes = await recipesRepository.getAll();
+      set({
+        recipes,
+        selectedRecipe: null, // Clear selection to be safe
+        isLoading: false,
+      });
+
+      return count;
+    } catch (error) {
+      set({
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to perform bulk rollback",
+        isLoading: false,
+      });
+      throw error;
+    }
+  },
 }));

@@ -100,6 +100,9 @@ export interface Recipe {
   profitMargin: number | null;
   createdAt: string;
   updatedAt: string;
+  isExperiment?: boolean;
+  parentRecipeId?: number;
+  experimentName?: string;
 }
 
 export interface CreateRecipeInput {

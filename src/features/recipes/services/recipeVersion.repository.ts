@@ -46,6 +46,23 @@ export interface VersionComparison {
   changed: boolean;
 }
 
+export interface DetailedVersionDiff {
+  field: string;
+  oldValue: unknown;
+  newValue: unknown;
+  changeType: "added" | "removed" | "modified" | "unchanged";
+  percentChange?: number; // For numeric fields
+}
+
+export interface IngredientDiff {
+  ingredientId: number;
+  ingredientName: string;
+  changeType: "added" | "removed" | "modified" | "unchanged";
+  quantityChange?: { old: number; new: number };
+  costChange?: { old: number | null; new: number | null };
+  unitChange?: { old: string; new: string };
+}
+
 /**
  * Repository for managing recipe versions
  */
@@ -245,6 +262,39 @@ export class RecipeVersionRepository {
   }
 
   /**
+   * Bulk rollback all recipes to their state at a specific date/time
+   * Returns the number of recipes affected
+   */
+  async bulkRollbackToDate(date: string, reason?: string): Promise<number> {
+    // Get all recipe IDs
+    const recipeIds = await db.selectFrom("recipes").select("id").execute();
+
+    let affectedCount = 0;
+
+    for (const { id } of recipeIds) {
+      // Find the most recent version before the given date
+      const version = await db
+        .selectFrom("recipe_versions")
+        .select("version_number")
+        .where("recipe_id", "=", id)
+        .where("created_at", "<=", date)
+        .orderBy("created_at", "desc")
+        .executeTakeFirst();
+
+      if (version) {
+        await this.rollbackToVersion(
+          id,
+          version.version_number,
+          reason || `Bulk rollback to state at ${date}`,
+        );
+        affectedCount++;
+      }
+    }
+
+    return affectedCount;
+  }
+
+  /**
    * Compare two versions
    */
   async compareVersions(
@@ -299,6 +349,274 @@ export class RecipeVersionRepository {
     });
 
     return comparisons;
+  }
+
+  /**
+   * Compare two versions with detailed diff information
+   */
+  async compareVersionsDetailed(
+    recipeId: number,
+    version1: number,
+    version2: number,
+  ): Promise<{
+    recipeDiff: DetailedVersionDiff[];
+    ingredientDiff: IngredientDiff[];
+  }> {
+    const v1 = await this.getVersion(recipeId, version1);
+    const v2 = await this.getVersion(recipeId, version2);
+
+    if (!v1 || !v2) {
+      throw new Error("One or both versions not found");
+    }
+
+    // Compare recipe fields
+    const recipeDiff: DetailedVersionDiff[] = [];
+
+    const numericFields: Array<{
+      key: keyof RecipeVersion;
+      name: string;
+    }> = [
+      { key: "servings", name: "Servings" },
+      { key: "prepTimeMinutes", name: "Prep Time (minutes)" },
+      { key: "sellingPrice", name: "Selling Price" },
+      { key: "targetCostPercentage", name: "Target Cost %" },
+      { key: "wasteBufferPercentage", name: "Waste Buffer %" },
+      { key: "totalCost", name: "Total Cost" },
+      { key: "profitMargin", name: "Profit Margin %" },
+    ];
+
+    const textFields: Array<{
+      key: keyof RecipeVersion;
+      name: string;
+    }> = [
+      { key: "name", name: "Name" },
+      { key: "description", name: "Description" },
+      { key: "category", name: "Category" },
+      { key: "currency", name: "Currency" },
+      { key: "cookingInstructions", name: "Cooking Instructions" },
+    ];
+
+    // Process numeric fields with percentage change
+    for (const { key, name } of numericFields) {
+      const oldValue = v1[key] as number | null;
+      const newValue = v2[key] as number | null;
+      const changed = oldValue !== newValue;
+
+      let percentChange: number | undefined;
+      if (changed && oldValue && newValue && oldValue !== 0) {
+        percentChange = ((newValue - oldValue) / oldValue) * 100;
+      }
+
+      recipeDiff.push({
+        field: name,
+        oldValue,
+        newValue,
+        changeType: changed ? "modified" : "unchanged",
+        percentChange,
+      });
+    }
+
+    // Process text fields
+    for (const { key, name } of textFields) {
+      const oldValue = v1[key];
+      const newValue = v2[key];
+      const changed = oldValue !== newValue;
+
+      recipeDiff.push({
+        field: name,
+        oldValue,
+        newValue,
+        changeType: changed ? "modified" : "unchanged",
+      });
+    }
+
+    // Compare ingredients using Hybrid Matching Strategy
+    const ingredientDiff: IngredientDiff[] = [];
+
+    // Pools of ingredients to match
+    // We clone them to be safe
+    const v1Pool = [...v1.ingredientsSnapshot];
+    const v2Pool = [...v2.ingredientsSnapshot];
+
+    // Phase 1: Match by exact Row ID (Stable Identity)
+    // This handles edits to existing rows perfectly if IDs are preserved
+    const matchedIndicesV1 = new Set<number>();
+    const matchedIndicesV2 = new Set<number>();
+
+    for (let i = 0; i < v1Pool.length; i++) {
+      const oldIng = v1Pool[i];
+      // Find matching ID in V2 that hasn't been matched yet
+      const matchIndex = v2Pool.findIndex(
+        (newIng, idx) => !matchedIndicesV2.has(idx) && newIng.id === oldIng.id,
+      );
+
+      if (matchIndex !== -1) {
+        // Matched by ID
+        const newIng = v2Pool[matchIndex];
+        matchedIndicesV1.add(i);
+        matchedIndicesV2.add(matchIndex);
+
+        // Calculate diff
+        const quantityChanged = oldIng.quantity !== newIng.quantity;
+        const costChanged = oldIng.cost !== newIng.cost;
+        const unitChanged = oldIng.unit !== newIng.unit;
+        const isModified = quantityChanged || costChanged || unitChanged;
+
+        ingredientDiff.push({
+          ingredientId: oldIng.ingredient_id,
+          ingredientName: `Ingredient ${oldIng.ingredient_id}`,
+          changeType: isModified ? "modified" : "unchanged",
+          quantityChange: isModified
+            ? { old: oldIng.quantity, new: newIng.quantity }
+            : undefined,
+          costChange: isModified
+            ? { old: oldIng.cost, new: newIng.cost }
+            : undefined,
+          unitChange: isModified
+            ? { old: oldIng.unit, new: newIng.unit }
+            : undefined,
+        });
+      }
+    }
+
+    // Phase 2: Match by Ingredient Type (Semantic Identity)
+    // This handles cases where IDs changed (delete/re-insert) or new duplicates added
+    for (let i = 0; i < v1Pool.length; i++) {
+      if (matchedIndicesV1.has(i)) continue;
+
+      const oldIng = v1Pool[i];
+      // Find matching ingredient_id in remaining V2 items
+      const matchIndex = v2Pool.findIndex(
+        (newIng, idx) =>
+          !matchedIndicesV2.has(idx) &&
+          newIng.ingredient_id === oldIng.ingredient_id,
+      );
+
+      if (matchIndex !== -1) {
+        // Matched by Type
+        const newIng = v2Pool[matchIndex];
+        matchedIndicesV1.add(i);
+        matchedIndicesV2.add(matchIndex);
+
+        // Calculate diff (Assume modified, since mapped by type)
+        const quantityChanged = oldIng.quantity !== newIng.quantity;
+        const costChanged = oldIng.cost !== newIng.cost;
+        const unitChanged = oldIng.unit !== newIng.unit;
+        const isModified = quantityChanged || costChanged || unitChanged;
+
+        ingredientDiff.push({
+          ingredientId: oldIng.ingredient_id,
+          ingredientName: `Ingredient ${oldIng.ingredient_id}`,
+          changeType: isModified ? "modified" : "unchanged",
+          quantityChange: isModified
+            ? { old: oldIng.quantity, new: newIng.quantity }
+            : undefined,
+          costChange: isModified
+            ? { old: oldIng.cost, new: newIng.cost }
+            : undefined,
+          unitChange: isModified
+            ? { old: oldIng.unit, new: newIng.unit }
+            : undefined,
+        });
+      }
+    }
+
+    // Phase 3: Residuals
+    // Remaining V1 -> Removed
+    for (let i = 0; i < v1Pool.length; i++) {
+      if (!matchedIndicesV1.has(i)) {
+        const oldIng = v1Pool[i];
+        ingredientDiff.push({
+          ingredientId: oldIng.ingredient_id,
+          ingredientName: `Ingredient ${oldIng.ingredient_id}`,
+          changeType: "removed",
+          quantityChange: { old: oldIng.quantity, new: 0 },
+          costChange: { old: oldIng.cost, new: null },
+          unitChange: { old: oldIng.unit, new: "" },
+        });
+      }
+    }
+
+    // Remaining V2 -> Added
+    for (let i = 0; i < v2Pool.length; i++) {
+      if (!matchedIndicesV2.has(i)) {
+        const newIng = v2Pool[i];
+        ingredientDiff.push({
+          ingredientId: newIng.ingredient_id,
+          ingredientName: `Ingredient ${newIng.ingredient_id}`,
+          changeType: "added",
+          quantityChange: { old: 0, new: newIng.quantity },
+          costChange: { old: null, new: newIng.cost },
+          unitChange: { old: "", new: newIng.unit },
+        });
+      }
+    }
+
+    return {
+      recipeDiff,
+      ingredientDiff,
+    };
+  }
+
+  /**
+   * Export version history to CSV format
+   */
+  async exportHistoryToCSV(recipeId: number): Promise<string> {
+    const versions = await this.getVersions(recipeId);
+
+    if (versions.length === 0) {
+      throw new Error("No version history to export");
+    }
+
+    // CSV Headers
+    const headers = [
+      "Version",
+      "Date",
+      "Name",
+      "Total Cost",
+      "Profit Margin %",
+      "Selling Price",
+      "Currency",
+      "Servings",
+      "Ingredient Count",
+      "Change Reason",
+      "Change Notes",
+      "Created By",
+    ];
+
+    // Helper to escape CSV values
+    const escapeCSV = (value: unknown): string => {
+      if (value === null || value === undefined) return "";
+      const str = String(value);
+      // Escape quotes and wrap in quotes if contains comma, quote, or newline
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    // Build rows
+    const rows = versions.map((v) => [
+      v.versionNumber,
+      v.createdAt,
+      escapeCSV(v.name),
+      v.totalCost?.toFixed(2) || "0.00",
+      v.profitMargin?.toFixed(2) || "0.00",
+      v.sellingPrice?.toFixed(2) || "",
+      v.currency,
+      v.servings,
+      v.ingredientsSnapshot.length,
+      escapeCSV(v.changeReason || ""),
+      escapeCSV(v.changeNotes || ""),
+      escapeCSV(v.createdBy || ""),
+    ]);
+
+    // Combine headers and rows
+    const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join(
+      "\n",
+    );
+
+    return csv;
   }
 
   /**

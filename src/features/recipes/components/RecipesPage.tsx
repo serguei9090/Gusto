@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/hooks/useTranslation";
 import type { Recipe } from "@/types/ingredient.types";
 import { useRecipeStore } from "../store/recipes.store";
+import { BulkRollbackDialog } from "./BulkRollbackDialog";
 import { RecipeDetailModal } from "./RecipeDetailModal";
 import { RecipeForm, type RecipeFormData } from "./RecipeForm";
 import { RecipeTable } from "./RecipeTable";
@@ -97,6 +98,7 @@ export const RecipesPage = () => {
           <p className="text-muted-foreground">{t("recipes.subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
+          <BulkRollbackDialog />
           <Button onClick={() => setIsFormOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             {t("recipes.addRecipe")}

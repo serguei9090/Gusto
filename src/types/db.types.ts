@@ -31,6 +31,9 @@ export interface RecipesTable {
   profit_margin: number | null;
   current_version: number | null;
   last_version_date: string | null;
+  is_experiment: number;
+  parent_recipe_id: number | null;
+  experiment_name: string | null;
   created_at: Generated<string>;
   updated_at: Generated<string>;
 }

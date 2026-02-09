@@ -1,9 +1,10 @@
-import { ChefHat, Printer, X } from "lucide-react";
+import { Beaker, ChefHat, GitPullRequest, Printer, X } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRecipeStore } from "../store/recipes.store";
+import { ExperimentBadge } from "./ExperimentBadge";
 import { RecipeHistory } from "./RecipeHistory";
 import { RecipeOverview } from "./RecipeOverview";
 
@@ -16,8 +17,14 @@ export const RecipeDetailModal = ({
   recipeId,
   onClose,
 }: RecipeDetailModalProps) => {
-  const { selectedRecipe, fetchFullRecipe, isLoading, error } =
-    useRecipeStore();
+  const {
+    selectedRecipe,
+    fetchFullRecipe,
+    isLoading,
+    error,
+    createExperiment,
+    applyExperimentToParent,
+  } = useRecipeStore();
 
   useEffect(() => {
     if (recipeId) fetchFullRecipe(recipeId);
@@ -34,6 +41,45 @@ export const RecipeDetailModal = ({
 
   const handlePrint = () => {
     globalThis.print();
+  };
+
+  const handleCreateExperiment = async () => {
+    if (!selectedRecipe) return;
+    const name = globalThis.prompt(
+      "Enter a name for this experiment:",
+      "Scale Test",
+    );
+    if (!name) return;
+
+    try {
+      const experiment = await createExperiment(selectedRecipe.id, name);
+      // Wait a moment and then fetch the new experiment to switch view?
+      // Or just notify. For now, we stay on parent.
+      alert(`Experiment "${experiment.name}" created!`);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to create experiment");
+    }
+  };
+
+  const handleApplyToOriginal = async () => {
+    if (!selectedRecipe?.isExperiment) return;
+
+    if (
+      !confirm(
+        "Are you sure you want to apply these changes to the original recipe? This will update the parent recipe with current experiment data.",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await applyExperimentToParent(selectedRecipe.id);
+      alert("Changes applied to original recipe!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to apply changes");
+    }
   };
 
   const renderContent = () => {
@@ -91,9 +137,42 @@ export const RecipeDetailModal = ({
             <div className="p-2 bg-primary/10 rounded-full">
               <ChefHat className="h-6 w-6 text-primary" />
             </div>
-            <h2 className="text-xl font-semibold">Recipe Detail</h2>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-semibold">Recipe Detail</h2>
+                {selectedRecipe?.isExperiment && (
+                  <ExperimentBadge
+                    experimentName={selectedRecipe.experimentName}
+                    parentRecipeId={selectedRecipe.parentRecipeId}
+                  />
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {selectedRecipe?.name}
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
+            {!selectedRecipe?.isExperiment ? (
+              <Button
+                variant="outline"
+                onClick={handleCreateExperiment}
+                size="sm"
+              >
+                <Beaker className="mr-2 h-4 w-4" />
+                New Experiment
+              </Button>
+            ) : (
+              <Button
+                variant="default"
+                onClick={handleApplyToOriginal}
+                size="sm"
+                className="bg-amber-600 hover:bg-amber-700"
+              >
+                <GitPullRequest className="mr-2 h-4 w-4" />
+                Apply to Original
+              </Button>
+            )}
             <Button variant="secondary" onClick={handlePrint} size="sm">
               <Printer className="mr-2 h-4 w-4" />
               Print Cost Sheet

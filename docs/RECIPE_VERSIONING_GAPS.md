@@ -25,9 +25,9 @@ Implement a comparison view that shows two columns (Version A vs Version B) and 
 - **Green:** Added items or increased values.
 - **Yellow:** Modified text.
 
-### 2. Branching & Experiments
-Allow chefs to "Fork" a recipe into a new draft without affecting the main version history until it is "Merged".
-- **Use Case:** Testing a "Gluten-Free" variant of a pizza dough without cluttering the main history until it's finalized.
+### 2. Experiments & Variants
+Allow chefs to create an "Experiment" copy of a recipe (e.g., "Pizza Dough - Gluten Free Test") that is linked to the original but exists independently.
+- **Use Case:** Testing a variation without altering the main recipe's history. If the experiment is successful, it can be saved as a new recipe or manually used to update the original.
 
 ### 3. Bulk Rollback
 If a bad ingredient update affects 50 recipes (e.g., incorrect price entry), allow a system-wide rollback for that specific batch of updates.

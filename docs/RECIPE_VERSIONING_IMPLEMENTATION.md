@@ -436,22 +436,40 @@ User-facing components for viewing version history, examining detailed snapshots
 
 ## Future Enhancements
 
-1.  **Diff Visualization**
-    *   Visual diff of recipe changes (side-by-side comparison).
-    *   Ingredient-level change tracking highlighting.
+## Recently Implemented Enhancements (completed)
 
-2.  **Version Tags**
-    *   Tag important versions (e.g., "Production", "Testing").
-    *   Filter by tags.
+1.  **Visual Diff Tool** (Phase 1)
+    - Side-by-side comparison of any 2 recipe versions.
+    - Color-coded changes: 🟢 Added, 🔴 Removed, 🟡 Modified.
+    - Automatic percentage calculation for cost and margin changes.
+    - Detailed ingredient-level diffing.
 
-3.  **Branching**
-    *   Create recipe variants.
-    *   Merge changes between variants.
+2.  **Export History** (Phase 2)
+    - Export full version history for any recipe to CSV.
+    - Includes date, creator, reason, costs, and ingredient counts.
 
-4.  **Automated Versioning**
-    *   Auto-create versions on schedule.
-    *   Version on significant cost changes.
+3.  **Experiments & Variants** (Phase 3)
+    - Create independent experiment copies of recipes.
+    - Identified by `Beaker` icon and experiment name.
+    - "Apply to Original" feature to merge experiment findings back to the main recipe.
+    - Experiments displayed in the main recipe list for easy access.
 
-5.  **Export/Import**
-    *   Export version history.
-    *   Import versions from other systems.
+4.  **Bulk Rollback** (Phase 4)
+    - System-wide rollback capability.
+    - Revert all recipes to their state at a specific point in time.
+    - Multi-step confirmation to prevent accidental data loss.
+
+---
+
+## Future Roadmap
+
+1.  **Version Tags**
+    - Tag important versions (e.g., "Production", "Testing").
+    - Filter by tags.
+
+2.  **Automated Versioning**
+    - Auto-create versions on schedule.
+    - Version on significant cost changes (> 5% fluctuation).
+
+3.  **PDF Export**
+    - Generate professional PDF version reports.
