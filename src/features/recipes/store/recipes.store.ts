@@ -7,6 +7,7 @@ import type {
   UpdateRecipeInput,
 } from "@/types/ingredient.types";
 import { recipesRepository } from "../services/recipes.repository";
+import { recipeVersionRepository } from "../services/recipeVersion.repository";
 
 interface RecipeStore {
   // State
@@ -105,16 +106,27 @@ export const useRecipeStore = create<RecipeStore>((set, _get) => ({
     try {
       await recipesRepository.update(id, data);
 
+      // Create a new version snapshot
+      await recipeVersionRepository.createVersion({
+        recipeId: id,
+        changeNotes: data.changeNotes || "Updated via application",
+        createdBy: "user", // TODO: Replace with actual user when auth is implemented
+      });
+
       // Re-fetch since cost calculations involve backend logic triggers
       const recipes = await recipesRepository.getAll();
 
-      set((state) => ({
+      // If the currently selected recipe was just updated, refresh its details
+      let updatedSelectedRecipe = _get().selectedRecipe;
+      if (updatedSelectedRecipe?.id === id) {
+        updatedSelectedRecipe = await recipesRepository.getById(id);
+      }
+
+      set({
         recipes,
-        // If the updated recipe was the selected one, clear it to force a re-fetch of details if needed
-        selectedRecipe:
-          state.selectedRecipe?.id === id ? null : state.selectedRecipe,
+        selectedRecipe: updatedSelectedRecipe,
         isLoading: false,
-      }));
+      });
     } catch (error) {
       set({
         error:

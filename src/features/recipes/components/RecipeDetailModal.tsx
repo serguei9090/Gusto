@@ -1,18 +1,11 @@
-import { ChefHat, Clock, Printer, Users, X } from "lucide-react";
+import { ChefHat, Printer, X } from "lucide-react";
 import { useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRecipeStore } from "../store/recipes.store";
+import { RecipeHistory } from "./RecipeHistory";
+import { RecipeOverview } from "./RecipeOverview";
 
 interface RecipeDetailModalProps {
   recipeId: number;
@@ -44,10 +37,6 @@ export const RecipeDetailModal = ({
   };
 
   if (!selectedRecipe && !isLoading) return null;
-
-  const costPerServing = selectedRecipe?.totalCost
-    ? selectedRecipe.totalCost / selectedRecipe.servings
-    : 0;
 
   return (
     // We render a manual overlay/modal structure similar to what we did in the Page to ensure full control,
@@ -83,201 +72,28 @@ export const RecipeDetailModal = ({
           ) : error ? (
             <div className="text-destructive p-4 text-center">{error}</div>
           ) : selectedRecipe ? (
-            <div className="space-y-8" id="printable-recipe">
-              {/* Recipe Header Info */}
-              <div className="space-y-4">
-                <div>
-                  <Badge
-                    variant="outline"
-                    className="mb-2 print:text-black print:border-black"
-                  >
-                    {selectedRecipe.category || "Uncategorized"}
-                  </Badge>
-                  <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                    {selectedRecipe.name}
-                  </h1>
-                </div>
-
-                <div className="flex gap-6 text-muted-foreground print:text-black">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    <span>
-                      Yield:{" "}
-                      <span className="font-medium text-foreground print:text-black">
-                        {selectedRecipe.servings} servings
-                      </span>
-                    </span>
-                  </div>
-                  {selectedRecipe.prepTimeMinutes && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      <span>
-                        Prep Time:{" "}
-                        <span className="font-medium text-foreground print:text-black">
-                          {selectedRecipe.prepTimeMinutes} mins
-                        </span>
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {selectedRecipe.description && (
-                  <p className="text-muted-foreground print:text-black">
-                    {selectedRecipe.description}
-                  </p>
-                )}
+            <Tabs defaultValue="overview" className="flex-1 flex flex-col">
+              <div className="px-0 pb-4 print:hidden">
+                <TabsList className="w-full justify-start">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="history">Version History</TabsTrigger>
+                </TabsList>
               </div>
 
-              {/* Cost Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:grid-cols-3">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Cost per Serving
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      ${costPerServing.toFixed(2)}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Selling Price
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      ${selectedRecipe.sellingPrice?.toFixed(2) || "0.00"}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card
-                  className={
-                    (selectedRecipe.profitMargin || 0) < 20
-                      ? "border-destructive/50 bg-destructive/10"
-                      : (selectedRecipe.profitMargin || 0) < 30
-                        ? "border-yellow-500/50 bg-yellow-500/10"
-                        : "border-green-500/50 bg-green-500/10"
-                  }
-                >
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-foreground">
-                      Profit Margin
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div
-                      className={`text-2xl font-bold ${
-                        (selectedRecipe.profitMargin || 0) < 20
-                          ? "text-destructive"
-                          : (selectedRecipe.profitMargin || 0) < 30
-                            ? "text-yellow-700 dark:text-yellow-500"
-                            : "text-green-700 dark:text-green-500"
-                      }`}
-                    >
-                      {selectedRecipe.profitMargin?.toFixed(1)}%
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Ingredients Table */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold border-b pb-2">
-                  Ingredients & Cost Breakdown
-                </h3>
-                <div className="border rounded-md">
-                  <Table>
-                    <TableHeader className="bg-muted/50">
-                      <TableRow>
-                        <TableHead>Ingredient</TableHead>
-                        <TableHead>Quantity</TableHead>
-                        <TableHead>Unit Cost</TableHead>
-                        <TableHead className="text-right">Total Cost</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {selectedRecipe.ingredients.map((ing) => (
-                        <TableRow
-                          key={ing.id}
-                          className="print:border-b-gray-200"
-                        >
-                          <TableCell className="font-medium">
-                            {ing.ingredientName}
-                          </TableCell>
-                          <TableCell>
-                            {ing.quantity} {ing.unit}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            ${ing.currentPricePerUnit?.toFixed(2)} /{" "}
-                            {ing.ingredientUnit}
-                          </TableCell>
-                          <TableCell className="text-right font-mono">
-                            ${ing.cost?.toFixed(2)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                    <TableFooter className="bg-muted/50 font-medium">
-                      {(selectedRecipe.wasteBufferPercentage || 0) > 0 && (
-                        <>
-                          <TableRow>
-                            <TableCell colSpan={3}>Subtotal</TableCell>
-                            <TableCell className="text-right">
-                              $
-                              {(
-                                (selectedRecipe.totalCost || 0) /
-                                (1 +
-                                  (selectedRecipe.wasteBufferPercentage || 0) /
-                                    100)
-                              ).toFixed(2)}
-                            </TableCell>
-                          </TableRow>
-                          <TableRow className="text-orange-600">
-                            <TableCell colSpan={3}>
-                              Waste Buffer (
-                              {selectedRecipe.wasteBufferPercentage}%)
-                            </TableCell>
-                            <TableCell className="text-right font-bold">
-                              +$
-                              {(
-                                ((selectedRecipe.totalCost || 0) *
-                                  (selectedRecipe.wasteBufferPercentage || 0)) /
-                                (100 +
-                                  (selectedRecipe.wasteBufferPercentage || 0))
-                              ).toFixed(2)}
-                            </TableCell>
-                          </TableRow>
-                        </>
-                      )}
-                      <TableRow>
-                        <TableCell colSpan={3} className="font-bold">
-                          Total Batch Cost
-                        </TableCell>
-                        <TableCell className="text-right font-black text-lg">
-                          ${selectedRecipe.totalCost?.toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                    </TableFooter>
-                  </Table>
+              <TabsContent value="history" className="mt-0 h-full">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Change Log</h3>
+                  <RecipeHistory
+                    recipeId={selectedRecipe.id}
+                    key={selectedRecipe.updatedAt}
+                  />
                 </div>
-              </div>
+              </TabsContent>
 
-              {/* Cooking Instructions */}
-              {selectedRecipe.cookingInstructions && (
-                <div className="space-y-4 break-before-page">
-                  <h3 className="text-lg font-semibold border-b pb-2">
-                    Cooking Instructions
-                  </h3>
-                  <div className="prose dark:prose-invert max-w-none text-muted-foreground print:text-black whitespace-pre-line">
-                    {selectedRecipe.cookingInstructions}
-                  </div>
-                </div>
-              )}
-            </div>
+              <TabsContent value="overview" className="mt-0 space-y-8 h-full">
+                <RecipeOverview recipe={selectedRecipe} />
+              </TabsContent>
+            </Tabs>
           ) : null}
         </div>
       </div>

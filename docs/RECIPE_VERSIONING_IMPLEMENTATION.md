@@ -404,41 +404,54 @@ LEFT JOIN recipe_versions rv ON r.id = rv.recipe_id AND rv.is_current = 1;
 - Test rolling back versions
 - Test cost trend visualization
 
-## Future Enhancements
+## UI Implementation
 
-1. **Diff Visualization**
-   - Visual diff of recipe changes
-   - Ingredient-level change tracking
+### Components created:
 
-2. **Version Tags**
-   - Tag important versions (e.g., "Production", "Testing")
-   - Filter by tags
+1.  **RecipeHistory (`RecipeHistory.tsx`)**
+    *   Displays a scrollable list of all past versions.
+    *   Shows key metrics for each version: Cost, Margin, Selling Price (including estimated), and Ingredient count.
+    *   Provides "View" button to open a detailed modal for a specific version.
+    *   Provides "Restore" button to rollback to a previous version (with confirmation).
 
-3. **Branching**
-   - Create recipe variants
-   - Merge changes between variants
+2.  **RecipeOverview (`RecipeOverview.tsx`)**
+    *   Reusable component that renders the full details of a recipe.
+    *   Used in both the "Overview" tab of the live recipe and the "Version Detail" dialog.
+    *   Displays header info, cost summary cards, ingredients table, and cooking instructions.
 
-4. **Automated Versioning**
-   - Auto-create versions on schedule
-   - Version on significant cost changes
+3.  **RecipeDetailModal (`RecipeDetailModal.tsx`)**
+    *   Integrated `RecipeHistory` into a "Version History" tab.
+    *   Uses `RecipeOverview` for the main view.
 
-5. **Export/Import**
-   - Export version history
-   - Import versions from other systems
+### Key Logic:
 
-## Files Created/Modified
-
-### New Files
-- `src/services/database/migrations/003_add_recipe_versioning.ts`
-- `src/features/recipes/services/recipeVersion.repository.ts`
-- `docs/RECIPE_VERSIONING_IMPLEMENTATION.md`
-
-### Modified Files
-- `src/types/db.types.ts` - Added `RecipeVersionsTable` and updated `RecipesTable`
-- `GAPS_ISSUES.md` - Marked recipe versioning as implemented
+*   **Price Estimation:** In the history view, if a past version did not have a manual selling price, the system calculates and displays an "Estimated" price based on the total cost and target margin at that time.
+*   **Deep Viewing:** Users can click "View" on any history item to open a `z-index` layered dialog showing the exact state of the recipe at that point in time.
 
 ## Conclusion
 
-The recipe versioning system provides a robust foundation for tracking recipe changes over time. It enables historical analysis, cost trend tracking, and safe experimentation with recipe modifications. The implementation is type-safe, performant, and ready for UI integration.
+The recipe versioning system provides a robust foundation for tracking recipe changes over time. It enables historical analysis, cost trend tracking, and safe experimentation with recipe modifications. The implementation is type-safe, performant, and now fully integrated into the UI.
 
-The next phase involves creating user-facing components for viewing version history, comparing versions, and performing rollbacks through the UI.
+User-facing components for viewing version history, examining detailed snapshots, and performing rollbacks are fully functional.
+
+## Future Enhancements
+
+1.  **Diff Visualization**
+    *   Visual diff of recipe changes (side-by-side comparison).
+    *   Ingredient-level change tracking highlighting.
+
+2.  **Version Tags**
+    *   Tag important versions (e.g., "Production", "Testing").
+    *   Filter by tags.
+
+3.  **Branching**
+    *   Create recipe variants.
+    *   Merge changes between variants.
+
+4.  **Automated Versioning**
+    *   Auto-create versions on schedule.
+    *   Version on significant cost changes.
+
+5.  **Export/Import**
+    *   Export version history.
+    *   Import versions from other systems.

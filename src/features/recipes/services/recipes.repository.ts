@@ -147,11 +147,34 @@ export class RecipesRepository {
       .where("id", "=", id)
       .execute();
 
+    if (data.ingredients) {
+      // Replace all ingredients
+      await db
+        .deleteFrom("recipe_ingredients")
+        .where("recipe_id", "=", id)
+        .execute();
+
+      if (data.ingredients.length > 0) {
+        await db
+          .insertInto("recipe_ingredients")
+          .values(
+            data.ingredients.map((ing) => ({
+              recipe_id: id,
+              ingredient_id: ing.ingredientId,
+              quantity: ing.quantity,
+              unit: ing.unit,
+            })),
+          )
+          .execute();
+      }
+    }
+
     if (
       data.sellingPrice !== undefined ||
       data.servings !== undefined ||
       data.targetCostPercentage !== undefined ||
-      data.wasteBufferPercentage !== undefined
+      data.wasteBufferPercentage !== undefined ||
+      data.ingredients !== undefined
     ) {
       await this.recalculateCosts(id);
     }

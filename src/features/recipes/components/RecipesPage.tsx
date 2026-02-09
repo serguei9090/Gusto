@@ -152,9 +152,32 @@ export const RecipesPage = () => {
             <RecipeForm
               onSubmit={handleCreateOrUpdate}
               initialData={
-                (editingRecipeId
-                  ? selectedRecipe
-                  : undefined) as unknown as Partial<RecipeFormData>
+                editingRecipeId && selectedRecipe
+                  ? ({
+                      name: selectedRecipe.name,
+                      servings: selectedRecipe.servings,
+                      currency: selectedRecipe.currency,
+                      category: selectedRecipe.category || undefined,
+                      description: selectedRecipe.description || undefined,
+                      prepTimeMinutes:
+                        selectedRecipe.prepTimeMinutes || undefined,
+                      cookingInstructions:
+                        selectedRecipe.cookingInstructions || undefined,
+                      sellingPrice: selectedRecipe.sellingPrice || undefined,
+                      targetCostPercentage:
+                        selectedRecipe.targetCostPercentage || undefined,
+                      wasteBufferPercentage:
+                        selectedRecipe.wasteBufferPercentage || undefined,
+                      ingredients: selectedRecipe.ingredients.map((ing) => ({
+                        ingredientId: ing.ingredientId,
+                        quantity: ing.quantity,
+                        unit: ing.unit,
+                        name: ing.ingredientName,
+                        price: ing.currentPricePerUnit,
+                        ingredientUnit: ing.ingredientUnit,
+                      })),
+                    } as Partial<RecipeFormData>)
+                  : undefined
               }
               onCancel={handleCloseForm}
               isLoading={isLoading}

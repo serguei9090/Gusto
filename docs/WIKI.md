@@ -123,10 +123,17 @@ features/[feature-name]/
 - Labor cost and overhead percentage
 - PDF export for recipe cost sheets
 - Yield and serving size tracking
+- **Version Control & History:**
+  - Automatically tracks every change (ingredients, instructions, costs)
+  - View full details of any past version
+  - Rollback to previous versions safely
+  - "Estimated Price" calculation for historic versions without fixed pricing
 
 **Key Components:**
 - `RecipeForm`: Multi-step recipe creation
 - `RecipeTable`: Recipe listing with cost summary
+- `RecipeDetailModal`: Detailed view with tabs for Overview and History
+- `RecipeHistory`: List and rollback interface for version control
 - `RecipesRepository`: Recipe data access and calculations
 
 ### 3. Inventory Tracking

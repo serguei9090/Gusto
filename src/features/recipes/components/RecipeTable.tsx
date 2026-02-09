@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Recipe } from "@/types/ingredient.types";
+import { calculateSuggestedPrice } from "@/utils/costEngine";
 import { formatCurrencyAmount } from "@/utils/currencyConverter";
 
 interface RecipeTableProps {
@@ -75,7 +76,22 @@ export const RecipeTable = ({
                 {formatCurrency(recipe.totalCost, recipe.currency)}
               </TableCell>
               <TableCell>
-                {formatCurrency(recipe.sellingPrice, recipe.currency)}
+                {recipe.sellingPrice
+                  ? formatCurrency(recipe.sellingPrice, recipe.currency)
+                  : (() => {
+                      const suggested = calculateSuggestedPrice(
+                        recipe.totalCost || 0,
+                        recipe.targetCostPercentage || 25,
+                      );
+                      return (
+                        <span
+                          className="text-muted-foreground italic"
+                          title="Suggested Price"
+                        >
+                          {formatCurrency(suggested, recipe.currency)} (Est.)
+                        </span>
+                      );
+                    })()}
               </TableCell>
               <TableCell>
                 <span className={getMarginColor(recipe.profitMargin)}>

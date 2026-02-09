@@ -124,6 +124,8 @@ export interface UpdateRecipeInput {
   sellingPrice?: number | null;
   targetCostPercentage?: number | null;
   wasteBufferPercentage?: number | null;
+  changeNotes?: string;
+  ingredients?: { ingredientId: number; quantity: number; unit: string }[];
 }
 
 export interface RecipeWithIngredients extends Recipe {
