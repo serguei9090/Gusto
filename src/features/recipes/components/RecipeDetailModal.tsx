@@ -36,6 +36,46 @@ export const RecipeDetailModal = ({
     globalThis.print();
   };
 
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-40">
+          Loading details...
+        </div>
+      );
+    }
+    if (error) {
+      return <div className="text-destructive p-4 text-center">{error}</div>;
+    }
+    if (selectedRecipe) {
+      return (
+        <Tabs defaultValue="overview" className="flex-1 flex flex-col">
+          <div className="px-0 pb-4 print:hidden">
+            <TabsList className="w-full justify-start">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="history">Version History</TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="history" className="mt-0 h-full">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Change Log</h3>
+              <RecipeHistory
+                recipeId={selectedRecipe.id}
+                key={selectedRecipe.updatedAt}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="overview" className="mt-0 space-y-8 h-full">
+            <RecipeOverview recipe={selectedRecipe} />
+          </TabsContent>
+        </Tabs>
+      );
+    }
+    return null;
+  };
+
   if (!selectedRecipe && !isLoading) return null;
 
   return (
@@ -65,36 +105,7 @@ export const RecipeDetailModal = ({
         </div>
 
         <div className="overflow-y-auto flex-1 p-6 print:p-0 print:overflow-visible">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-40">
-              Loading details...
-            </div>
-          ) : error ? (
-            <div className="text-destructive p-4 text-center">{error}</div>
-          ) : selectedRecipe ? (
-            <Tabs defaultValue="overview" className="flex-1 flex flex-col">
-              <div className="px-0 pb-4 print:hidden">
-                <TabsList className="w-full justify-start">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="history">Version History</TabsTrigger>
-                </TabsList>
-              </div>
-
-              <TabsContent value="history" className="mt-0 h-full">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Change Log</h3>
-                  <RecipeHistory
-                    recipeId={selectedRecipe.id}
-                    key={selectedRecipe.updatedAt}
-                  />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="overview" className="mt-0 space-y-8 h-full">
-                <RecipeOverview recipe={selectedRecipe} />
-              </TabsContent>
-            </Tabs>
-          ) : null}
+          {renderContent()}
         </div>
       </div>
     </div>
