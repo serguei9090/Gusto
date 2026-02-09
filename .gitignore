@@ -5,6 +5,12 @@ bun.lock
 # Build outputs
 dist
 build
+
+# Gusto
+restaurant.db
+src/modules/pro/*
+!src/modules/pro/.gitkeep
+
 target
 playwright-report
 test-results

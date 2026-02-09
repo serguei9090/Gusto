@@ -3,22 +3,16 @@ import { Toaster } from "sonner";
 import { GlobalErrorBarrier } from "@/components/error/GlobalErrorBarrier";
 import type { View } from "@/components/Sidebar";
 import { MainLayout } from "@/components/templates/MainLayout";
-import { CalculatorsPage } from "@/features/calculators";
-import { DashboardPage } from "@/features/dashboard";
-import { IngredientsPage } from "@/features/ingredients";
-import { InventoryPage } from "@/features/inventory";
-import { PrepSheetsPage } from "@/features/prep-sheets";
-import { useConfigStore } from "@/features/settings/store/config.store";
-import { useCurrencyStore } from "@/features/settings/store/currency.store";
-import { SuppliersPage } from "@/features/suppliers";
 import { initDb } from "@/lib/db";
-import { RecipesPage } from "./features/recipes/components/RecipesPage";
-import { CurrencySettingsPage } from "./features/settings/pages/CurrencySettingsPage";
-import { SettingsPage } from "./features/settings/SettingsPage";
+import { useRegistry } from "@/lib/modules/registry";
+import { CurrencySettingsPage } from "@/modules/core/settings/pages/CurrencySettingsPage";
+import { useConfigStore } from "@/modules/core/settings/store/config.store";
+import { useCurrencyStore } from "@/modules/core/settings/store/currency.store";
 
 function App() {
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const { initialize: initializeCurrency } = useCurrencyStore();
+  const reg = useRegistry();
 
   // Initialize database and currency store on mount
   // biome-ignore lint/correctness/useExhaustiveDependencies: Initialize once on mount
@@ -32,57 +26,36 @@ function App() {
   }, []); // Run once on mount
 
   const renderContent = () => {
-    switch (currentView) {
-      case "dashboard":
-        return <DashboardPage />;
-      case "ingredients":
-        return <IngredientsPage />;
-      case "recipes":
-        return <RecipesPage />;
-      case "inventory":
-        return <InventoryPage />;
-      case "suppliers":
-        return <SuppliersPage />;
-      case "prepsheets":
-        return <PrepSheetsPage />;
-      case "calculators":
-        return <CalculatorsPage />;
-      case "settings":
+    // Check for special internal views first
+    if (currentView === "currency-settings") {
+      return <CurrencySettingsPage />;
+    }
+
+    const module = reg.get(currentView);
+    if (module) {
+      if (module.id === "settings") {
+        const SettingsComp = module.component as React.ComponentType<{
+          onNavigateToCurrencySettings: () => void;
+        }>;
         return (
-          <SettingsPage
+          <SettingsComp
             onNavigateToCurrencySettings={() =>
               setCurrentView("currency-settings")
             }
           />
         );
-      case "currency-settings":
-        return <CurrencySettingsPage />;
-      default:
-        return <IngredientsPage />;
+      }
+      return <module.component />;
     }
+
+    // Default fallback
+    const ingredients = reg.get("ingredients");
+    return ingredients ? <ingredients.component /> : null;
   };
 
   const getTitle = () => {
-    switch (currentView) {
-      case "dashboard":
-        return "Dashboard";
-      case "ingredients":
-        return "Ingredient Management";
-      case "recipes":
-        return "Recipe Manager";
-      case "inventory":
-        return "Inventory Tracker";
-      case "suppliers":
-        return "Supplier Directory";
-      case "prepsheets":
-        return "Prep Sheets";
-      case "calculators":
-        return "Math Helpers & Calculators";
-      case "settings":
-        return "Settings";
-      default:
-        return "";
-    }
+    const module = reg.get(currentView);
+    return module?.title || "";
   };
 
   return (

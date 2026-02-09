@@ -65,7 +65,8 @@
     "recipes": "Recetas",
     "inventory": "Inventario",
     "suppliers": "Proveedores",
-    "prepSheets": "Hojas de Preparación",
+    "prepsheets": "Hojas de Preparación",
+    "pro-demo": "Demo Pro",
     "reports": "Informes",
     "calculators": "Calculadoras",
     "settings": "Configuración"

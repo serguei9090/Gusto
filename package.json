@@ -19,7 +19,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:all": "bun run test:unit && bun run test:e2e",
-    "db:migrate": "bun run scripts/db-migrate.ts"
+    "db:migrate": "bun run scripts/db-migrate.ts",
+    "tauri:dev:pro": "cross-env VITE_APP_MODE=pro bun run tauri:dev",
+    "build:pro": "cross-env VITE_APP_MODE=pro bun run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -65,6 +67,7 @@
     "@vitejs/plugin-react": "^4.3.0",
     "@vitest/ui": "^4.0.18",
     "better-sqlite3": "^12.6.2",
+    "cross-env": "^10.1.0",
     "jsdom": "^28.0.0",
     "lefthook": "^2.1.0",
     "tailwindcss": "^4.1.18",

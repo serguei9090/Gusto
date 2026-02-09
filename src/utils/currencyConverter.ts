@@ -1,5 +1,5 @@
-import { currencyRepository } from "@/features/settings/services/currency.repository";
-import { useCurrencyStore } from "@/features/settings/store/currency.store";
+import { currencyRepository } from "@/modules/core/settings/services/currency.repository";
+import { useCurrencyStore } from "@/modules/core/settings/store/currency.store";
 
 export interface ConversionResult {
   converted: number;

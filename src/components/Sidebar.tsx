@@ -1,21 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Calculator,
-  ChefHat,
-  ClipboardList,
-  LayoutDashboard,
-  type LucideIcon,
-  Menu,
-  Package,
-  Settings,
-  ShoppingBasket,
-  Users,
-} from "lucide-react";
+import { Menu, Settings } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/images/logo.png";
 import { Button } from "@/components/ui/button";
-import { useSettingsStore } from "@/features/settings/store/settings.store";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useSettingsStore } from "@/modules/core/settings/store/settings.store";
 
 export type View =
   | "dashboard"
@@ -34,36 +23,87 @@ interface SidebarProps {
   onChangeView: (view: View) => void;
 }
 
+import { useRegistry } from "@/lib/modules/registry";
+import type { ModuleDefinition } from "@/types/module";
+
 export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
   const { t } = useTranslation();
   const { modules, moduleOrder } = useSettingsStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const reg = useRegistry();
 
-  const moduleConfig: Record<string, { label: string; icon: LucideIcon }> = {
-    dashboard: { label: t("navigation.dashboard"), icon: LayoutDashboard },
-    ingredients: { label: t("navigation.ingredients"), icon: ShoppingBasket },
-    recipes: { label: t("navigation.recipes"), icon: ChefHat },
-    inventory: { label: t("navigation.inventory"), icon: Package },
-    suppliers: { label: t("navigation.suppliers"), icon: Users },
-    prepsheets: { label: t("navigation.prepSheets"), icon: ClipboardList },
-    calculators: { label: t("navigation.calculators"), icon: Calculator },
-    settings: { label: t("navigation.settings"), icon: Settings },
-  };
+  // Filter and sort items based on order and visibility, excluding settings from main list
+  const allRegistered = reg.getAll();
 
-  // Filter and sort items based on order and visibility, excluding settings
-  const displayItems = moduleOrder
+  // 1. Get items from the user's custom order
+  const orderedItems = moduleOrder
     .filter((id) => {
       const normalizedId = id.toLowerCase();
-      // Exclude settings from main nav
       if (normalizedId === "settings") return false;
-      // Use ?? true to show modules by default if not explicitly hidden in settings
+
+      const module = reg.get(normalizedId);
+      if (!module) return false;
+
       const isVisible = modules[id] ?? modules[normalizedId] ?? true;
-      return isVisible && moduleConfig[normalizedId];
+      return isVisible;
     })
     .map((id) => {
       const normalizedId = id.toLowerCase();
-      return { id: normalizedId, ...moduleConfig[normalizedId] };
+      const module = reg.get(normalizedId);
+      if (!module) return null;
+
+      const tKey = `navigation.${normalizedId}`;
+      const translated = t(tKey);
+
+      return {
+        id: normalizedId,
+        label: translated === tKey ? module.title : translated,
+        icon: module.icon,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+
+  // 2. Add modules that are in the registry but NOT in the store's moduleOrder (like a new Pro module)
+  const discoveryItems = allRegistered
+    .filter((m: ModuleDefinition) => {
+      const id = m.id.toLowerCase();
+      return (
+        id !== "settings" &&
+        !moduleOrder.some((oid) => oid.toLowerCase() === id)
+      );
+    })
+    .map((m: ModuleDefinition) => {
+      const tKey = `navigation.${m.id.toLowerCase()}`;
+      const translated = t(tKey);
+      return {
+        id: m.id.toLowerCase(),
+        label: translated === tKey ? m.title : translated,
+        icon: m.icon,
+      };
     });
+
+  const displayItems = [...orderedItems, ...discoveryItems];
+
+  // Specifically get the settings module for the bottom button
+  const settingsMod = reg.get("settings");
+  const settingsTKey = "navigation.settings";
+  const settingsTranslated = t(settingsTKey);
+
+  const settingsConfig = settingsMod
+    ? {
+        label:
+          settingsTranslated === settingsTKey
+            ? settingsMod.title
+            : settingsTranslated,
+        icon: settingsMod.icon,
+      }
+    : {
+        label:
+          settingsTranslated === settingsTKey
+            ? t("navigation.settings")
+            : settingsTranslated,
+        icon: Settings,
+      };
 
   return (
     <motion.aside
@@ -150,9 +190,9 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
             }
             ${isCollapsed ? "justify-center" : ""}
           `}
-          title={isCollapsed ? moduleConfig.settings.label : undefined}
+          title={isCollapsed ? settingsConfig.label : undefined}
         >
-          <Settings size={20} className="shrink-0" />
+          <settingsConfig.icon size={20} className="shrink-0" />
           <AnimatePresence>
             {isCollapsed ? null : (
               <motion.span
@@ -161,7 +201,7 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
                 exit={{ opacity: 0, width: 0 }}
                 className="whitespace-nowrap overflow-hidden"
               >
-                {moduleConfig.settings.label}
+                {settingsConfig.label}
               </motion.span>
             )}
           </AnimatePresence>

@@ -65,7 +65,8 @@
     "recipes": "Recipes",
     "inventory": "Inventory",
     "suppliers": "Suppliers",
-    "prepSheets": "Prep Sheets",
+    "prepsheets": "Prep Sheets",
+    "pro-demo": "Pro Demo",
     "reports": "Reports",
     "calculators": "Calculators",
     "settings": "Settings"

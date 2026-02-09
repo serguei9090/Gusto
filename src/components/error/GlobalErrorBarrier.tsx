@@ -67,7 +67,7 @@ export class GlobalErrorBarrier extends Component<Props, State> {
             </Button>
           </div>
 
-          {process.env.NODE_ENV === "development" && (
+          {import.meta.env.DEV && (
             <div className="mt-12 p-4 bg-muted rounded-md text-left max-w-2xl w-full overflow-auto">
               <p className="font-mono text-xs text-destructive mb-2 font-bold uppercase">
                 Dev Debug Info:
