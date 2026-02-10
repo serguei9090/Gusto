@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTranslation } from "@/hooks/useTranslation";
-import { STANDARD_UNITS } from "@/lib/constants/units";
+
 import { cn } from "@/lib/utils";
 import { useConfigStore } from "../store/config.store";
 
@@ -76,7 +76,7 @@ export const UnitConfigModal = ({ isOpen, onClose }: UnitConfigModalProps) => {
   const activeUnitsMap = useMemo(() => {
     const map = new Map<string, number>();
     items
-      .filter((item) => item.type.startsWith("unit"))
+      .filter((item) => item.type.startsWith("unit") && item.is_active === 1)
       .forEach((item) => {
         map.set(item.name.toLowerCase(), item.id);
       });
@@ -98,7 +98,7 @@ export const UnitConfigModal = ({ isOpen, onClose }: UnitConfigModalProps) => {
         }
       } else {
         // Add
-        await addItem(`unit:${category}`, unit);
+        await addItem(`unit:${category.toLowerCase()}`, unit);
         toast.success(`Added ${unit}`, { duration: 1500 });
       }
     } catch (error) {
@@ -111,9 +111,30 @@ export const UnitConfigModal = ({ isOpen, onClose }: UnitConfigModalProps) => {
     const groups: { category: string; units: string[] }[] = [];
     const lowerFilter = filterText.toLowerCase();
 
-    Object.entries(STANDARD_UNITS).forEach(([category, units]) => {
-      // Filter units based on search or show all if category matches
-      const categoryMatch = category.toLowerCase().includes(lowerFilter);
+    // Group items by category (type)
+    const categoryMap = new Map<string, string[]>();
+
+    items
+      .filter((item) => item.type.startsWith("unit"))
+      .forEach((item) => {
+        const category = item.type.split(":")[1] || "other";
+        // Use raw category key
+        if (!categoryMap.has(category)) {
+          categoryMap.set(category, []);
+        }
+        categoryMap.get(category)?.push(item.name);
+      });
+
+    // Process groups
+    categoryMap.forEach((units, category) => {
+      // Filter units based on search or show all if translated category matches
+      // We need to check against translated name for search
+      const translatedCategory = t(`common.unit_categories.${category}`, {
+        defaultValue: category,
+      });
+      const categoryMatch = translatedCategory
+        .toLowerCase()
+        .includes(lowerFilter);
 
       const filteredUnits = units.filter(
         (u) => categoryMatch || u.toLowerCase().includes(lowerFilter),
@@ -128,8 +149,19 @@ export const UnitConfigModal = ({ isOpen, onClose }: UnitConfigModalProps) => {
       }
     });
 
+    // Sort groups by fixed order
+    const CATEGORY_ORDER = ["mass", "volume", "length", "misc", "other"];
+    groups.sort((a, b) => {
+      const idxA = CATEGORY_ORDER.indexOf(a.category);
+      const idxB = CATEGORY_ORDER.indexOf(b.category);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.category.localeCompare(b.category);
+    });
+
     return groups;
-  }, [filterText]);
+  }, [items, filterText, t]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -157,7 +189,9 @@ export const UnitConfigModal = ({ isOpen, onClose }: UnitConfigModalProps) => {
               {groupedUnits.map(({ category, units }) => (
                 <div key={category} className="space-y-3">
                   <h3 className="text-sm font-semibold text-muted-foreground border-b pb-1">
-                    {category}
+                    {t(`common.unit_categories.${category}`, {
+                      defaultValue: category,
+                    })}
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                     {units.map((unit) => {

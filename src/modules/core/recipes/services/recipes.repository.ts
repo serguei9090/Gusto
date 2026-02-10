@@ -28,6 +28,7 @@ export interface JoinedRecipeIngredientRow {
 }
 
 import {
+  CircularReferenceError,
   calculateProfitMargin,
   calculateRecipeTotal,
   calculateSuggestedPrice,
@@ -180,6 +181,9 @@ export class RecipesRepository {
       .execute();
 
     if (data.ingredients) {
+      // --- Circular Reference Detection ---
+      await this.validateNoCircularReferences(id, data.ingredients);
+
       // Replace all ingredients
       await db
         .deleteFrom("recipe_ingredients")
@@ -226,6 +230,9 @@ export class RecipesRepository {
     unit: string,
     subRecipeId: number | null = null,
   ): Promise<void> {
+    if (subRecipeId) {
+      await this.validateNoCircularReferences(recipeId, [{ subRecipeId }]);
+    }
     await db
       .insertInto("recipe_ingredients")
       .values({
@@ -431,6 +438,54 @@ export class RecipesRepository {
       dietaryRestrictions: experiment.dietaryRestrictions,
       calories: experiment.calories,
     });
+  }
+
+  async validateNoCircularReferences(
+    recipeId: number,
+    ingredients: { subRecipeId?: number | null }[],
+  ): Promise<void> {
+    const subRecipeIds = ingredients
+      .map((i) => i.subRecipeId)
+      .filter((id): id is number => id !== null && id !== undefined);
+
+    for (const subId of subRecipeIds) {
+      if (subId === recipeId) {
+        const recipe = await this.getById(recipeId);
+        throw new CircularReferenceError(recipe?.name || `ID ${recipeId}`);
+      }
+
+      const hasCycle = await this.checkForCycle(recipeId, subId);
+      if (hasCycle) {
+        const subRecipe = await this.getById(subId);
+        throw new CircularReferenceError(subRecipe?.name || `ID ${subId}`);
+      }
+    }
+  }
+
+  private async checkForCycle(
+    targetId: number,
+    currentId: number,
+    visited = new Set<number>(),
+  ): Promise<boolean> {
+    if (targetId === currentId) return true;
+    if (visited.has(currentId)) return false;
+    visited.add(currentId);
+
+    const subRecipes = await this.getSubRecipeIds(currentId);
+    for (const subId of subRecipes) {
+      if (await this.checkForCycle(targetId, subId, visited)) return true;
+    }
+    return false;
+  }
+
+  private async getSubRecipeIds(recipeId: number): Promise<number[]> {
+    const rows = await db
+      .selectFrom("recipe_ingredients")
+      .select("sub_recipe_id")
+      .where("recipe_id", "=", recipeId)
+      .where("sub_recipe_id", "is not", null)
+      .execute();
+    return rows.map((r) => r.sub_recipe_id as number);
   }
 
   private mapRowToRecipe(row: RecipeRow): Recipe {

@@ -1,0 +1,349 @@
+{
+  "app": {
+    "name": "Gusto",
+    "version_label": "v{{version}}",
+    "version_full": "{{name}} v{{version}}"
+  },
+  "common": {
+    "actions": {
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "add": "Ajouter",
+      "search": "Rechercher",
+      "filter": "Filtrer",
+      "close": "Fermer",
+      "confirm": "Confirmer",
+      "back": "Retour",
+      "next": "Suivant",
+      "submit": "Soumettre",
+      "reset": "Réinitialiser",
+      "help": "Aide",
+      "select": "Sélectionner"
+    },
+    "labels": {
+      "name": "Nom",
+      "description": "Description",
+      "category": "Catégorie",
+      "price": "Prix",
+      "currency": "Devise",
+      "date": "Date",
+      "notes": "Remarques",
+      "status": "Statut",
+      "total": "Total",
+      "quantity": "Quantité",
+      "unit": "Unité"
+    },
+    "messages": {
+      "loading": "Chargement...",
+      "saving": "Enregistrement...",
+      "success": "Succès !",
+      "error": "Une erreur est survenue",
+      "noData": "Aucune donnée disponible",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet élément ?"
+    },
+    "validation": {
+      "required": "Ce champ est obligatoire",
+      "invalidEmail": "Adresse e-mail invalide",
+      "minLength": "La longueur minimale est de {{count}} caractères",
+      "maxLength": "La longueur maximale est de {{count}} caractères",
+      "positive": "Doit être un nombre positif"
+    },
+    "categories": {
+      "protein": "Protéine",
+      "vegetable": "Légume",
+      "dairy": "Produit laitier",
+      "spice": "Épice",
+      "grain": "Céréale",
+      "fruit": "Fruit",
+      "condiment": "Condiment",
+      "other": "Autre",
+      "appetizer": "Entrée",
+      "main": "Plat principal",
+      "dessert": "Dessert",
+      "beverage": "Boisson",
+      "side": "Accompagnement"
+    },
+    "unit_categories": {
+      "mass": "Masse / Poids",
+      "volume": "Volume",
+      "length": "Longueur",
+      "misc": "Divers",
+      "other": "Autre"
+    }
+  },
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "ingredients": "Ingrédients",
+    "recipes": "Recettes",
+    "inventory": "Inventaire",
+    "suppliers": "Fournisseurs",
+    "prepsheets": "Fiches de préparation",
+    "pro-demo": "Démo Pro",
+    "reports": "Rapports",
+    "calculators": "Calculatrices",
+    "settings": "Paramètres"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérer la logique et les préférences.",
+    "general": {
+      "title": "Paramètres généraux",
+      "description": "Préférences de l'application et localisation.",
+      "languageLabel": "Langue / Language",
+      "languageHelp": "Sélectionnez votre langue préférée.",
+      "selectLanguage": "Choisir la langue"
+    },
+    "currency": {
+      "title": "Paramètres de devise",
+      "description": "Configurer les taux de change et la devise de référence.",
+      "resetDefaults": "Rétablir les valeurs par défaut",
+      "baseLabel": "Devise de référence (Base)",
+      "baseHelp": "La devise utilisée comme base 1.00 pour les calculs.",
+      "selectCurrency": "Choisir la devise",
+      "exchangeRatesLabel": "Taux de change (Relatif à {{currency}})",
+      "baseBadge": "Base"
+    },
+    "modules": {
+      "title": "Modules",
+      "description": "Activer, désactiver ou réorganiser les fonctionnalités.",
+      "suppliersHelp": "Gérer les fournisseurs externes.",
+      "prepSheetsHelp": "Créer des plans de production.",
+      "calculatorsHelp": "Outils de calcul et de tarification.",
+      "dragToReorder": "Faites glisser pour réorganiser les éléments.",
+      "visible": "Visible",
+      "hidden": "Masqué"
+    },
+    "config": {
+      "title": "Configuration de l'application",
+      "description": "Gérer diverses listes utilisées dans l'application.",
+      "help": "Personnalisez les unités de mesure, les catégories d'ingrédients et de recettes.",
+      "units": "Unités de mesure",
+      "unitsDesc": "Unités pour les ingrédients et les quantités de recettes (ex. kg, oz).",
+      "ingredientCategories": "Catégories d'ingrédients",
+      "ingredientCategoriesDesc": "Catégories pour organiser votre garde-manger et votre stock.",
+      "recipeCategories": "Catégories de recettes",
+      "recipeCategoriesDesc": "Catégories pour organiser votre menu et votre livre de recettes.",
+      "manage": "Gérer",
+      "standardLibrary": "Bibliothèque standard",
+      "myUnits": "Mes unités",
+      "noUnitsEnabled": "Aucune unité activée. Allez dans la Bibliothèque standard pour en ajouter."
+    }
+  },
+  "ingredients": {
+    "title": "Ingrédients",
+    "addIngredient": "Ajouter un ingrédient",
+    "editIngredient": "Modifier l'ingrédient",
+    "deleteIngredient": "Supprimer l'ingrédient",
+    "ingredientDetails": "Détails de l'ingrédient",
+    "subtitle": "Gérer votre stock d'ingrédients et suivre les coûts",
+    "prompts": {
+      "update": "Mettez à jour les détails de l'ingrédient ci-dessous.",
+      "add": "Remplissez le formulaire ci-dessous pour ajouter un nouvel ingrédient à votre inventaire."
+    },
+    "archive": {
+      "title": "Archiver l'ingrédient",
+      "message": "Êtes-vous sûr de vouloir archiver \"{{name}}\" ? Il sera retiré de la liste principale mais restera dans les recettes existantes.",
+      "action": "Archiver",
+      "progress": "Archivage..."
+    },
+    "fields": {
+      "currentPrice": "Prix actuel",
+      "pricePerUnit": "Prix par unité",
+      "currentStock": "Stock actuel",
+      "minStockLevel": "Niveau de stock minimum",
+      "supplier": "Fournisseur",
+      "unitOfMeasure": "Unité de mesure",
+      "purchaseUnit": "Unité d'achat",
+      "conversionRatio": "Ratio de conversion"
+    },
+    "help": {
+      "name": "Entrez un nom descriptif pour cet ingrédient. Il sera utilisé dans tout le système pour l'identification.",
+      "category": "Sélectionnez la catégorie principale à laquelle appartient cet ingrédient. Cela aide à l'organisation et au filtrage.",
+      "currentPrice": "Le prix d'achat actuel de cet ingrédient auprès de votre fournisseur. Utilisé pour calculer le coût des recettes.",
+      "pricePerUnit": "Le coût par unité de mesure unique. Par exemple, si vous achetez en gros mais utilisez de plus petites portions, cela aide à calculer le coût exact des recettes.",
+      "currency": "Sélectionnez la devise pour le prix de cet ingrédient. Elle sera convertie dans votre devise de base pour les calculs.",
+      "unitOfMeasure": "L'unité standard que vous utilisez pour mesurer cet ingrédient (ex. kg, lb, litres, pièces).",
+      "currentStock": "La quantité actuelle de cet ingrédient que vous avez en stock.",
+      "minStockLevel": "Définissez un niveau de stock minimum. Vous serez alerté lorsque l'inventaire descendra en dessous de ce montant.",
+      "supplier": "Sélectionnez le fournisseur principal pour cet ingrédient. Vous pouvez ajouter des fournisseurs dans la section Fournisseurs.",
+      "purchaseUnit": "L'unité dans laquelle vous achetez cet article (ex. Carton, Paquet, Sac).",
+      "conversionRatio": "Combien d'unités de base y a-t-il dans une unité d'achat. Par exemple, si vous achetez un carton de 12 bouteilles, le ratio est 12."
+    },
+    "placeholders": {
+      "searchIngredients": "Rechercher des ingrédients...",
+      "ingredientName": "ex. Sauce tomate",
+      "purchaseUnit": "ex. Carton de 12"
+    }
+  },
+  "recipes": {
+    "title": "Recettes",
+    "addRecipe": "Ajouter une recette",
+    "editRecipe": "Modifier la recette",
+    "deleteRecipe": "Supprimer la recette",
+    "recipeDetails": "Détails de la recette",
+    "recipeDetailsDesc": "Informations de base sur le plat.",
+    "financials": "Finances",
+    "financialsDesc": "Objectifs de coûts et de prix.",
+    "allergens": "Allergènes et restrictions alimentaires",
+    "allergensDesc": "Marquer les restrictions alimentaires et les allergènes courants.",
+    "commonAllergens": "Allergènes courants",
+    "dietaryRestrictions": "Restrictions alimentaires",
+    "ingredientsTitle": "Ingrédients",
+    "ingredientsDesc": "Composants de la recette.",
+    "subRecipes": "Sous-recettes",
+    "noMatches": "Aucune correspondance trouvée",
+    "addComponent": "+ Ajouter un composant",
+    "cost": "Coût",
+    "subtotal": "Sous-total",
+    "trueCost": "Coût réel de la recette",
+    "suggestedPrice": "Prix suggéré",
+    "actualCost": "Coût réel des aliments",
+    "targetCost": "Coût cible des aliments",
+    "netMargin": "Marge nette",
+    "targetMargin": "Marge cible",
+    "default": "Défaut",
+    "fields": {
+      "servings": "Portions",
+      "prepTime": "Temps de préparation (minutes)",
+      "cookingInstructions": "Instructions de cuisson",
+      "sellingPrice": "Prix de vente",
+      "targetCostPercentage": "% Coût cible",
+      "wasteBuffer": "% Perte / Marge",
+      "batchYield": "Rendement du lot",
+      "yieldUnit": "Unité de rendement",
+      "calories": "Calories (kcal)",
+      "totalCost": "Coût total",
+      "profitMargin": "Marge bénéficiaire",
+      "addIngredient": "Ajouter un ingrédient"
+    },
+    "placeholders": {
+      "searchRecipes": "Rechercher des recettes...",
+      "recipeName": "ex. Pizza Margherita",
+      "briefOverview": "Bref aperçu...",
+      "yield": "ex. 5",
+      "yieldUnit": "ex. kg",
+      "calories": "0",
+      "sellingPrice": "0.00",
+      "targetCost": "25",
+      "wasteBuffer": "0",
+      "searchComponents": "Rechercher des composants..."
+    },
+    "help": {
+      "name": "Entrez un nom mémorable pour cette recette. Il apparaîtra sur votre menu et vos rapports.",
+      "category": "Classez cette recette pour aider à l'organisation du menu (ex. Entrée, Plat principal, Dessert).",
+      "description": "Fournissez une brève description de ce plat. Peut être utilisé pour les descriptions de menu ou les notes internes.",
+      "servings": "Nombre de portions que cette recette produit. Utilisé pour calculer les coûts par portion.",
+      "prepTime": "Temps de préparation estimé en minutes. Aide à la planification de la cuisine et au calcul des coûts de main-d'œuvre.",
+      "sellingPrice": "Le prix du menu pour ce plat. Utilisé pour calculer les marges bénéficiaires.",
+      "targetCostPercentage": "Votre coût alimentaire idéal en pourcentage du prix de vente (ex. 30%). Le système vous alertera si les coûts réels dépassent ce montant.",
+      "wasteBuffer": "Ajoutez un pourcentage pour tenir compte du gaspillage d'ingrédients, des parures ou des déversements (ex. 5-10%). Cela garantit des calculs de coûts plus précis.",
+      "yield": "La quantité totale produite par cette recette (ex. 5 pour 5kg).",
+      "yieldUnit": "L'unité pour le rendement du lot (ex. kg, L, pièces).",
+      "calories": "Estimation des calories par portion."
+    },
+    "sections": {
+      "basicInfo": "Informations de base",
+      "financials": "Finances",
+      "ingredients": "Ingrédients"
+    },
+    "subtitle": "Gérez vos éléments de menu et calculez les coûts."
+  },
+  "inventory": {
+    "title": "Inventaire",
+    "stockLevel": "Niveau de stock",
+    "lastUpdated": "Dernière mise à jour",
+    "lowStock": "Stock faible",
+    "lowStockAlert": "Alerte de stock faible",
+    "outOfStock": "Rupture de stock",
+    "inStock": "En stock",
+    "subtitle": "Gérez les niveaux de stock et suivez les transactions.",
+    "searchPlaceholder": "Rechercher dans l'inventaire...",
+    "totalItems": "Total des articles",
+    "activeIngredients": "Ingrédients actifs",
+    "itemsNeedingAttention": "Articles nécessitant une attention",
+    "help": {
+      "transactionType": "Choisissez le type de mouvement : L'achat ajoute du stock, L'utilisation/Perte enlève du stock, et L'ajustement définit le compte exact.",
+      "quantity": "Entrez la quantité de stock à ajouter, retirer ou définir. Utilisez l'unité de base de l'ingrédient.",
+      "costPerUnit": "Le prix payé par unité pour cette transaction. Pour les achats, cela met à jour le coût de l'ingrédient. Pour l'utilisation/perte, utilisé pour les rapports.",
+      "currency": "La devise pour les coûts de cette transaction. Les transactions multidevises sont automatiquement converties pour les rapports.",
+      "reference": "Numéro de référence ou ID de facture optionnel pour le suivi (ex. numéros de facture fournisseur).",
+      "notes": "Contexte supplémentaire sur cette transaction, comme les raisons des ajustements ou des pertes."
+    }
+  },
+  "suppliers": {
+    "title": "Fournisseurs",
+    "addSupplier": "Ajouter un fournisseur",
+    "editSupplier": "Modifier le fournisseur",
+    "supplierDetails": "Détails du fournisseur",
+    "fields": {
+      "contactPerson": "Personne à contacter",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "address": "Adresse",
+      "paymentTerms": "Conditions de paiement"
+    },
+    "help": {
+      "name": "Entrez le nom commercial de ce fournisseur. Cela vous aide à les identifier dans les commandes et les rapports.",
+      "contactPerson": "La personne principale à contacter chez ce fournisseur pour les commandes et les demandes.",
+      "email": "Adresse e-mail du fournisseur pour les confirmations de commande et les communications.",
+      "phone": "Numéro de téléphone principal pour joindre ce fournisseur pour les urgences ou les questions sur les commandes.",
+      "address": "Adresse physique ou postale du fournisseur. Utile pour le suivi des livraisons et les dossiers.",
+      "paymentTerms": "Arrangement de paiement convenu (ex. Net 30, COD ou conditions de crédit). Aide à la planification de la trésorerie."
+    },
+    "subtitle": "Gérez vos sources d'ingrédients et vos contacts.",
+    "searchPlaceholder": "Rechercher des fournisseurs...",
+    "totalSuppliers": "Total des fournisseurs",
+    "activePartners": "Partenaires actifs"
+  },
+  "prepSheets": {
+    "title": "Fiches de préparation",
+    "createPrepSheet": "Créer une fiche de préparation",
+    "prepDate": "Date de préparation",
+    "recipes": "Recettes",
+    "totalIngredients": "Total des ingrédients nécessaires",
+    "exportPDF": "Exporter en PDF",
+    "subtitle": "Planifiez la production et générez des listes de préparation combinées.",
+    "createNew": "Créer nouveau",
+    "savedSheets": "Fiches enregistrées",
+    "noSavedSheets": "Aucune fiche de préparation enregistrée",
+    "generatePrompt": "Générez et enregistrez une fiche de préparation pour la voir ici.",
+    "shift": "Équipe",
+    "actions": "Actions",
+    "view": "Voir"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcomeMessage": "Bienvenue dans la gestion de restaurant",
+    "stockValue": "Valeur du stock",
+    "avgMargin": "Marge moyenne",
+    "stats": {
+      "totalIngredients": "Total ingrédients",
+      "totalRecipes": "Total recettes",
+      "lowStockItems": "Articles à stock faible",
+      "totalSuppliers": "Total fournisseurs",
+      "totalInventoryValue": "Valeur totale de l'inventaire",
+      "belowMinLevel": "Articles sous le niveau minimum",
+      "acrossAllRecipes": "Dans toutes les recettes",
+      "activeRecipes": "Recettes actives"
+    },
+    "urgentReorders": "Commandes urgentes",
+    "stockLevelsHealthy": "Niveaux de stock sains",
+    "highMarginRecipes": "Recettes à forte marge",
+    "noRecipeData": "Aucune donnée de recette disponible"
+  },
+  "currency": {
+    "usd": "Dollar américain",
+    "eur": "Euro"
+  },
+  "error": {
+    "barrier": {
+      "title": "Quelque chose s'est mal passé",
+      "description": "L'application a rencontré un problème d'interface inattendu. Un rapport technique a été enregistré dans vos journaux locaux.",
+      "restart": "Redémarrer l'application",
+      "go_home": "Aller à l'accueil",
+      "dev_info": "Info de débogage :"
+    }
+  }
+}

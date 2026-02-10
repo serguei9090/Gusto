@@ -2,6 +2,8 @@ import { Settings } from "lucide-react";
 import type { ModuleDefinition } from "@/types/module";
 import { SettingsPage } from "./SettingsPage";
 
+export type { SettingsSection } from "./registry";
+export { settingsRegistry } from "./registry";
 export * from "./SettingsPage";
 
 export const settingsModule: ModuleDefinition = {

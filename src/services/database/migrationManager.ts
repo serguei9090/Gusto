@@ -434,6 +434,106 @@ export const migrations: Migration[] = [
         .catch(ignoreDuplicate);
     },
   },
+  {
+    id: "20260211_move_units_to_db",
+    up: async (db) => {
+      // 1. Add is_active column
+      const ignoreDuplicate = (e: unknown) => {
+        if (String(e).includes("duplicate column name")) return;
+        throw e;
+      };
+      await db
+        .execute(
+          "ALTER TABLE configuration_items ADD COLUMN is_active INTEGER DEFAULT 1",
+        )
+        .catch(ignoreDuplicate);
+
+      // 2. Define standard units
+      const STANDARD_UNITS = {
+        Mass: ["kg", "g", "mg", "lb", "oz"],
+        Volume: [
+          "l",
+          "ml",
+          "cl",
+          "dl",
+          "gal",
+          "qt",
+          "pt",
+          "cup",
+          "fl oz",
+          "tbsp",
+          "tsp",
+          "dash",
+          "pinch",
+          "drop",
+        ],
+        Misc: [
+          "pack",
+          "bunch",
+          "box",
+          "case",
+          "can",
+          "bottle",
+          "jar",
+          "bag",
+          "bundle",
+          "roll",
+        ],
+        Length: ["m", "cm", "mm", "in", "ft", "yd"],
+        Other: ["each", "piece"],
+      };
+
+      const UNIT_DISPLAY_ORDER: Record<string, string[]> = {
+        mass: ["mg", "g", "oz", "lb", "kg"],
+        volume: ["ml", "tsp", "tbsp", "cup", "pt", "qt", "l", "gal"],
+        other: ["piece", "each"],
+      };
+
+      // 3. Migrate existing units to new type format (unit -> unit:category)
+      // We'll iterate through all standard units and update/insert them.
+
+      for (const [category, units] of Object.entries(STANDARD_UNITS)) {
+        const type = `unit:${category.toLowerCase()}`;
+
+        for (const unitName of units) {
+          // Determine order index
+          let orderIndex = 999;
+          const orderList = UNIT_DISPLAY_ORDER[category.toLowerCase()];
+          if (orderList) {
+            const idx = orderList.indexOf(unitName);
+            if (idx !== -1) orderIndex = idx;
+          }
+
+          // Update existing or insert new
+          // First check if it exists with type='unit' (old format)
+          await db.execute(
+            `UPDATE configuration_items 
+             SET type = $1, order_index = $2, is_active = 1
+             WHERE name = $3 AND type = 'unit'`,
+            [type, orderIndex, unitName],
+          );
+
+          // Now ensure it exists (upsert-ish)
+          await db.execute(
+            `INSERT INTO configuration_items (type, name, is_default, is_active, order_index)
+             VALUES ($1, $2, 1, 1, $3)
+             ON CONFLICT(type, name) DO UPDATE SET
+             order_index = excluded.order_index,
+             is_active = 1`,
+            [type, unitName, orderIndex],
+          );
+        }
+      }
+
+      // 4. Clean up any remaining "unit" type items that weren't in standard list
+      // We might want to keep them but move them to unit:misc?
+      await db.execute(
+        `UPDATE configuration_items 
+         SET type = 'unit:misc' 
+         WHERE type = 'unit'`,
+      );
+    },
+  },
 ];
 
 async function applyMigration(

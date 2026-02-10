@@ -25,7 +25,7 @@ export class ConfigRepository {
   }
 
   async add(type: ConfigItem["type"], name: string): Promise<ConfigItem> {
-    // Check for duplicates
+    // Check for existing item (including inactive ones)
     const existing = await db
       .selectFrom("configuration_items")
       .selectAll()
@@ -33,7 +33,17 @@ export class ConfigRepository {
       .where("name", "=", name)
       .executeTakeFirst();
 
-    if (existing) return existing;
+    if (existing) {
+      if (existing.is_active !== 1) {
+        await db
+          .updateTable("configuration_items")
+          .set({ is_active: 1 })
+          .where("id", "=", existing.id)
+          .execute();
+        return { ...existing, is_active: 1 };
+      }
+      return existing;
+    }
 
     const [result] = await db
       .insertInto("configuration_items")
@@ -41,6 +51,7 @@ export class ConfigRepository {
         type,
         name,
         is_default: 0,
+        is_active: 1, // Explicitly set active
       })
       .returningAll()
       .execute();
@@ -50,13 +61,23 @@ export class ConfigRepository {
   async delete(id: number): Promise<void> {
     const item = await db
       .selectFrom("configuration_items")
-      .selectAll()
+      .select(["is_default"])
       .where("id", "=", id)
       .executeTakeFirst();
 
     if (!item) throw new Error("Item not found");
 
-    await db.deleteFrom("configuration_items").where("id", "=", id).execute();
+    if (item.is_default === 1) {
+      // Soft delete default items
+      await db
+        .updateTable("configuration_items")
+        .set({ is_active: 0 })
+        .where("id", "=", id)
+        .execute();
+    } else {
+      // Hard delete custom items
+      await db.deleteFrom("configuration_items").where("id", "=", id).execute();
+    }
   }
 
   async restoreDefaults(type: ConfigItem["type"]): Promise<void> {
@@ -87,21 +108,13 @@ export class ConfigRepository {
     };
 
     if (type.startsWith("unit")) {
-      // Handle standard units with categories
-      const { STANDARD_UNITS } = await import("@/lib/constants/units");
-      for (const [category, units] of Object.entries(STANDARD_UNITS)) {
-        for (const unitName of units) {
-          await db
-            .insertInto("configuration_items")
-            .values({
-              type: `unit:${category}`,
-              name: unitName,
-              is_default: 1,
-            })
-            .onConflict((oc) => oc.columns(["type", "name"]).doNothing())
-            .execute();
-        }
-      }
+      // Restore all default units by setting is_active = 1
+      await db
+        .updateTable("configuration_items")
+        .set({ is_active: 1 })
+        .where("type", "like", "unit:%")
+        .where("is_default", "=", 1)
+        .execute();
       return;
     }
 

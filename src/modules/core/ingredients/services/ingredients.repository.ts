@@ -1,6 +1,6 @@
-import type { Selectable } from "kysely";
+import type { ExpressionBuilder, Selectable } from "kysely";
 import { db } from "@/lib/db";
-import type { IngredientsTable } from "@/types/db.types";
+import type { Database, IngredientsTable } from "@/types/db.types";
 
 export type IngredientRow = Selectable<IngredientsTable>;
 
@@ -181,8 +181,7 @@ export class IngredientsRepository {
     const rows = await db
       .selectFrom("ingredients")
       .selectAll()
-      // biome-ignore lint/suspicious/noExplicitAny: Kysely helper type
-      .where((eb: any) =>
+      .where((eb: ExpressionBuilder<Database, "ingredients">) =>
         eb.and([
           eb("min_stock_level", "is not", null),
           eb("current_stock", "<", eb.ref("min_stock_level")),

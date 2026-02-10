@@ -64,6 +64,13 @@
       "dessert": "Dessert",
       "beverage": "Beverage",
       "side": "Side Dish"
+    },
+    "unit_categories": {
+      "mass": "Mass / Weight",
+      "volume": "Volume",
+      "length": "Length",
+      "misc": "Misc",
+      "other": "Other"
     }
   },
   "navigation": {

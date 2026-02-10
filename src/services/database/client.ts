@@ -1,6 +1,37 @@
 import Database from "@tauri-apps/plugin-sql";
 import { runMigrations } from "./migrationManager";
 
+/**
+ * Database connection mode.
+ * - "local" (default): Uses Tauri SQLite plugin with a local file.
+ * - "remote": Connects to a remote database via URL (requires VITE_DB_URL).
+ *
+ * Set via the VITE_DB_MODE environment variable.
+ */
+type DbMode = "local" | "remote";
+
+function getDbMode(): DbMode {
+  const mode = import.meta.env.VITE_DB_MODE as string | undefined;
+  if (mode === "remote") return "remote";
+  return "local";
+}
+
+function getDbConnectionString(): string {
+  const mode = getDbMode();
+  if (mode === "remote") {
+    const url = import.meta.env.VITE_DB_URL as string | undefined;
+    if (!url) {
+      throw new Error(
+        'VITE_DB_MODE is "remote" but VITE_DB_URL is not set. ' +
+          "Please provide a database connection URL.",
+      );
+    }
+    return url;
+  }
+  // Default: local SQLite
+  return "sqlite:gusto.db";
+}
+
 // Singleton instance and initialization lock
 let dbInstance: Database | null = null;
 let initPromise: Promise<Database> | null = null;
@@ -11,12 +42,16 @@ export async function getDatabase(): Promise<Database> {
 
   initPromise = (async () => {
     try {
-      // Initial connection
-      const db = await Database.load("sqlite:gusto.db");
-      console.log("✅ Database connected via Tauri SQL plugin");
+      const connectionString = getDbConnectionString();
+      const db = await Database.load(connectionString);
+      console.log(
+        `✅ Database connected via Tauri SQL plugin (mode: ${getDbMode()}, uri: ${connectionString})`,
+      );
 
-      // Initialize schema
-      await initSchema(db);
+      // Initialize schema (only for local SQLite)
+      if (getDbMode() === "local") {
+        await initSchema(db);
+      }
 
       // Run migrations
       await runMigrations(db);

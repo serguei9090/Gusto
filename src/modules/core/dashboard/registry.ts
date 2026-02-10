@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { useSyncExternalStore } from "react";
 
 export interface DashboardWidget {
   id: string;
@@ -11,11 +12,9 @@ export interface DashboardWidget {
   order: number;
 }
 
-import { useEffect, useState } from "react";
-
 class WidgetRegistry {
   private widgets: DashboardWidget[] = [];
-  private listeners: Set<() => void> = new Set();
+  private readonly listeners: Set<() => void> = new Set();
 
   register(widget: DashboardWidget) {
     if (this.widgets.some((w) => w.id === widget.id)) {
@@ -51,14 +50,18 @@ class WidgetRegistry {
 
 export const dashboardRegistry = new WidgetRegistry();
 
+// Stable references for useSyncExternalStore (never re-created)
+const subscribeFn = (cb: () => void) => dashboardRegistry.subscribe(cb);
+const getSnapshotFn = () => dashboardRegistry.getAll();
+
+/**
+ * React hook that subscribes to dashboard widget registry changes.
+ * Uses `useSyncExternalStore` for correct concurrent-mode behaviour.
+ */
 export function useDashboardWidgets() {
-  const [widgets, setWidgets] = useState(dashboardRegistry.getAll());
-
-  useEffect(() => {
-    return dashboardRegistry.subscribe(() => {
-      setWidgets([...dashboardRegistry.getAll()]);
-    });
-  }, []);
-
-  return widgets;
+  return useSyncExternalStore(
+    subscribeFn,
+    getSnapshotFn,
+    getSnapshotFn, // SSR fallback
+  );
 }

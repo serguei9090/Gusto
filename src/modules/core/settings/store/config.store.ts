@@ -16,7 +16,7 @@ interface ConfigState {
   reorder: (items: ConfigItem[]) => Promise<void>;
 
   // Helpers to get specific types
-  getUnits: () => string[];
+  getUnits: () => { name: string; type: string }[];
   getIngredientCategories: () => string[];
   getRecipeCategories: () => string[];
 }
@@ -95,15 +95,17 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
 
   getUnits: () => {
     return get()
-      .items.filter((i) => i.type.startsWith("unit"))
-      .map((i) => i.name);
+      .items.filter((i) => i.type.startsWith("unit") && i.is_active === 1)
+      .map((i) => ({ name: i.name, type: i.type }));
   },
 
   getIngredientCategories: () => {
     return Array.from(
       new Set(
         get()
-          .items.filter((i) => i.type === "ingredient_category")
+          .items.filter(
+            (i) => i.type === "ingredient_category" && i.is_active === 1,
+          )
           .map((i) => i.name),
       ),
     );
@@ -113,7 +115,9 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
     return Array.from(
       new Set(
         get()
-          .items.filter((i) => i.type === "recipe_category")
+          .items.filter(
+            (i) => i.type === "recipe_category" && i.is_active === 1,
+          )
           .map((i) => i.name),
       ),
     );

@@ -7,10 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  UNIT_CATEGORY_LABELS,
-  UNIT_DISPLAY_ORDER,
-} from "@/lib/constants/units";
+
+import { useTranslation } from "@/hooks/useTranslation";
 import { useConfigStore } from "@/modules/core/settings/store/config.store";
 
 export interface UnitSelectProps {
@@ -29,24 +27,31 @@ export function UnitSelect({
 }: UnitSelectProps) {
   const { getUnits } = useConfigStore();
   const dynamicUnits = getUnits();
-  const validUnits = new Set(dynamicUnits);
+  const { t } = useTranslation();
 
-  // Filter and group units based on standardized display order
-  const groups = Object.entries(UNIT_DISPLAY_ORDER).map(([key, units]) => {
-    const availableUnits = units.filter((u) => validUnits.has(u));
+  // Define category order
+  const CATEGORY_ORDER = ["mass", "volume", "length", "misc", "other"];
+
+  // Group units by category
+  const groups = CATEGORY_ORDER.map((categoryKey) => {
+    const categoryType = `unit:${categoryKey}`;
+    // Filter units that belong to this category
+    const units = dynamicUnits.filter((u) => u.type === categoryType);
     return {
-      label: UNIT_CATEGORY_LABELS[key] || key,
-      units: availableUnits,
+      label: t(`common.unit_categories.${categoryKey}`, {
+        defaultValue: categoryKey,
+      }),
+      units,
     };
   });
 
-  // Find any units in the store that weren't captured in our explicit groups
-  const groupedUnitSet = new Set(groups.flatMap((g) => g.units));
-  const remainingUnits = dynamicUnits.filter((u) => !groupedUnitSet.has(u));
+  // Find units that didn't match any standard category
+  const knownTypes = new Set(CATEGORY_ORDER.map((k) => `unit:${k}`));
+  const remainingUnits = dynamicUnits.filter((u) => !knownTypes.has(u.type));
 
   if (remainingUnits.length > 0) {
     groups.push({
-      label: UNIT_CATEGORY_LABELS.misc,
+      label: "Custom / Other",
       units: remainingUnits,
     });
   }
@@ -62,8 +67,8 @@ export function UnitSelect({
             <SelectGroup key={group.label}>
               <SelectLabel>{group.label}</SelectLabel>
               {group.units.map((unit) => (
-                <SelectItem key={unit} value={unit}>
-                  {unit}
+                <SelectItem key={unit.name} value={unit.name}>
+                  {unit.name}
                 </SelectItem>
               ))}
             </SelectGroup>

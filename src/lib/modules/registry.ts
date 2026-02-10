@@ -5,6 +5,9 @@ class ModuleRegistry {
   private static instance: ModuleRegistry;
   private readonly modules: Map<string, ModuleDefinition> = new Map();
   private readonly listeners: Set<() => void> = new Set();
+  /** Cached snapshot – recomputed only on mutation */
+  private cachedAll: ModuleDefinition[] = [];
+  private snapshotDirty = true;
 
   private constructor() {}
 
@@ -41,13 +44,17 @@ class ModuleRegistry {
    * Filters out modules that are disabled by feature flags.
    */
   public getAll(): ModuleDefinition[] {
-    const store = useFeatureStore.getState();
-    return Array.from(this.modules.values())
-      .filter((m) => {
-        if (!m.requiredFeature) return true;
-        return store.isEnabled(m.requiredFeature);
-      })
-      .sort((a, b) => a.order - b.order);
+    if (this.snapshotDirty) {
+      const store = useFeatureStore.getState();
+      this.cachedAll = Array.from(this.modules.values())
+        .filter((m) => {
+          if (!m.requiredFeature) return true;
+          return store.isEnabled(m.requiredFeature);
+        })
+        .sort((a, b) => a.order - b.order);
+      this.snapshotDirty = false;
+    }
+    return this.cachedAll;
   }
 
   /**
@@ -59,6 +66,9 @@ class ModuleRegistry {
   }
 
   private notify(): void {
+    this.snapshotDirty = true;
+    // Recompute snapshot eagerly so subscribers get the same ref
+    this.getAll();
     this.listeners.forEach((l) => {
       l();
     });
@@ -101,17 +111,34 @@ class ModuleRegistry {
   }
 }
 
-import { useEffect, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 export const registry = ModuleRegistry.getInstance();
 
-// Hook to subscribe to registry changes
+// Stable references for useSyncExternalStore (never re-created)
+const subscribeFn = (cb: () => void) => registry.subscribe(cb);
+const getSnapshotFn = () => registry.getAll();
+
+/**
+ * React hook that subscribes to ModuleRegistry changes.
+ * Uses `useSyncExternalStore` for correct concurrent-mode behaviour.
+ */
 export function useRegistry() {
-  const [_tick, setTick] = useState(0);
+  const modules = useSyncExternalStore(
+    subscribeFn,
+    getSnapshotFn,
+    getSnapshotFn, // SSR fallback
+  );
 
-  useEffect(() => {
-    return registry.subscribe(() => setTick((t) => t + 1));
-  }, []);
-
-  return registry;
+  return useMemo(
+    () => ({
+      modules,
+      get: (id: string) => registry.get(id),
+      getAll: () => modules,
+      getCoreModules: () => registry.getCoreModules(),
+      getProModules: () => registry.getProModules(),
+      initialize: () => registry.initialize(),
+    }),
+    [modules],
+  );
 }

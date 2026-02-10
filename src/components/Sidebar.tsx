@@ -6,17 +6,11 @@ import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useSettingsStore } from "@/modules/core/settings/store/settings.store";
 
-export type View =
-  | "dashboard"
-  | "ingredients"
-  | "recipes"
-  | "inventory"
-  | "suppliers"
-  | "prepsheets"
-  | "calculators"
-  | "settings"
-  | "currency-settings"
-  | "app-config";
+/**
+ * View type for navigation.
+ * Generalized to string to support dynamic modules.
+ */
+export type View = string;
 
 interface SidebarProps {
   currentView: View;
@@ -146,7 +140,7 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
         {displayItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => onChangeView(item.id as View)}
+            onClick={() => onChangeView(item.id)}
             type="button"
             className={`
               w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors relative

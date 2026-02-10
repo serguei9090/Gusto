@@ -156,6 +156,7 @@ export interface ConfigurationItemsTable {
   is_default: number; // 1 or 0
   created_at: Generated<string>;
   order_index: number | null;
+  is_active: number | null;
 }
 
 export interface Database {

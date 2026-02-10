@@ -19,7 +19,8 @@
       "next": "Siguiente",
       "submit": "Enviar",
       "reset": "Restablecer",
-      "help": "Ayuda"
+      "help": "Ayuda",
+      "select": "Seleccionar"
     },
     "labels": {
       "name": "Nombre",
@@ -45,8 +46,8 @@
     "validation": {
       "required": "Este campo es obligatorio",
       "invalidEmail": "Dirección de correo electrónico no válida",
-      "minLength": "La longitud mínima es {{count}} caracteres",
-      "maxLength": "La longitud máxima es {{count}} caracteres",
+      "minLength": "La longitud mínima es de {{count}} caracteres",
+      "maxLength": "La longitud máxima es de {{count}} caracteres",
       "positive": "Debe ser un número positivo"
     },
     "categories": {
@@ -62,7 +63,14 @@
       "main": "Plato Principal",
       "dessert": "Postre",
       "beverage": "Bebida",
-      "side": "Acompañamiento"
+      "side": "Guarnición"
+    },
+    "unit_categories": {
+      "mass": "Masa / Peso",
+      "volume": "Volumen",
+      "length": "Longitud",
+      "misc": "Varios",
+      "other": "Otro"
     }
   },
   "navigation": {
@@ -89,7 +97,7 @@
     },
     "currency": {
       "title": "Configuración de Moneda",
-      "description": "Configurar tasas de cambio y moneda de referencia.",
+      "description": "Configure tasas de cambio y moneda de referencia.",
       "resetDefaults": "Restablecer valores",
       "baseLabel": "Moneda de Referencia (Base)",
       "baseHelp": "La moneda utilizada como base 1.00 para los cálculos.",
@@ -103,7 +111,7 @@
       "suppliersHelp": "Gestionar proveedores externos.",
       "prepSheetsHelp": "Crear planes de producción.",
       "calculatorsHelp": "Herramientas de costos y matemáticas.",
-      "dragToReorder": "Arrastre para reordenar los elementos.",
+      "dragToReorder": "Arrastre para reordenar los elementos en la barra lateral.",
       "visible": "Visible",
       "hidden": "Oculto"
     },
@@ -114,7 +122,7 @@
       "units": "Unidades de Medida",
       "unitsDesc": "Unidades para ingredientes y cantidades de recetas (ej. kg, oz).",
       "ingredientCategories": "Categorías de Ingredientes",
-      "ingredientCategoriesDesc": "Categorías para organizar su despensa y stock.",
+      "ingredientCategoriesDesc": "Categorías para organizar su despensa y inventario.",
       "recipeCategories": "Categorías de Recetas",
       "recipeCategoriesDesc": "Categorías para organizar su menú y libro de recetas.",
       "manage": "Gestionar",
@@ -129,6 +137,17 @@
     "editIngredient": "Editar Ingrediente",
     "deleteIngredient": "Eliminar Ingrediente",
     "ingredientDetails": "Detalles del Ingrediente",
+    "subtitle": "Gestione su inventario de ingredientes y realice el seguimiento de costos",
+    "prompts": {
+      "update": "Actualice los detalles del ingrediente a continuación.",
+      "add": "Complete el formulario a continuación para agregar un nuevo ingrediente a su inventario."
+    },
+    "archive": {
+      "title": "Archivar Ingrediente",
+      "message": "¿Está seguro de que desea archivar \"{{name}}\"? Se eliminará de la lista principal pero permanecerá en las recetas existentes.",
+      "action": "Archivar",
+      "progress": "Archivando..."
+    },
     "fields": {
       "currentPrice": "Precio Actual",
       "pricePerUnit": "Precio por Unidad",
@@ -137,7 +156,7 @@
       "supplier": "Proveedor",
       "unitOfMeasure": "Unidad de Medida",
       "purchaseUnit": "Unidad de Compra",
-      "conversionRatio": "Ratio de Conversión"
+      "conversionRatio": "Factor de Conversión"
     },
     "help": {
       "name": "Ingrese un nombre descriptivo para este ingrediente. Este se utilizará en todo el sistema para su identificación.",
@@ -145,12 +164,12 @@
       "currentPrice": "El precio de compra actual de este ingrediente de su proveedor. Esto se utiliza para calcular los costos de las recetas.",
       "pricePerUnit": "El costo por unidad individual de medida. Por ejemplo, si compra al por mayor pero usa porciones más pequeñas, esto ayuda a calcular los costos exactos de las recetas.",
       "currency": "Seleccione la moneda para el precio de este ingrediente. Esto se convertirá a su moneda base para los cálculos.",
-      "unitOfMeasure": "La unidad estándar que utiliza para medir este ingredient (por ejemplo, kg, lbs, litros, piezas).",
+      "unitOfMeasure": "La unidad estándar que utiliza para medir este ingrediente (por ejemplo, kg, lbs, litros, piezas).",
       "currentStock": "La cantidad actual de este ingrediente que tiene disponible en su inventario.",
       "minStockLevel": "Establezca un nivel mínimo de stock. Se le alertará cuando el inventario caiga por debajo de esta cantidad.",
       "supplier": "Seleccione el proveedor principal de este ingrediente. Puede agregar proveedores en la sección de Proveedores.",
       "purchaseUnit": "La unidad en la que compra este artículo (ej. Caja, Paquete, Saco).",
-      "conversionRatio": "Cuántas unidades base hay en una unidad de compra. Por ejemplo, si compra una caja de 12 botellas, el ratio es 12."
+      "conversionRatio": "Cuántas unidades base hay en una unidad de compra. Por ejemplo, si compra una caja de 12 botellas, el factor es 12."
     },
     "placeholders": {
       "searchIngredients": "Buscar ingredientes...",
@@ -164,20 +183,52 @@
     "editRecipe": "Editar Receta",
     "deleteRecipe": "Eliminar Receta",
     "recipeDetails": "Detalles de la Receta",
+    "recipeDetailsDesc": "Información básica sobre el plato.",
+    "financials": "Finanzas",
+    "financialsDesc": "Objetivos de costos y precios.",
+    "allergens": "Información sobre Alérgenos y Dietética",
+    "allergensDesc": "Marque las restricciones dietéticas y los alérgenos comunes.",
+    "commonAllergens": "Alérgenos Comunes",
+    "dietaryRestrictions": "Restricciones Dietéticas",
+    "ingredientsTitle": "Ingredientes",
+    "ingredientsDesc": "Componentes de la receta.",
+    "subRecipes": "Sub-Recetas",
+    "noMatches": "No se encontraron coincidencias",
+    "addComponent": "+ Agregar Componente",
+    "cost": "Costo",
+    "subtotal": "Subtotal",
+    "trueCost": "Costo Real de la Receta",
+    "suggestedPrice": "Precio Sugerido",
+    "actualCost": "Costo Real de Alimentos",
+    "targetCost": "Costo de Alimentos Objetivo",
+    "netMargin": "Margen de Beneficio Neto",
+    "targetMargin": "Margen de Beneficio Objetivo",
+    "default": "Por defecto",
     "fields": {
       "servings": "Porciones",
       "prepTime": "Tiempo de Preparación (minutos)",
       "cookingInstructions": "Instrucciones de Cocción",
       "sellingPrice": "Precio de Venta",
-      "targetCostPercentage": "Porcentaje de Costo Objetivo",
+      "targetCostPercentage": "% de Costo Objetivo",
+      "wasteBuffer": "% de Merma / Buffer",
+      "batchYield": "Rendimiento del Lote",
+      "yieldUnit": "Unidad de Rendimiento",
+      "calories": "Calorías (kcal)",
       "totalCost": "Costo Total",
       "profitMargin": "Margen de Beneficio",
       "addIngredient": "Agregar Ingrediente"
     },
     "placeholders": {
       "searchRecipes": "Buscar recetas...",
-      "recipeName": "ej. Pizza Margarita",
-      "briefOverview": "Descripción breve..."
+      "recipeName": "ej. Hamburguesa de Res",
+      "briefOverview": "Breve descripción...",
+      "yield": "ej. 5",
+      "yieldUnit": "ej. kg",
+      "calories": "0",
+      "sellingPrice": "0.00",
+      "targetCost": "25",
+      "wasteBuffer": "0",
+      "searchComponents": "Buscar componentes..."
     },
     "help": {
       "name": "Ingrese un nombre memorable para esta receta. Esto aparecerá en su menú e informes.",
@@ -185,9 +236,12 @@
       "description": "Proporcione una breve descripción de este plato. Esto puede usarse para descripciones de menú o notas internas.",
       "servings": "Número de porciones que produce esta receta. Se utiliza para calcular los costos por porción.",
       "prepTime": "Tiempo de preparación estimado en minutos. Ayuda con la programación de cocina y los cálculos de costos laborales.",
-      "sellingPrice": "El precio del menú para este plato. Se utiliza para calcular los márgenes de beneficio.",
-      "targetCostPercentage": "Su costo de alimentos ideal como porcentaje del precio de venta (por ejemplo, 30%). El sistema le alertará si los costos reales exceden esto.",
-      "wasteBuffer": "Agregue un porcentaje para tener en cuenta el desperdicio de ingredientes, recortes o derrames (p. ej., 5-10%). Esto garantiza cálculos de costos más precisos."
+      "sellingPrice": "El precio en el menú para este plato. Se utiliza para calcular los márgenes de beneficio.",
+      "targetCostPercentage": "Su costo ideal de alimentos como porcentaje del precio de venta (por ejemplo, 30%). El sistema le alertará si los costos reales exceden esto.",
+      "wasteBuffer": "Agregue un porcentaje para tener en cuenta el desperdicio de ingredientes, recortes o derrames (p. ej., 5-10%). Esto garantiza cálculos de costos más precisos.",
+      "yield": "La cantidad total que produce esta receta (ej. 5 para 5kg).",
+      "yieldUnit": "La unidad para el rendimiento del lote (ej. kg, L, unidades).",
+      "calories": "Conteo estimado de calorías por porción."
     },
     "sections": {
       "basicInfo": "Información Básica",
@@ -204,18 +258,18 @@
     "lowStockAlert": "Alerta de Stock Bajo",
     "outOfStock": "Sin Stock",
     "inStock": "En Stock",
-    "subtitle": "Gestione los niveles de existencias y realice un seguimiento de las transacciones.",
+    "subtitle": "Gestione los niveles de existencias y realice el seguimiento de las transacciones.",
     "searchPlaceholder": "Buscar inventario...",
     "totalItems": "Artículos Totales",
     "activeIngredients": "Ingredientes activos",
     "itemsNeedingAttention": "Artículos que requieren atención",
     "help": {
-      "transactionType": "Elija el tipo de movimiento: Compra añade stock, Uso/Desperdicio resta stock, y Ajuste establece el conteo exacto.",
-      "quantity": "Ingrese la cantidad de stock a añadir, eliminar o establecer. Use la unidad base del ingrediente.",
-      "costPerUnit": "El precio pagado por unidad. Para compras, esto actualiza el costo del ingrediente. Para uso/desperdicio, se usa para informes.",
-      "currency": "La moneda para los costos de esta transacción. Las transacciones multidivisa se convierten automáticamente en los informes.",
-      "reference": "Número de referencia o factura opcional para seguimiento (ej. número de factura del proveedor).",
-      "notes": "Contexto adicional sobre esta transacción, como razones para ajustes o desperdicios."
+      "transactionType": "Elija el tipo de movimiento: Compra añade stock, Uso/Mermas resta stock, y Ajuste establece el conteo exacto.",
+      "quantity": "Ingrese la cantidad de stock a añadir, retirar o establecer. Use la unidad base de medida del ingrediente.",
+      "costPerUnit": "El precio pagado por unidad para esta transacción. Para compras, esto actualiza el costo del ingrediente. Para uso/mermas, se usa para informes.",
+      "currency": "La moneda para los costos de esta transacción. Las transacciones multidivisa se convierten automáticamente para los informes.",
+      "reference": "Número de referencia o ID de factura opcional para seguimiento (ej. número de factura del proveedor).",
+      "notes": "Contexto adicional sobre esta transacción, como razones para ajustes o mermas."
     }
   },
   "suppliers": {
@@ -232,11 +286,11 @@
     },
     "help": {
       "name": "Ingrese el nombre comercial de este proveedor. Esto le ayuda a identificarlos en pedidos e informes.",
-      "contactPerson": "La persona principal a contactar en este proveedor para pedidos y consultas.",
+      "contactPerson": "La persona principal a contactar con este proveedor para pedidos y consultas.",
       "email": "Dirección de correo electrónico del proveedor para confirmaciones de pedidos y comunicaciones.",
       "phone": "Número de teléfono principal para comunicarse con este proveedor para asuntos urgentes o preguntas sobre pedidos.",
       "address": "Dirección física o postal del proveedor. Útil para el seguimiento de entregas y registros.",
-      "paymentTerms": "Acuerdo de pago acordado (por ejemplo, Neto 30, COD o términos de crédito). Ayuda con la planificación del flujo de efectivo."
+      "paymentTerms": "Acuerdo de pago pactado (por ejemplo, Neto 30, COD o términos de crédito). Ayuda con la planificación del flujo de caja."
     },
     "subtitle": "Gestione sus fuentes de ingredientes y contactos.",
     "searchPlaceholder": "Buscar proveedores...",
@@ -274,7 +328,7 @@
       "acrossAllRecipes": "En todas las recetas",
       "activeRecipes": "Recetas activas"
     },
-    "urgentReorders": "Reordenes Urgentes",
+    "urgentReorders": "Reabastecimientos Urgentes",
     "stockLevelsHealthy": "Niveles de stock saludables",
     "highMarginRecipes": "Recetas de Alto Margen",
     "noRecipeData": "No hay datos de recetas disponibles"

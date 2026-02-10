@@ -1,9 +1,67 @@
 import { convertUnit } from "./conversions";
 import { convertCurrency } from "./currencyConverter";
 
+export class CostingError extends Error {
+  constructor(
+    message: string,
+    public code: string = "COSTING_ERROR",
+  ) {
+    super(message);
+    this.name = "CostingError";
+  }
+}
+
+export class CircularReferenceError extends CostingError {
+  constructor(recipeName: string) {
+    super(
+      `Circular reference detected: Recipe "${recipeName}" refers back to itself through sub-recipes.`,
+      "CIRCULAR_REFERENCE",
+    );
+    this.name = "CircularReferenceError";
+  }
+}
+
 interface RecipeItemCost {
   cost: number;
   error?: string;
+  errorCode?: string;
+}
+
+/**
+ * A utility to track visited recipes during recursive costing to prevent infinite loops.
+ */
+export class CostingCycleGuard {
+  private readonly visited = new Set<number>();
+
+  constructor(initialIds: number[] = []) {
+    for (const id of initialIds) {
+      this.visited.add(id);
+    }
+  }
+
+  /**
+   * Records a recipe as visited and throws if a cycle is detected.
+   */
+  enter(id: number, name: string) {
+    if (this.visited.has(id)) {
+      throw new CircularReferenceError(name);
+    }
+    this.visited.add(id);
+  }
+
+  /**
+   * Removes a recipe from the visited set (useful for DAG traversal where a recipe can be reached via multiple paths but not cycles).
+   */
+  exit(id: number) {
+    this.visited.delete(id);
+  }
+
+  /**
+   * Returns a copy of the guard with current state.
+   */
+  clone() {
+    return new CostingCycleGuard(Array.from(this.visited));
+  }
 }
 
 interface CostInputItem {
@@ -33,7 +91,13 @@ export async function calculateRecipeTotal(
   items: CostInputItem[],
   wasteBuffer = 0,
   recipeCurrency = "USD",
+  guard?: CostingCycleGuard,
+  currentRecipeInfo?: { id: number; name: string },
 ) {
+  if (guard && currentRecipeInfo) {
+    guard.enter(currentRecipeInfo.id, currentRecipeInfo.name);
+  }
+
   let subtotal = 0;
   const errors: string[] = [];
 

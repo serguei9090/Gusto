@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { createModuleStore } from "@/lib/store";
 import { prepSheetsRepository } from "../services/prep-sheets.repository";
 import type { PrepSheet, PrepSheetFormData } from "../types";
 
@@ -46,127 +46,130 @@ const INITIAL_FIELDS = {
   notes: "",
 };
 
-export const usePrepSheetsStore = create<PrepSheetsState>((set, get) => ({
-  prepSheets: [],
-  currentSheet: null,
-  isLoading: false,
-  error: null,
-  builderSelections: [],
-  builderFields: INITIAL_FIELDS,
-  notification: null,
+export const usePrepSheetsStore = createModuleStore<PrepSheetsState>(
+  { name: "prep-sheets" },
+  (set, get) => ({
+    prepSheets: [],
+    currentSheet: null,
+    isLoading: false,
+    error: null,
+    builderSelections: [],
+    builderFields: INITIAL_FIELDS,
+    notification: null,
 
-  fetchPrepSheets: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const data = await prepSheetsRepository.getAll();
-      set({ prepSheets: data, isLoading: false });
-    } catch (err) {
-      set({ error: String(err), isLoading: false });
-    }
-  },
+    fetchPrepSheets: async () => {
+      set({ isLoading: true, error: null });
+      try {
+        const data = await prepSheetsRepository.getAll();
+        set({ prepSheets: data, isLoading: false });
+      } catch (err) {
+        set({ error: String(err), isLoading: false });
+      }
+    },
 
-  generateSheet: async (formData) => {
-    set({ isLoading: true, error: null });
-    try {
-      const sheet = await prepSheetsRepository.generate(formData);
-      set({ currentSheet: sheet, isLoading: false });
-      return sheet;
-    } catch (err) {
-      set({ error: String(err), isLoading: false });
-      throw err;
-    }
-  },
+    generateSheet: async (formData) => {
+      set({ isLoading: true, error: null });
+      try {
+        const sheet = await prepSheetsRepository.generate(formData);
+        set({ currentSheet: sheet, isLoading: false });
+        return sheet;
+      } catch (err) {
+        set({ error: String(err), isLoading: false });
+        throw err;
+      }
+    },
 
-  saveSheet: async (sheet) => {
-    set({ isLoading: true, error: null });
-    try {
-      const id = await prepSheetsRepository.save(sheet);
-      await get().fetchPrepSheets(); // Refresh
+    saveSheet: async (sheet) => {
+      set({ isLoading: true, error: null });
+      try {
+        const id = await prepSheetsRepository.save(sheet);
+        await get().fetchPrepSheets(); // Refresh
+        set({
+          notification: {
+            message: "Prep sheet saved successfully!",
+            type: "success",
+          },
+        });
+        return id;
+      } catch (err) {
+        set({
+          error: String(err),
+          notification: {
+            message: "Failed to save prep sheet",
+            type: "error",
+          },
+          isLoading: false,
+        });
+        throw err;
+      }
+    },
+
+    deleteSheet: async (id) => {
+      set({ isLoading: true, error: null });
+      try {
+        await prepSheetsRepository.delete(id);
+        await get().fetchPrepSheets();
+        set({
+          notification: {
+            message: "Prep sheet deleted",
+            type: "success",
+          },
+        });
+      } catch (err) {
+        set({ error: String(err), isLoading: false });
+      }
+    },
+
+    setCurrentSheet: (sheet) => set({ currentSheet: sheet }),
+
+    addRecipeToBuilder: (recipeId, servings) => {
+      const { builderSelections } = get();
+      const existing = builderSelections.find((s) => s.recipeId === recipeId);
+      if (existing) {
+        set({
+          builderSelections: builderSelections.map((s) =>
+            s.recipeId === recipeId ? { ...s, servings } : s,
+          ),
+        });
+      } else {
+        set({
+          builderSelections: [...builderSelections, { recipeId, servings }],
+        });
+      }
+    },
+
+    updateBuilderServings: (recipeId, servings) => {
       set({
-        notification: {
-          message: "Prep sheet saved successfully!",
-          type: "success",
-        },
-      });
-      return id;
-    } catch (err) {
-      set({
-        error: String(err),
-        notification: {
-          message: "Failed to save prep sheet",
-          type: "error",
-        },
-        isLoading: false,
-      });
-      throw err;
-    }
-  },
-
-  deleteSheet: async (id) => {
-    set({ isLoading: true, error: null });
-    try {
-      await prepSheetsRepository.delete(id);
-      await get().fetchPrepSheets();
-      set({
-        notification: {
-          message: "Prep sheet deleted",
-          type: "success",
-        },
-      });
-    } catch (err) {
-      set({ error: String(err), isLoading: false });
-    }
-  },
-
-  setCurrentSheet: (sheet) => set({ currentSheet: sheet }),
-
-  addRecipeToBuilder: (recipeId, servings) => {
-    const { builderSelections } = get();
-    const existing = builderSelections.find((s) => s.recipeId === recipeId);
-    if (existing) {
-      set({
-        builderSelections: builderSelections.map((s) =>
+        builderSelections: get().builderSelections.map((s) =>
           s.recipeId === recipeId ? { ...s, servings } : s,
         ),
       });
-    } else {
+    },
+
+    removeRecipeFromBuilder: (recipeId) => {
       set({
-        builderSelections: [...builderSelections, { recipeId, servings }],
+        builderSelections: get().builderSelections.filter(
+          (s) => s.recipeId !== recipeId,
+        ),
       });
-    }
-  },
+    },
 
-  updateBuilderServings: (recipeId, servings) => {
-    set({
-      builderSelections: get().builderSelections.map((s) =>
-        s.recipeId === recipeId ? { ...s, servings } : s,
-      ),
-    });
-  },
+    setBuilderField: (field, value) => {
+      set((state) => ({
+        builderFields: {
+          ...state.builderFields,
+          [field]: value,
+        },
+      }));
+    },
 
-  removeRecipeFromBuilder: (recipeId) => {
-    set({
-      builderSelections: get().builderSelections.filter(
-        (s) => s.recipeId !== recipeId,
-      ),
-    });
-  },
+    clearBuilder: () =>
+      set({
+        builderSelections: [],
+        builderFields: INITIAL_FIELDS,
+        currentSheet: null,
+      }),
 
-  setBuilderField: (field, value) => {
-    set((state) => ({
-      builderFields: {
-        ...state.builderFields,
-        [field]: value,
-      },
-    }));
-  },
-
-  clearBuilder: () =>
-    set({
-      builderSelections: [],
-      builderFields: INITIAL_FIELDS,
-      currentSheet: null,
-    }),
-
-  clearNotification: () => set({ notification: null }),
-}));
+    clearNotification: () => set({ notification: null }),
+  }),
+);
