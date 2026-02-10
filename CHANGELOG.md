@@ -16,6 +16,11 @@ All notable changes to this project will be documented in this file.
 - **Dashboard Stability**: Fixed a critical bug in `WidgetRegistry` where non-immutable updates caused infinite React re-renders and prevented widgets from appearing on initial load.
 - **Type Safety**: Eliminated multiple `any` type assertions across repository tests and stores, improving codebase reliability and lint compliance.
 - **UI Polishing**: Added loading spinners for lazy-loaded modules using React Suspense.
+- **SonarQube Critical Issues**: 
+  - Fixed blocker test with no assertions in `prep-sheet-aggregation.test.ts`
+  - Replaced mutable `db` export with immutable `getDb()` function to prevent external mutation
+  - Maintained backward compatibility with deprecated `db` Proxy export
+  - Reduced critical issues from 5 to 3, eliminating all blocker-level bugs
 
 ## [1.0.4] - 2026-02-09
 
