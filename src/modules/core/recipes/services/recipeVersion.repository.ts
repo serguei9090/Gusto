@@ -379,24 +379,173 @@ export class RecipeVersionRepository {
   }
 
   /**
-   * Compare two versions with detailed diff information
+   * Build an IngredientDiff object for a modified ingredient
+   * @private
    */
-  async compareVersionsDetailed(
-    recipeId: number,
-    version1: number,
-    version2: number,
-  ): Promise<{
-    recipeDiff: DetailedVersionDiff[];
-    ingredientDiff: IngredientDiff[];
-  }> {
-    const v1 = await this.getVersion(recipeId, version1);
-    const v2 = await this.getVersion(recipeId, version2);
+  private buildModifiedIngredientDiff(
+    oldIng: RecipeVersion["ingredientsSnapshot"][0],
+    newIng: RecipeVersion["ingredientsSnapshot"][0],
+  ): IngredientDiff {
+    const quantityChanged = oldIng.quantity !== newIng.quantity;
+    const costChanged = oldIng.cost !== newIng.cost;
+    const unitChanged = oldIng.unit !== newIng.unit;
+    const isModified = quantityChanged || costChanged || unitChanged;
 
-    if (!v1 || !v2) {
-      throw new Error("One or both versions not found");
+    return {
+      ingredientId: oldIng.ingredient_id,
+      subRecipeId: oldIng.sub_recipe_id,
+      ingredientName: oldIng.ingredient_id
+        ? `Ingredient ${oldIng.ingredient_id}`
+        : `Sub-Recipe ${oldIng.sub_recipe_id}`,
+      changeType: isModified ? "modified" : "unchanged",
+      quantityChange: isModified
+        ? { old: oldIng.quantity, new: newIng.quantity }
+        : undefined,
+      costChange: isModified
+        ? { old: oldIng.cost, new: newIng.cost }
+        : undefined,
+      unitChange: isModified
+        ? { old: oldIng.unit, new: newIng.unit }
+        : undefined,
+      isSubRecipe: !!oldIng.sub_recipe_id,
+    };
+  }
+
+  /**
+   * Build an IngredientDiff object for a removed ingredient
+   * @private
+   */
+  private buildRemovedIngredientDiff(
+    oldIng: RecipeVersion["ingredientsSnapshot"][0],
+  ): IngredientDiff {
+    return {
+      ingredientId: oldIng.ingredient_id,
+      subRecipeId: oldIng.sub_recipe_id,
+      ingredientName: oldIng.ingredient_id
+        ? `Ingredient ${oldIng.ingredient_id}`
+        : `Sub-Recipe ${oldIng.sub_recipe_id}`,
+      changeType: "removed",
+      quantityChange: { old: oldIng.quantity, new: 0 },
+      costChange: { old: oldIng.cost, new: null },
+      unitChange: { old: oldIng.unit, new: "" },
+      isSubRecipe: !!oldIng.sub_recipe_id,
+    };
+  }
+
+  /**
+   * Build an IngredientDiff object for an added ingredient
+   * @private
+   */
+  private buildAddedIngredientDiff(
+    newIng: RecipeVersion["ingredientsSnapshot"][0],
+  ): IngredientDiff {
+    return {
+      ingredientId: newIng.ingredient_id,
+      subRecipeId: newIng.sub_recipe_id,
+      ingredientName: newIng.ingredient_id
+        ? `Ingredient ${newIng.ingredient_id}`
+        : `Sub-Recipe ${newIng.sub_recipe_id}`,
+      changeType: "added",
+      quantityChange: { old: 0, new: newIng.quantity },
+      costChange: { old: null, new: newIng.cost },
+      unitChange: { old: "", new: newIng.unit },
+      isSubRecipe: !!newIng.sub_recipe_id,
+    };
+  }
+
+  /**
+   * Phase 1: Match ingredients by exact Row ID
+   * @private
+   */
+  private matchIngredientsByRowId(
+    v1Pool: RecipeVersion["ingredientsSnapshot"],
+    v2Pool: RecipeVersion["ingredientsSnapshot"],
+    matchedIndicesV1: Set<number>,
+    matchedIndicesV2: Set<number>,
+    ingredientDiff: IngredientDiff[],
+  ): void {
+    for (let i = 0; i < v1Pool.length; i++) {
+      const oldIng = v1Pool[i];
+      const matchIndex = v2Pool.findIndex(
+        (newIng, idx) => !matchedIndicesV2.has(idx) && newIng.id === oldIng.id,
+      );
+
+      if (matchIndex !== -1) {
+        const newIng = v2Pool[matchIndex];
+        matchedIndicesV1.add(i);
+        matchedIndicesV2.add(matchIndex);
+        ingredientDiff.push(this.buildModifiedIngredientDiff(oldIng, newIng));
+      }
+    }
+  }
+
+  /**
+   * Phase 2: Match ingredients by Ingredient Type (Semantic Identity)
+   * @private
+   */
+  private matchIngredientsByType(
+    v1Pool: RecipeVersion["ingredientsSnapshot"],
+    v2Pool: RecipeVersion["ingredientsSnapshot"],
+    matchedIndicesV1: Set<number>,
+    matchedIndicesV2: Set<number>,
+    ingredientDiff: IngredientDiff[],
+  ): void {
+    for (let i = 0; i < v1Pool.length; i++) {
+      if (matchedIndicesV1.has(i)) continue;
+
+      const oldIng = v1Pool[i];
+      const matchIndex = v2Pool.findIndex(
+        (newIng, idx) =>
+          !matchedIndicesV2.has(idx) &&
+          ((oldIng.ingredient_id &&
+            newIng.ingredient_id === oldIng.ingredient_id) ||
+            (oldIng.sub_recipe_id &&
+              newIng.sub_recipe_id === oldIng.sub_recipe_id)),
+      );
+
+      if (matchIndex !== -1) {
+        const newIng = v2Pool[matchIndex];
+        matchedIndicesV1.add(i);
+        matchedIndicesV2.add(matchIndex);
+        ingredientDiff.push(this.buildModifiedIngredientDiff(oldIng, newIng));
+      }
+    }
+  }
+
+  /**
+   * Phase 3: Process remaining unmatched ingredients (removed/added)
+   * @private
+   */
+  private processUnmatchedIngredients(
+    v1Pool: RecipeVersion["ingredientsSnapshot"],
+    v2Pool: RecipeVersion["ingredientsSnapshot"],
+    matchedIndicesV1: Set<number>,
+    matchedIndicesV2: Set<number>,
+    ingredientDiff: IngredientDiff[],
+  ): void {
+    // Remaining V1 -> Removed
+    for (let i = 0; i < v1Pool.length; i++) {
+      if (!matchedIndicesV1.has(i)) {
+        ingredientDiff.push(this.buildRemovedIngredientDiff(v1Pool[i]));
+      }
     }
 
-    // Compare recipe fields
+    // Remaining V2 -> Added
+    for (let i = 0; i < v2Pool.length; i++) {
+      if (!matchedIndicesV2.has(i)) {
+        ingredientDiff.push(this.buildAddedIngredientDiff(v2Pool[i]));
+      }
+    }
+  }
+
+  /**
+   * Build recipe field differences
+   * @private
+   */
+  private buildRecipeDiff(
+    v1: RecipeVersion,
+    v2: RecipeVersion,
+  ): DetailedVersionDiff[] {
     const recipeDiff: DetailedVersionDiff[] = [];
 
     const numericFields: Array<{
@@ -460,146 +609,63 @@ export class RecipeVersionRepository {
       });
     }
 
+    return recipeDiff;
+  }
+
+  /**
+   * Compare two versions with detailed diff information
+   */
+  async compareVersionsDetailed(
+    recipeId: number,
+    version1: number,
+    version2: number,
+  ): Promise<{
+    recipeDiff: DetailedVersionDiff[];
+    ingredientDiff: IngredientDiff[];
+  }> {
+    const v1 = await this.getVersion(recipeId, version1);
+    const v2 = await this.getVersion(recipeId, version2);
+
+    if (!v1 || !v2) {
+      throw new Error("One or both versions not found");
+    }
+
+    // Compare recipe fields
+    const recipeDiff = this.buildRecipeDiff(v1, v2);
+
     // Compare ingredients using Hybrid Matching Strategy
     const ingredientDiff: IngredientDiff[] = [];
-
-    // Pools of ingredients to match
-    // We clone them to be safe
     const v1Pool = [...v1.ingredientsSnapshot];
     const v2Pool = [...v2.ingredientsSnapshot];
-
-    // Phase 1: Match by exact Row ID (Stable Identity)
-    // This handles edits to existing rows perfectly if IDs are preserved
     const matchedIndicesV1 = new Set<number>();
     const matchedIndicesV2 = new Set<number>();
 
-    for (let i = 0; i < v1Pool.length; i++) {
-      const oldIng = v1Pool[i];
-      // Find matching ID in V2 that hasn't been matched yet
-      const matchIndex = v2Pool.findIndex(
-        (newIng, idx) => !matchedIndicesV2.has(idx) && newIng.id === oldIng.id,
-      );
+    // Phase 1: Match by exact Row ID
+    this.matchIngredientsByRowId(
+      v1Pool,
+      v2Pool,
+      matchedIndicesV1,
+      matchedIndicesV2,
+      ingredientDiff,
+    );
 
-      if (matchIndex !== -1) {
-        // Matched by ID
-        const newIng = v2Pool[matchIndex];
-        matchedIndicesV1.add(i);
-        matchedIndicesV2.add(matchIndex);
+    // Phase 2: Match by Ingredient Type
+    this.matchIngredientsByType(
+      v1Pool,
+      v2Pool,
+      matchedIndicesV1,
+      matchedIndicesV2,
+      ingredientDiff,
+    );
 
-        // Calculate diff
-        const quantityChanged = oldIng.quantity !== newIng.quantity;
-        const costChanged = oldIng.cost !== newIng.cost;
-        const unitChanged = oldIng.unit !== newIng.unit;
-        const isModified = quantityChanged || costChanged || unitChanged;
-
-        ingredientDiff.push({
-          ingredientId: oldIng.ingredient_id,
-          subRecipeId: oldIng.sub_recipe_id,
-          ingredientName: oldIng.ingredient_id
-            ? `Ingredient ${oldIng.ingredient_id}`
-            : `Sub-Recipe ${oldIng.sub_recipe_id}`,
-          changeType: isModified ? "modified" : "unchanged",
-          quantityChange: isModified
-            ? { old: oldIng.quantity, new: newIng.quantity }
-            : undefined,
-          costChange: isModified
-            ? { old: oldIng.cost, new: newIng.cost }
-            : undefined,
-          unitChange: isModified
-            ? { old: oldIng.unit, new: newIng.unit }
-            : undefined,
-          isSubRecipe: !!oldIng.sub_recipe_id,
-        });
-      }
-    }
-
-    // Phase 2: Match by Ingredient Type (Semantic Identity)
-    // This handles cases where IDs changed (delete/re-insert) or new duplicates added
-    for (let i = 0; i < v1Pool.length; i++) {
-      if (matchedIndicesV1.has(i)) continue;
-
-      const oldIng = v1Pool[i];
-      // Find matching ingredient_id in remaining V2 items
-      const matchIndex = v2Pool.findIndex(
-        (newIng, idx) =>
-          !matchedIndicesV2.has(idx) &&
-          ((oldIng.ingredient_id &&
-            newIng.ingredient_id === oldIng.ingredient_id) ||
-            (oldIng.sub_recipe_id &&
-              newIng.sub_recipe_id === oldIng.sub_recipe_id)),
-      );
-
-      if (matchIndex !== -1) {
-        // Matched by Type
-        const newIng = v2Pool[matchIndex];
-        matchedIndicesV1.add(i);
-        matchedIndicesV2.add(matchIndex);
-
-        // Calculate diff (Assume modified, since mapped by type)
-        const quantityChanged = oldIng.quantity !== newIng.quantity;
-        const costChanged = oldIng.cost !== newIng.cost;
-        const unitChanged = oldIng.unit !== newIng.unit;
-        const isModified = quantityChanged || costChanged || unitChanged;
-
-        ingredientDiff.push({
-          ingredientId: oldIng.ingredient_id,
-          subRecipeId: oldIng.sub_recipe_id,
-          ingredientName: oldIng.ingredient_id
-            ? `Ingredient ${oldIng.ingredient_id}`
-            : `Sub-Recipe ${oldIng.sub_recipe_id}`,
-          changeType: isModified ? "modified" : "unchanged",
-          quantityChange: isModified
-            ? { old: oldIng.quantity, new: newIng.quantity }
-            : undefined,
-          costChange: isModified
-            ? { old: oldIng.cost, new: newIng.cost }
-            : undefined,
-          unitChange: isModified
-            ? { old: oldIng.unit, new: newIng.unit }
-            : undefined,
-          isSubRecipe: !!oldIng.sub_recipe_id,
-        });
-      }
-    }
-
-    // Phase 3: Residuals
-    // Remaining V1 -> Removed
-    for (let i = 0; i < v1Pool.length; i++) {
-      if (!matchedIndicesV1.has(i)) {
-        const oldIng = v1Pool[i];
-        ingredientDiff.push({
-          ingredientId: oldIng.ingredient_id,
-          subRecipeId: oldIng.sub_recipe_id,
-          ingredientName: oldIng.ingredient_id
-            ? `Ingredient ${oldIng.ingredient_id}`
-            : `Sub-Recipe ${oldIng.sub_recipe_id}`,
-          changeType: "removed",
-          quantityChange: { old: oldIng.quantity, new: 0 },
-          costChange: { old: oldIng.cost, new: null },
-          unitChange: { old: oldIng.unit, new: "" },
-          isSubRecipe: !!oldIng.sub_recipe_id,
-        });
-      }
-    }
-
-    // Remaining V2 -> Added
-    for (let i = 0; i < v2Pool.length; i++) {
-      if (!matchedIndicesV2.has(i)) {
-        const newIng = v2Pool[i];
-        ingredientDiff.push({
-          ingredientId: newIng.ingredient_id,
-          subRecipeId: newIng.sub_recipe_id,
-          ingredientName: newIng.ingredient_id
-            ? `Ingredient ${newIng.ingredient_id}`
-            : `Sub-Recipe ${newIng.sub_recipe_id}`,
-          changeType: "added",
-          quantityChange: { old: 0, new: newIng.quantity },
-          costChange: { old: null, new: newIng.cost },
-          unitChange: { old: "", new: newIng.unit },
-          isSubRecipe: !!newIng.sub_recipe_id,
-        });
-      }
-    }
+    // Phase 3: Process unmatched (removed/added)
+    this.processUnmatchedIngredients(
+      v1Pool,
+      v2Pool,
+      matchedIndicesV1,
+      matchedIndicesV2,
+      ingredientDiff,
+    );
 
     return {
       recipeDiff,
