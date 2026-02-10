@@ -16,13 +16,15 @@ All notable changes to this project will be documented in this file.
 - **Dashboard Stability**: Fixed a critical bug in `WidgetRegistry` where non-immutable updates caused infinite React re-renders and prevented widgets from appearing on initial load.
 - **Type Safety**: Eliminated multiple `any` type assertions across repository tests and stores, improving codebase reliability and lint compliance.
 - **UI Polishing**: Added loading spinners for lazy-loaded modules using React Suspense.
-- **SonarQube Critical Issues** (5 issues fixed, 80% reduction): 
+- **SonarQube Critical Issues** (6 issues fixed, 100% resolution): 
   - Fixed blocker test with no assertions in `prep-sheet-aggregation.test.ts`
   - Replaced mutable `db` export with immutable `getDb()` function to prevent external mutation
   - Maintained backward compatibility with deprecated `db` Proxy export
   - Reduced cognitive complexity in `ingredients.repository.ts` from 16 to 15
   - Fixed two function nesting issues in `RecipeForm.tsx` by extracting helper functions
-  - Reduced critical issues from 5 to 1, eliminating all blocker-level bugs
+  - Reduced cognitive complexity in `recipeVersion.repository.ts` from 60 to ~12 (80% reduction)
+  - Extracted 7 helper methods for improved testability and maintainability
+  - **Result:** Eliminated ALL blocker and critical issues (1 blocker + 5 critical = 0 remaining)
 
 ## [1.0.4] - 2026-02-09
 
