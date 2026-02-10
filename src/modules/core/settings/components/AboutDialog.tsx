@@ -1,4 +1,5 @@
-import { ExternalLink, FileText, Github, Info, Mail } from "lucide-react";
+import { GitHubLogoIcon } from "@radix-ui/react-icons";
+import { ExternalLink, FileText, Info, Mail } from "lucide-react";
 import logo from "@/assets/images/logo.png";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,7 +42,7 @@ export const AboutDialog = ({ trigger }: AboutDialogProps) => {
               alt="Gusto Logo"
               className="w-8 h-8 object-contain"
             />
-            Gusto
+            <span>Gusto</span>
           </DialogTitle>
           <DialogDescription>
             Professional Restaurant Management System
@@ -120,11 +121,11 @@ export const AboutDialog = ({ trigger }: AboutDialogProps) => {
             </h3>
             <div className="space-y-2">
               <a
-                href="mailto:support@gusto.app"
+                href="mailto:serguei246@gmail.com"
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
               >
                 <Mail className="h-4 w-4" />
-                <span>support@gusto.app</span>
+                <span>serguei246@gmail.com</span>
                 <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
               </a>
               <a
@@ -138,12 +139,12 @@ export const AboutDialog = ({ trigger }: AboutDialogProps) => {
                 <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
               </a>
               <a
-                href="https://github.com/gusto/app"
+                href="https://github.com/serguei9090/Gusto"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
               >
-                <Github className="h-4 w-4" />
+                <GitHubLogoIcon className="h-4 w-4" />
                 <span>GitHub Repository</span>
                 <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
               </a>
@@ -155,27 +156,32 @@ export const AboutDialog = ({ trigger }: AboutDialogProps) => {
           {/* Legal */}
           <div className="space-y-3">
             <div className="flex flex-col gap-2 text-xs text-muted-foreground">
-              <div className="flex items-center gap-2">
+              <p className="text-center font-medium">
+                Licensed for Personal Use & Small Business
+              </p>
+              <div className="flex items-center justify-center gap-2">
                 <Button
                   variant="link"
                   className="h-auto p-0 text-xs"
-                  onClick={() => {
-                    // TODO: Open license dialog or page
-                    globalThis.alert(
-                      "License information would be displayed here",
-                    );
-                  }}
+                  onClick={() =>
+                    window.open(
+                      "https://github.com/serguei9090/Gusto/blob/main/LICENSE.md",
+                      "_blank",
+                    )
+                  }
                 >
-                  License
+                  License Details
                 </Button>
                 <span>•</span>
                 <Button
                   variant="link"
                   className="h-auto p-0 text-xs"
-                  onClick={() => {
-                    // TODO: Open privacy policy dialog or page
-                    globalThis.alert("Privacy policy would be displayed here");
-                  }}
+                  onClick={() =>
+                    window.open(
+                      "https://github.com/serguei9090/Gusto/blob/main/PRIVACY_POLICY.md",
+                      "_blank",
+                    )
+                  }
                 >
                   Privacy Policy
                 </Button>
@@ -183,12 +189,12 @@ export const AboutDialog = ({ trigger }: AboutDialogProps) => {
                 <Button
                   variant="link"
                   className="h-auto p-0 text-xs"
-                  onClick={() => {
-                    // TODO: Open terms of service dialog or page
-                    globalThis.alert(
-                      "Terms of service would be displayed here",
-                    );
-                  }}
+                  onClick={() =>
+                    window.open(
+                      "https://github.com/serguei9090/Gusto/blob/main/TERMS_OF_SERVICE.md",
+                      "_blank",
+                    )
+                  }
                 >
                   Terms of Service
                 </Button>
