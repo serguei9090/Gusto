@@ -288,6 +288,24 @@ export const RecipeForm = ({
     return "text-green-600";
   };
 
+  // Helper to render unit select field (reduces nesting in map callback)
+  const renderUnitSelect = useCallback(
+    (index: number) => (
+      <Controller
+        control={control}
+        name={`ingredients.${index}.unit`}
+        render={({ field }) => (
+          <UnitSelect
+            value={field.value}
+            onValueChange={field.onChange}
+            className="h-8 w-full text-xs"
+          />
+        )}
+      />
+    ),
+    [control],
+  );
+
   return (
     <form onSubmit={submitHandler} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -803,17 +821,7 @@ export const RecipeForm = ({
                       />
                     </td>
                     <td className="p-4 align-middle">
-                      <Controller
-                        control={control}
-                        name={`ingredients.${index}.unit`}
-                        render={({ field }) => (
-                          <UnitSelect
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            className="h-8 w-full text-xs"
-                          />
-                        )}
-                      />
+                      {renderUnitSelect(index)}
                     </td>
                     <td className="p-4 align-middle text-right font-mono">
                       <CostDisplay
