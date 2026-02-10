@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Search, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -25,10 +25,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "@/hooks/useTranslation";
 import { UnitSelect } from "@/modules/core/ingredients/components/UnitSelect";
 import { useIngredientsStore } from "@/modules/core/ingredients/store/ingredients.store";
+import type { Ingredient } from "@/modules/core/ingredients/types";
 import { useRecipeStore } from "@/modules/core/recipes/store/recipes.store";
 import { CurrencySelector } from "@/modules/core/settings/components/CurrencySelector";
 import { useConfigStore } from "@/modules/core/settings/store/config.store";
 import { useCurrencyStore } from "@/modules/core/settings/store/currency.store";
+import type { Recipe } from "@/types/ingredient.types";
 import {
   calculateFoodCostPercentage,
   calculateIngredientCost,
@@ -161,35 +163,48 @@ export const RecipeForm = ({
 
   const watchedCurrency = watch("currency") || "USD";
 
+  // Helper function to map sub-recipe field to cost calculation item
+  const mapSubRecipeToItem = useCallback(
+    (field: RecipeFormData["ingredients"][0], allRecipes: Recipe[]) => {
+      const original = allRecipes.find((r) => r.id === field.subRecipeId);
+      return {
+        name: original?.name || "Unknown Recipe",
+        quantity: field.quantity,
+        unit: field.unit,
+        currentPricePerUnit:
+          (original?.totalCost || 0) /
+          (original?.yieldAmount || original?.servings || 1),
+        ingredientUnit: original?.yieldUnit || "piece",
+        currency: original?.currency || "USD",
+      };
+    },
+    [],
+  );
+
+  // Helper function to map ingredient field to cost calculation item
+  const mapIngredientToItem = useCallback(
+    (field: RecipeFormData["ingredients"][0], allIngredients: Ingredient[]) => {
+      const original = allIngredients.find((i) => i.id === field.ingredientId);
+      return {
+        name: original?.name || "Unknown Ingredient",
+        quantity: field.quantity,
+        unit: field.unit,
+        currentPricePerUnit: field.price || original?.pricePerUnit || 0,
+        ingredientUnit: field.ingredientUnit || original?.unitOfMeasure || "kg",
+        currency: original?.currency || "USD",
+      };
+    },
+    [],
+  );
+
   // Calculate Total Cost Asynchronously
   useEffect(() => {
     const updateCosts = async () => {
       const items = watchedIngredients.map((field) => {
         if (field.isSubRecipe) {
-          const original = allRecipes.find((r) => r.id === field.subRecipeId);
-          return {
-            name: original?.name || "Unknown Recipe",
-            quantity: field.quantity,
-            unit: field.unit,
-            currentPricePerUnit:
-              (original?.totalCost || 0) /
-              (original?.yieldAmount || original?.servings || 1),
-            ingredientUnit: original?.yieldUnit || "piece",
-            currency: original?.currency || "USD",
-          };
+          return mapSubRecipeToItem(field, allRecipes);
         }
-        const original = allIngredients.find(
-          (i) => i.id === field.ingredientId,
-        );
-        return {
-          name: original?.name || "Unknown Ingredient",
-          quantity: field.quantity,
-          unit: field.unit,
-          currentPricePerUnit: field.price || original?.pricePerUnit || 0,
-          ingredientUnit:
-            field.ingredientUnit || original?.unitOfMeasure || "kg",
-          currency: original?.currency || "USD",
-        };
+        return mapIngredientToItem(field, allIngredients);
       });
 
       const result = await calculateRecipeTotal(
@@ -209,6 +224,8 @@ export const RecipeForm = ({
     watchedCurrency,
     allIngredients,
     allRecipes,
+    mapSubRecipeToItem,
+    mapIngredientToItem,
   ]);
 
   const { subtotal, wasteCost, totalCost } = costSummary;
