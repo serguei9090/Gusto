@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "@/lib/db";
+import type { RecipeWithIngredients } from "@/types/ingredient.types";
+import { CircularReferenceError } from "@/utils/costEngine";
 import { RecipesRepository } from "../recipes.repository";
 
 // Mock the database
@@ -36,16 +38,20 @@ vi.mock("@/lib/db", () => {
 const dbMock = db as any;
 
 // Mock cost engine
-vi.mock("@/utils/costEngine", () => ({
-  calculateRecipeTotal: vi.fn(async () => ({
-    totalCost: 10,
-    subtotal: 10,
-    wasteCost: 0,
-    errors: [],
-  })),
-  calculateSuggestedPrice: vi.fn(() => 40),
-  calculateProfitMargin: vi.fn(() => 75),
-}));
+vi.mock("@/utils/costEngine", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/costEngine")>();
+  return {
+    ...actual,
+    calculateRecipeTotal: vi.fn(async () => ({
+      totalCost: 10,
+      subtotal: 10,
+      wasteCost: 0,
+      errors: [],
+    })),
+    calculateSuggestedPrice: vi.fn(() => 40),
+    calculateProfitMargin: vi.fn(() => 75),
+  };
+});
 
 describe("RecipesRepository", () => {
   let repository: RecipesRepository;
@@ -191,9 +197,80 @@ describe("RecipesRepository", () => {
         }),
       );
 
-      // Verify ingredients copy
       expect(dbMock.insertInto).toHaveBeenCalledWith("recipe_ingredients");
       expect(result.id).toBe(2);
+    });
+
+    it("should throw error if parent recipe not found", async () => {
+      vi.spyOn(repository, "getById").mockResolvedValue(null);
+      await expect(repository.createExperiment(999, "Test")).rejects.toThrow(
+        "Parent recipe 999 not found",
+      );
+    });
+  });
+
+  describe("applyExperimentToParent", () => {
+    it("should update parent with experiment data", async () => {
+      const mockExperiment = {
+        id: 2,
+        name: "Pasta - Test Exp",
+        servings: 4,
+        sellingPrice: 50,
+        ingredients: [],
+      };
+
+      const mockExpRow = { id: 2, parent_recipe_id: 1, is_experiment: 1 };
+
+      vi.spyOn(repository, "getById").mockResolvedValue(
+        mockExperiment as unknown as RecipeWithIngredients,
+      );
+      dbMock.executeTakeFirst.mockResolvedValue(mockExpRow);
+
+      const updateSpy = vi.spyOn(repository, "update").mockResolvedValue();
+
+      await repository.applyExperimentToParent(2);
+
+      expect(updateSpy).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({
+          servings: 4,
+          sellingPrice: 50,
+        }),
+      );
+    });
+  });
+
+  describe("delete", () => {
+    it("should delete recipe", async () => {
+      await repository.delete(1);
+      expect(dbMock.deleteFrom).toHaveBeenCalledWith("recipes");
+      expect(dbMock.where).toHaveBeenCalledWith("id", "=", 1);
+    });
+  });
+
+  describe("validateNoCircularReferences", () => {
+    it("should throw error if recipe refers to itself", async () => {
+      vi.spyOn(repository, "getById").mockResolvedValue({
+        name: "Self Recipe",
+      } as unknown as RecipeWithIngredients);
+
+      await expect(
+        repository.validateNoCircularReferences(1, [{ subRecipeId: 1 }]),
+      ).rejects.toThrow(CircularReferenceError);
+    });
+
+    it("should detect indirect cycles", async () => {
+      // 1 -> 2 -> 1
+      dbMock.execute.mockResolvedValueOnce([{ sub_recipe_id: 1 }]); // subRecipes for ID 2
+      vi.spyOn(repository, "getById").mockResolvedValue({
+        name: "Sub Recipe",
+      } as unknown as RecipeWithIngredients);
+
+      await expect(
+        repository.validateNoCircularReferences(1, [{ subRecipeId: 2 }]),
+      ).rejects.toThrow(CircularReferenceError);
+
+      expect(dbMock.selectFrom).toHaveBeenCalledWith("recipe_ingredients");
     });
   });
 });

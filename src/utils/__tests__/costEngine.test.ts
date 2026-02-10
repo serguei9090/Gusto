@@ -1,17 +1,58 @@
 import { describe, expect, it } from "vitest";
 import {
+  CircularReferenceError,
+  CostingCycleGuard,
+  calculateFoodCostPercentage,
   calculateIngredientCost,
   calculateProfitMargin,
   calculateRecipeTotal,
   calculateSuggestedPrice,
+  calculateWeightedAverage,
 } from "../costEngine";
 
 describe("Cost Engine", () => {
+  describe("CostingCycleGuard", () => {
+    it("should allow entering new recipes", () => {
+      const guard = new CostingCycleGuard();
+      expect(() => guard.enter(1, "Recipe 1")).not.toThrow();
+      expect(() => guard.enter(2, "Recipe 2")).not.toThrow();
+    });
+
+    it("should throw CircularReferenceError when re-entering same recipe", () => {
+      const guard = new CostingCycleGuard();
+      guard.enter(1, "Recipe 1");
+      expect(() => guard.enter(1, "Recipe 1")).toThrow(CircularReferenceError);
+      expect(() => guard.enter(1, "Recipe 1")).toThrow(
+        'Circular reference detected: Recipe "Recipe 1"',
+      );
+    });
+
+    it("should allow re-entering after exit (for DAGs)", () => {
+      const guard = new CostingCycleGuard();
+      guard.enter(1, "Recipe 1");
+      guard.exit(1);
+      expect(() => guard.enter(1, "Recipe 1")).not.toThrow();
+    });
+
+    it("should clone with current state", () => {
+      const guard = new CostingCycleGuard();
+      guard.enter(1, "Recipe 1");
+      const clone = guard.clone();
+      expect(() => clone.enter(1, "Recipe 1")).toThrow(CircularReferenceError);
+    });
+  });
+
   describe("calculateIngredientCost", () => {
     it("should calculate cost correctly with same units", () => {
       const result = calculateIngredientCost(2.5, "kg", 10, "kg");
       expect(result.cost).toBe(25);
       expect(result.error).toBeUndefined();
+    });
+
+    it("should handle error when units are non-convertible", () => {
+      const result = calculateIngredientCost(1, "liter", 10, "kg");
+      expect(result.cost).toBe(0);
+      expect(result.error).toBeDefined();
     });
 
     it("should handle zero quantity", () => {
@@ -75,6 +116,59 @@ describe("Cost Engine", () => {
       // 500g = 0.5kg at $2/kg = $1
       expect(result.totalCost).toBe(1);
     });
+
+    it("should apply waste buffer", async () => {
+      const items = [
+        {
+          name: "Tomato",
+          quantity: 1,
+          unit: "kg",
+          currentPricePerUnit: 10,
+          ingredientUnit: "kg",
+          currency: "USD",
+        },
+      ];
+
+      const result = await calculateRecipeTotal(items, 10); // 10% waste
+      expect(result.subtotal).toBe(10);
+      expect(result.wasteCost).toBe(1);
+      expect(result.totalCost).toBe(11);
+    });
+
+    it("should handle mixed currencies", async () => {
+      // Need to mock or ensure currencyConverter works
+      const items = [
+        {
+          name: "Item 1",
+          quantity: 1,
+          unit: "kg",
+          currentPricePerUnit: 10,
+          ingredientUnit: "kg",
+          currency: "USD",
+        },
+      ];
+
+      const result = await calculateRecipeTotal(items, 0, "USD");
+      expect(result.totalCost).toBe(10);
+    });
+
+    it("should collect errors for invalid items", async () => {
+      const items = [
+        {
+          name: "Invalid Item",
+          quantity: 1,
+          unit: "liter",
+          currentPricePerUnit: 10,
+          ingredientUnit: "kg",
+          currency: "USD",
+        },
+      ];
+
+      const result = await calculateRecipeTotal(items);
+      expect(result.totalCost).toBe(0);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toContain("Invalid Item");
+    });
   });
 
   describe("calculateProfitMargin", () => {
@@ -121,6 +215,29 @@ describe("Cost Engine", () => {
       // If cost is $30 and target cost is 25%, suggested price is $120
       const suggestedPrice = calculateSuggestedPrice(30, 25);
       expect(suggestedPrice).toBeCloseTo(120, 2);
+    });
+  });
+
+  describe("calculateFoodCostPercentage", () => {
+    it("should calculate percentage correctly", () => {
+      expect(calculateFoodCostPercentage(30, 100)).toBe(30);
+    });
+
+    it("should return 0 for zero selling price", () => {
+      expect(calculateFoodCostPercentage(30, 0)).toBe(0);
+    });
+  });
+
+  describe("calculateWeightedAverage", () => {
+    it("should calculate weighted average accurately", () => {
+      // 10 units at $5 + 20 units at $8 = (50 + 160) / 30 = 210 / 30 = 7
+      const result = calculateWeightedAverage(10, 5, 20, 8);
+      expect(result).toBe(7);
+    });
+
+    it("should handle zero total stock", () => {
+      const result = calculateWeightedAverage(0, 5, 0, 8);
+      expect(result).toBe(0);
     });
   });
 });

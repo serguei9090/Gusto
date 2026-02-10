@@ -444,9 +444,12 @@ export class RecipesRepository {
     recipeId: number,
     ingredients: { subRecipeId?: number | null }[],
   ): Promise<void> {
-    const subRecipeIds = ingredients
-      .map((i) => i.subRecipeId)
-      .filter((id): id is number => id !== null && id !== undefined);
+    const subRecipeIds: number[] = [];
+    for (const i of ingredients) {
+      if (i.subRecipeId !== null && i.subRecipeId !== undefined) {
+        subRecipeIds.push(i.subRecipeId);
+      }
+    }
 
     for (const subId of subRecipeIds) {
       if (subId === recipeId) {

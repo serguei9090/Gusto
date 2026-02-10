@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { Currency, ExchangeRate } from "../services/currency.repository";
 import { currencyRepository } from "../services/currency.repository";
 
-interface CurrencyState {
+export interface CurrencyState {
   currencies: Currency[];
   exchangeRates: ExchangeRate[];
   baseCurrency: string;
