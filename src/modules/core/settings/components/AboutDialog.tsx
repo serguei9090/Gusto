@@ -16,7 +16,7 @@ interface AboutDialogProps {
 }
 
 export const AboutDialog = ({ trigger }: AboutDialogProps) => {
-  const version = "1.0.0";
+  const version = __APP_VERSION__;
   const buildDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
