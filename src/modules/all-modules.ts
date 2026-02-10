@@ -1,4 +1,5 @@
 import { registry } from "@/lib/modules/registry";
+import { registerCoreMigrations } from "@/services/database/registerCoreMigrations";
 import { logger } from "@/utils/logger";
 import { calculatorsModule } from "./core/calculators";
 import { dashboardModule } from "./core/dashboard";
@@ -16,8 +17,9 @@ import { suppliersModule } from "./core/suppliers";
  * Pro modules are registered only if VITE_APP_MODE is 'pro'.
  */
 export function registerModules() {
-  // Register Core Settings Slots (before modules, so init() can add to them)
+  // Register Core Settings Slots and Migrations (before modules)
   registerCoreSettings();
+  registerCoreMigrations();
 
   // Register Core Modules (Always)
   registry.register(dashboardModule);

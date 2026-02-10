@@ -62,8 +62,8 @@ The project uses a modular design to separate base functionality from profession
    }
    ```
 3. **Core vs Pro**: 
-   - `core/`: Dashboard, Ingredients, Recipes, Suppliers.
-   - `pro/`: Advanced analytics, AI integration, Inventory forecasting (often gitignored in public core).
+   - `core/`: Standard features (Dashboard, Ingredients, Recipes, Suppliers).
+   - `pro/`: **Closed-source** premium extensions (Managed privately). These are currently **Under Construction** and allow for custom bespoke development.
 
 ---
 

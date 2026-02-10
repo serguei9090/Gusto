@@ -8,6 +8,7 @@ class ModuleRegistry {
   /** Cached snapshot – recomputed only on mutation */
   private cachedAll: ModuleDefinition[] = [];
   private snapshotDirty = true;
+  private isSystemInitialized = false;
 
   private constructor() {}
 
@@ -30,6 +31,13 @@ class ModuleRegistry {
     }
     this.modules.set(id, module);
     this.notify();
+
+    // If the system is already initialized, initialize this module immediately
+    if (this.isSystemInitialized && module.init) {
+      module.init().catch((err) => {
+        console.error(`Failed to lazy-initialize module "${module.id}":`, err);
+      });
+    }
   }
 
   /**
@@ -80,6 +88,9 @@ class ModuleRegistry {
    * This executes the optional `init()` method on each module.
    */
   public async initialize(): Promise<void> {
+    if (this.isSystemInitialized) return;
+    this.isSystemInitialized = true;
+
     // Only initialize enabled modules
     const modulesArray = this.getAll();
 

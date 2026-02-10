@@ -1,9 +1,15 @@
 import type { ComponentType } from "react";
-import { useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
+import { useSettingsStore } from "@/modules/core/settings/store/settings.store";
 
 export interface DashboardWidget {
   id: string;
   component: ComponentType;
+  /**
+   * Optional module ID this widget belongs to.
+   * If provided, the widget will be filtered based on module visibility.
+   */
+  moduleId?: string;
   /**
    * Grid column span (1-4). Default is 1.
    * Total grid columns is 4.
@@ -59,9 +65,22 @@ const getSnapshotFn = () => dashboardRegistry.getAll();
  * Uses `useSyncExternalStore` for correct concurrent-mode behaviour.
  */
 export function useDashboardWidgets() {
-  return useSyncExternalStore(
+  const allWidgets = useSyncExternalStore(
     subscribeFn,
     getSnapshotFn,
     getSnapshotFn, // SSR fallback
   );
+
+  const { modules } = useSettingsStore();
+
+  return useMemo(() => {
+    return allWidgets.filter((widget) => {
+      // If no moduleId is specified, always show it (it's core/global)
+      if (!widget.moduleId) return true;
+
+      // Otherwise, respect the module visibility setting
+      // Default to visible (true) if not found in store
+      return modules[widget.moduleId] ?? true;
+    });
+  }, [allWidgets, modules]);
 }
