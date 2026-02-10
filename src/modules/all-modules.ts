@@ -1,6 +1,6 @@
 import { registry } from "@/lib/modules/registry";
-import type { ModuleDefinition } from "@/types/module";
 import { registerCoreMigrations } from "@/services/database/registerCoreMigrations";
+import type { ModuleDefinition } from "@/types/module";
 import { logger } from "@/utils/logger";
 import { calculatorsModule } from "./core/calculators";
 import { dashboardModule } from "./core/dashboard";
@@ -34,7 +34,10 @@ export function registerModules() {
 
   // Register Pro Modules (Conditional)
   // We use import.meta.glob to safely check for the pro folder without crashing the build if it's missing (CI/CD)
-  const proImports = import.meta.glob("./pro/index.ts") as Record<string, () => Promise<{ proModules: ModuleDefinition[] }>>;
+  const proImports = import.meta.glob("./pro/index.ts") as Record<
+    string,
+    () => Promise<{ proModules: ModuleDefinition[] }>
+  >;
   const proEntryPath = "./pro/index.ts";
 
   if (import.meta.env.VITE_APP_MODE === "pro") {
