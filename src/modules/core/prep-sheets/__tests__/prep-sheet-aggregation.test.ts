@@ -262,7 +262,36 @@ describe("Prep Sheet Aggregation Logic", () => {
 
   describe("Sorting and Display Logic", () => {
     it("should aggregate ingredients correctly", () => {
-      // Test logic...
+      const ingredients = [
+        {
+          ingredientId: 1,
+          ingredientName: "Butter",
+          quantity: 250,
+          unit: "g",
+          recipeName: "Croissants",
+        },
+        {
+          ingredientId: 1,
+          ingredientName: "Butter",
+          quantity: 150,
+          unit: "g",
+          recipeName: "Cookies",
+        },
+        {
+          ingredientId: 2,
+          ingredientName: "Eggs",
+          quantity: 6,
+          unit: "piece",
+          recipeName: "Croissants",
+        },
+      ];
+
+      const result = aggregateIngredients(ingredients);
+
+      expect(result.size).toBe(2);
+      expect(result.get(1)?.totalQuantity).toBe(400);
+      expect(result.get(1)?.recipeBreakdown).toHaveLength(2);
+      expect(result.get(2)?.totalQuantity).toBe(6);
     });
 
     it("should sort ingredients alphabetically", () => {

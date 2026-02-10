@@ -1,0 +1,6 @@
+{
+  "sonarlint.connectedMode.project": {
+    "connectionId": "General",
+    "projectKey": "Gusto"
+  }
+}

@@ -20,6 +20,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:all": "bun run test:unit && bun run test:e2e",
     "db:migrate": "bun run scripts/db-migrate.ts",
+    "sonar": "cross-env SONAR_HOST_URL=http://10.0.0.184:9000 SONAR_TOKEN=sqp_b851893f939dcd193258570422553fb14a130ad6 sonar-scanner",
     "tauri:dev:pro": "cross-env VITE_APP_MODE=pro bun run tauri:dev",
     "build:pro": "cross-env VITE_APP_MODE=pro bun run build",
     "release:pro": "cross-env VITE_APP_MODE=pro tauri build --config \"{\\\"productName\\\": \\\"Gusto Pro\\\"}\""
@@ -72,6 +73,7 @@
     "cross-env": "^10.1.0",
     "jsdom": "^28.0.0",
     "lefthook": "^2.1.0",
+    "sonarqube-scanner": "^4.3.4",
     "tailwindcss": "^4.1.18",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.6.0",

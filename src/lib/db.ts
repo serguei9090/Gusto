@@ -17,14 +17,32 @@ const isTauri =
     navigator.userAgent.includes("Tauri"));
 
 /**
- * Synchronous database access for immediate use
- * In Tauri mode, this will initially return mock until initialized
- * Use getDb() for guaranteed real database access
+ * Internal database instance
+ * Use getDb() to access the database
  */
 // biome-ignore lint/suspicious/noExplicitAny: Mock DB or Kysely instance
-export let db: Kysely<Database> = mockDb as any;
+let dbInstance: Kysely<Database> = mockDb as any;
 
 import { errorManager } from "@/services/error/ErrorManager";
+
+/**
+ * Get the current database instance
+ * This is the recommended way to access the database
+ */
+export function getDb(): Kysely<Database> {
+  return dbInstance;
+}
+
+/**
+ * @deprecated Use getDb() instead. Direct db export will be removed in a future version.
+ * Backward compatibility export - this allows existing code to continue working
+ */
+export const db = new Proxy({} as Kysely<Database>, {
+  get(_target, prop) {
+    // biome-ignore lint/suspicious/noExplicitAny: Proxy requires dynamic property access
+    return (dbInstance as any)[prop];
+  },
+});
 
 /**
  * Initialize database at app startup
@@ -50,7 +68,7 @@ export async function initDb(): Promise<void> {
         dialect: new TauriSqliteDialect(),
       });
 
-      db = kdb;
+      dbInstance = kdb;
       console.log("✅ Database initialized (Tauri mode)");
     } catch (error) {
       console.error("❌ Database initialization failed:", error);

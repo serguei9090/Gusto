@@ -52,3 +52,5 @@ src-tauri/target
 docs
 coverage/
 *.tsbuildinfo
+.scannerwork
+.sonarlint
