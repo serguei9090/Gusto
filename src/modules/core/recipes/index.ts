@@ -1,6 +1,10 @@
 import { ChefHat } from "lucide-react";
+import React from "react";
 import type { ModuleDefinition } from "@/types/module";
-import { RecipesPage } from "./components/RecipesPage";
+
+const RecipesPage = React.lazy(() =>
+  import("./components/RecipesPage").then((m) => ({ default: m.RecipesPage })),
+);
 
 export { RecipesPage } from "./components/RecipesPage";
 export { recipesRepository } from "./services/recipes.repository";

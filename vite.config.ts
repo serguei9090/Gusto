@@ -36,4 +36,30 @@ export default defineConfig(async () => ({
   optimizeDeps: {
     entries: ["!playwright-report/**"],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom"],
+          "vendor-ui": [
+            "lucide-react",
+            "framer-motion",
+            "sonner",
+            "@radix-ui/react-icons",
+            "clsx",
+            "tailwind-merge",
+          ],
+          "vendor-utils": [
+            "date-fns",
+            "zod",
+            "zustand",
+            "kysely",
+            "i18next",
+            "react-i18next",
+          ],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 }));

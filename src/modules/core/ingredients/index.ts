@@ -1,6 +1,12 @@
 import { ShoppingBasket } from "lucide-react";
+import React from "react";
 import type { ModuleDefinition } from "@/types/module";
-import { IngredientsPage } from "./components/IngredientsPage";
+
+const IngredientsPage = React.lazy(() =>
+  import("./components/IngredientsPage").then((m) => ({
+    default: m.IngredientsPage,
+  })),
+);
 
 export * from "./components/IngredientForm";
 export * from "./components/IngredientsPage";

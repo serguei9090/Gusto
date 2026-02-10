@@ -1,8 +1,19 @@
 import { LayoutDashboard } from "lucide-react";
+import React from "react";
 import type { ModuleDefinition } from "@/types/module";
-import { DashboardPage } from "./components/DashboardPage";
+import { dashboardRegistry } from "./registry";
+import {
+  InventoryValueWidget,
+  LowStockWidget,
+} from "./widgets/InventoryWidgets";
+import { TopRecipesWidget, UrgentReordersWidget } from "./widgets/MainWidgets";
+import { ActiveRecipesWidget, AvgMarginWidget } from "./widgets/RecipeWidgets";
 
-export * from "./components/DashboardPage";
+const DashboardPage = React.lazy(() =>
+  import("./components/DashboardPage").then((m) => ({
+    default: m.DashboardPage,
+  })),
+);
 
 export const dashboardModule: ModuleDefinition = {
   id: "dashboard",
@@ -14,17 +25,7 @@ export const dashboardModule: ModuleDefinition = {
   description: "Overview of your restaurant performance",
   init: async () => {
     // Register default widgets
-    const { dashboardRegistry } = await import("./registry");
     dashboardRegistry.clear();
-    const { InventoryValueWidget, LowStockWidget } = await import(
-      "./widgets/InventoryWidgets"
-    );
-    const { AvgMarginWidget, ActiveRecipesWidget } = await import(
-      "./widgets/RecipeWidgets"
-    );
-    const { UrgentReordersWidget, TopRecipesWidget } = await import(
-      "./widgets/MainWidgets"
-    );
 
     dashboardRegistry.register({
       id: "inventory-value",
@@ -55,7 +56,7 @@ export const dashboardModule: ModuleDefinition = {
     dashboardRegistry.register({
       id: "urgent-reorders",
       component: UrgentReordersWidget,
-      colSpan: 2, // Takes up 2 columns out of 4 (approx half) or 2/3rds in a 3-col layout
+      colSpan: 2,
       order: 50,
     });
     dashboardRegistry.register({

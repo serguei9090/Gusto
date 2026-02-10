@@ -19,20 +19,26 @@ export interface DashboardWidget {
 }
 
 class WidgetRegistry {
-  private widgets: DashboardWidget[] = [];
   private readonly listeners: Set<() => void> = new Set();
+  private snapshot: DashboardWidget[] = [];
 
   register(widget: DashboardWidget) {
-    if (this.widgets.some((w) => w.id === widget.id)) {
+    // Check if widget already exists to prevent duplicates
+    if (this.snapshot.some((w) => w.id === widget.id)) {
       return;
     }
-    this.widgets.push(widget);
-    this.widgets.sort((a, b) => a.order - b.order);
+
+    // Create a new array reference (immutable update)
+    const nextState = [...this.snapshot, widget].sort(
+      (a, b) => a.order - b.order,
+    );
+    this.snapshot = nextState;
+
     this.notify();
   }
 
   getAll() {
-    return this.widgets;
+    return this.snapshot;
   }
 
   subscribe(listener: () => void) {
@@ -43,8 +49,10 @@ class WidgetRegistry {
   }
 
   clear() {
-    this.widgets = [];
-    this.notify();
+    if (this.snapshot.length > 0) {
+      this.snapshot = [];
+      this.notify();
+    }
   }
 
   private notify() {

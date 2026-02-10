@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { GlobalErrorBarrier } from "@/components/error/GlobalErrorBarrier";
 import type { View } from "@/components/Sidebar";
@@ -67,7 +67,15 @@ function App() {
         onChangeView={setCurrentView}
         title={getTitle()}
       >
-        {renderContent()}
+        <Suspense
+          fallback={
+            <div className="flex h-full w-full items-center justify-center p-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+          }
+        >
+          {renderContent()}
+        </Suspense>
       </MainLayout>
       <Toaster position="bottom-right" richColors closeButton />
     </GlobalErrorBarrier>

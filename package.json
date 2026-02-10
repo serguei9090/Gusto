@@ -21,7 +21,8 @@
     "test:all": "bun run test:unit && bun run test:e2e",
     "db:migrate": "bun run scripts/db-migrate.ts",
     "tauri:dev:pro": "cross-env VITE_APP_MODE=pro bun run tauri:dev",
-    "build:pro": "cross-env VITE_APP_MODE=pro bun run build"
+    "build:pro": "cross-env VITE_APP_MODE=pro bun run build",
+    "release:pro": "cross-env VITE_APP_MODE=pro bun run release"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
