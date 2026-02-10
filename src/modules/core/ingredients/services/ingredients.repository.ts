@@ -103,11 +103,13 @@ export class IngredientsRepository {
     return rows.map(this.mapRowToIngredient);
   }
 
-  async update(
-    id: number,
+  /**
+   * Builds update data object from partial ingredient input
+   * @private
+   */
+  private buildUpdateData(
     data: UpdateIngredientInput,
-  ): Promise<Ingredient | null> {
-    // Build update object only with defined values
+  ): Record<string, unknown> {
     const updateData: Record<string, unknown> = {
       last_updated: new Date().toISOString(),
     };
@@ -133,6 +135,15 @@ export class IngredientsRepository {
       updateData.conversion_ratio = data.conversionRatio;
     if (data.isActive !== undefined)
       updateData.is_active = data.isActive ? 1 : 0;
+
+    return updateData;
+  }
+
+  async update(
+    id: number,
+    data: UpdateIngredientInput,
+  ): Promise<Ingredient | null> {
+    const updateData = this.buildUpdateData(data);
 
     const result = await db
       .updateTable("ingredients")
