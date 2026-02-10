@@ -3,24 +3,22 @@ import { Toaster } from "sonner";
 import { GlobalErrorBarrier } from "@/components/error/GlobalErrorBarrier";
 import type { View } from "@/components/Sidebar";
 import { MainLayout } from "@/components/templates/MainLayout";
+import { useTranslation } from "@/hooks/useTranslation";
 import { initDb } from "@/lib/db";
 import { useRegistry } from "@/lib/modules/registry";
 import { CurrencySettingsPage } from "@/modules/core/settings/pages/CurrencySettingsPage";
-import { useConfigStore } from "@/modules/core/settings/store/config.store";
-import { useCurrencyStore } from "@/modules/core/settings/store/currency.store";
 
 function App() {
+  const { t } = useTranslation();
   const [currentView, setCurrentView] = useState<View>("dashboard");
-  const { initialize: initializeCurrency } = useCurrencyStore();
   const reg = useRegistry();
 
-  // Initialize database and currency store on mount
+  // Initialize database and modules on mount
   // biome-ignore lint/correctness/useExhaustiveDependencies: Initialize once on mount
   useEffect(() => {
     const init = async () => {
       await initDb();
-      await initializeCurrency();
-      await useConfigStore.getState().loadConfig();
+      await reg.initialize();
     };
     init();
   }, []); // Run once on mount
@@ -55,7 +53,11 @@ function App() {
 
   const getTitle = () => {
     const module = reg.get(currentView);
-    return module?.title || "";
+    if (!module) return "";
+
+    const tKey = `navigation.${module.id}`;
+    const translated = t(tKey);
+    return translated === tKey ? module.title : translated;
   };
 
   return (

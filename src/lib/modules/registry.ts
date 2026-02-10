@@ -1,3 +1,4 @@
+import { useFeatureStore } from "@/lib/features/store";
 import type { ModuleDefinition } from "@/types/module";
 
 class ModuleRegistry {
@@ -37,9 +38,16 @@ class ModuleRegistry {
 
   /**
    * Get all registered modules.
+   * Filters out modules that are disabled by feature flags.
    */
   public getAll(): ModuleDefinition[] {
-    return Array.from(this.modules.values()).sort((a, b) => a.order - b.order);
+    const store = useFeatureStore.getState();
+    return Array.from(this.modules.values())
+      .filter((m) => {
+        if (!m.requiredFeature) return true;
+        return store.isEnabled(m.requiredFeature);
+      })
+      .sort((a, b) => a.order - b.order);
   }
 
   /**
@@ -56,6 +64,27 @@ class ModuleRegistry {
     });
   }
   // ... rest of the helper methods
+
+  /**
+   * Initialize all registered modules.
+   * This executes the optional `init()` method on each module.
+   */
+  public async initialize(): Promise<void> {
+    // Only initialize enabled modules
+    const modulesArray = this.getAll();
+
+    for (const module of modulesArray) {
+      if (module.init) {
+        try {
+          // Serial execution to respect dependencies (if any)? Or parallel?
+          // Serial is safer for now.
+          await module.init();
+        } catch (error) {
+          console.error(`Failed to initialize module "${module.id}":`, error);
+        }
+      }
+    }
+  }
 
   /**
    * Get all core modules.

@@ -1,32 +1,17 @@
-import { AlertTriangle, ChefHat, Package, Percent } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useDashboardWidgets } from "@/modules/core/dashboard/registry";
 import { useDashboardStore } from "@/modules/core/dashboard/store/dashboard.store";
 import { useCurrencyStore } from "@/modules/core/settings/store/currency.store";
-import {
-  formatCurrencyAmount,
-  getBaseCurrency,
-} from "@/utils/currencyConverter";
-import { StatCard } from "./StatCard";
-import { TopRecipesCard } from "./TopRecipesCard";
-import { UrgentReordersCard } from "./UrgentReordersCard";
 
 export const DashboardPage = () => {
   const { t } = useTranslation();
-  const {
-    summary,
-    urgentReorders,
-    topRecipes,
-    fetchDashboardData,
-    error,
-    isLoading,
-  } = useDashboardStore();
+  const widgets = useDashboardWidgets();
+  const { fetchDashboardData, error, isLoading } = useDashboardStore();
 
   // Wait for currency store to finish loading before fetching dashboard data
   const { currencies, baseCurrency: storeCurrency } = useCurrencyStore();
   const currenciesLoaded = currencies.length > 0 || storeCurrency !== "USD";
-
-  const baseCurrency = getBaseCurrency();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Only run when currencies finish loading
   useEffect(() => {
@@ -55,43 +40,22 @@ export const DashboardPage = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title={t("dashboard.stockValue")}
-          value={formatCurrencyAmount(
-            summary?.totalInventoryValue || 0,
-            baseCurrency,
-          )}
-          icon={Package}
-          description={t("dashboard.stats.totalInventoryValue")}
-        />
-        <StatCard
-          title={t("dashboard.stats.lowStockItems")}
-          value={summary?.lowStockCount || 0}
-          icon={AlertTriangle}
-          description={t("dashboard.stats.belowMinLevel")}
-          className={summary?.lowStockCount ? "border-destructive/50" : ""}
-        />
-        <StatCard
-          title={t("dashboard.avgMargin")}
-          value={`${summary?.avgProfitMargin.toFixed(1) || 0}%`}
-          icon={Percent}
-          description={t("dashboard.stats.acrossAllRecipes")}
-        />
-        <StatCard
-          title={t("dashboard.stats.totalRecipes")}
-          value={summary?.recipeCount || 0}
-          icon={ChefHat}
-          description={t("dashboard.stats.activeRecipes")}
-        />
-      </div>
+        {widgets.map((widget) => {
+          const Component = widget.component;
+          const colSpanMap: Record<number, string> = {
+            1: "col-span-1",
+            2: "lg:col-span-2 col-span-2",
+            3: "lg:col-span-3 col-span-3",
+            4: "lg:col-span-4 col-span-4",
+          };
+          const colSpanClass = colSpanMap[widget.colSpan || 1] || "col-span-1";
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <div className="col-span-4">
-          <UrgentReordersCard items={urgentReorders} />
-        </div>
-        <div className="col-span-3">
-          <TopRecipesCard recipes={topRecipes} />
-        </div>
+          return (
+            <div key={widget.id} className={colSpanClass}>
+              <Component />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

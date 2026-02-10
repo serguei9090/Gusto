@@ -1,5 +1,6 @@
 import type { HTMLMotionProps } from "framer-motion";
 import { motion } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 import styles from "./Button.module.css";
 
 export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
@@ -24,6 +25,7 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
+  const { t } = useTranslation();
   return (
     <motion.button
       className={`${styles.button} ${styles[variant]} ${styles[size]}`}
@@ -33,7 +35,11 @@ export function Button({
       transition={{ duration: 0.15 }}
       {...props}
     >
-      {isLoading ? <span className={styles.loader}>Loading...</span> : children}
+      {isLoading ? (
+        <span className={styles.loader}>{t("common.messages.loading")}</span>
+      ) : (
+        children
+      )}
     </motion.button>
   );
 }

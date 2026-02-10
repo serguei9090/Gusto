@@ -133,10 +133,14 @@ describe("Currency Utilities", () => {
       expect(isValidCurrency("EUR")).toBe(true);
     });
 
-    it("should reject invalid currencies", () => {
-      expect(isValidCurrency("GBP")).toBe(false);
-      expect(isValidCurrency("JPY")).toBe(false);
+    it("should allow any 3 letter code", () => {
+      expect(isValidCurrency("GBP")).toBe(true);
+      expect(isValidCurrency("JPY")).toBe(true);
+    });
+
+    it("should reject invalid length codes", () => {
       expect(isValidCurrency("invalid")).toBe(false);
+      expect(isValidCurrency("US")).toBe(false);
     });
   });
 

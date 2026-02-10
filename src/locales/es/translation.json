@@ -1,4 +1,9 @@
 {
+  "app": {
+    "name": "Gusto",
+    "version_label": "v{{version}}",
+    "version_full": "{{name}} v{{version}}"
+  },
   "common": {
     "actions": {
       "save": "Guardar",
@@ -13,7 +18,8 @@
       "back": "Atrás",
       "next": "Siguiente",
       "submit": "Enviar",
-      "reset": "Restablecer"
+      "reset": "Restablecer",
+      "help": "Ayuda"
     },
     "labels": {
       "name": "Nombre",
@@ -276,5 +282,14 @@
   "currency": {
     "usd": "Dólar Estadounidense",
     "eur": "Euro"
+  },
+  "error": {
+    "barrier": {
+      "title": "Algo salió mal",
+      "description": "La aplicación ha encontrado un error inesperado de interfaz. Se ha guardado un informe técnico en sus registros locales.",
+      "restart": "Reiniciar aplicación",
+      "go_home": "Ir al inicio",
+      "dev_info": "Información de depuración:"
+    }
   }
 }

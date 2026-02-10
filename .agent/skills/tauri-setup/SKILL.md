@@ -305,43 +305,89 @@ body {
 }
 ```
 
-### Step 10: Setup Drizzle Database
+### Step 9: Setup Design System (Tailwind v4)
 
-Create `src/services/database/schema.ts`:
+Update `src/index.css`:
 
-```typescript
-import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core';
+```css
+@import "tailwindcss";
 
-export const ingredients = sqliteTable('ingredients', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-  category: text('category').notNull(),
-  unitOfMeasure: text('unit_of_measure').notNull(),
-  currentPrice: real('current_price').notNull(),
-  pricePerUnit: real('price_per_unit').notNull(),
-  currentStock: real('current_stock').default(0),
-  minStockLevel: real('min_stock_level'),
-  supplierId: integer('supplier_id'),
-  notes: text('notes'),
-  lastUpdated: text('last_updated').default('CURRENT_TIMESTAMP'),
-});
+@theme {
+  /* Colors - Restaurant Theme */
+  --color-primary: #22c55e;
+  --color-primary-foreground: #ffffff;
+  
+  --color-secondary: #f4f4f5;
+  --color-secondary-foreground: #18181b;
+  
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+  
+  --color-accent: #f4f4f5;
+  --color-accent-foreground: #18181b;
+  
+  --color-popover: #ffffff;
+  --color-popover-foreground: #09090b;
 
-// Add more tables as per PROJECT_PLAN.md schema
+  --color-card: #ffffff;
+  --color-card-foreground: #09090b;
+
+  /* Border Radius */
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  body {
+    @apply bg-white text-gray-900;
+  }
+}
 ```
 
-Create `drizzle.config.ts`:
+### Step 10: Setup Kysely Database
+
+Create `src/lib/db.ts`:
 
 ```typescript
-import type { Config } from 'drizzle-kit';
+import { Kysely } from 'kysely';
+import { TauriSqliteDialect } from '@/lib/db-dialect'; // You'll need to implement this for Tauri
+import { Database } from '@/types/db';
 
-export default {
-  schema: './src/services/database/schema.ts',
-  out: './src/services/database/migrations',
-  driver: 'better-sqlite3',
-  dbCredentials: {
-    url: './restaurant.db',
-  },
-} satisfies Config;
+export const db = new Kysely<Database>({
+  dialect: new TauriSqliteDialect({
+    path: 'restaurant.db',
+  }),
+});
+```
+
+Create `src/types/db.ts`:
+
+```typescript
+import { Generated } from 'kysely';
+
+export interface IngredientTable {
+  id: Generated<number>;
+  name: string;
+  category: string;
+  unit_of_measure: string;
+  current_price: number;
+  price_per_unit: number;
+  current_stock: number | null;
+  min_stock_level: number | null;
+  supplier_id: number | null;
+  notes: string | null;
+  last_updated: string | null;
+}
+
+export interface Database {
+  ingredients: IngredientTable;
+  // Add other tables here
+}
 ```
 
 ### Step 11: Create Environment Files
@@ -369,7 +415,7 @@ Ensure `.gitignore` includes:
 ```gitignore
 # Dependencies
 node_modules/
-bun.lockb
+bun.lock*
 
 # Build outputs
 dist/
@@ -409,14 +455,13 @@ Add these scripts to `package.json`:
 ```json
 {
   "scripts": {
-    "dev": "tauri dev",
-    "build": "tauri build",
+    "dev": "vite",
+    "tauri:dev": "tauri dev",
+    "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui",
     "lint": "biome check .",
-    "lint:fix": "biome check --apply .",
+    "lint:fix": "biome check --write .",
     "type-check": "tsc --noEmit",
     "db:generate": "drizzle-kit generate:sqlite",
     "db:push": "drizzle-kit push:sqlite",
@@ -427,52 +472,40 @@ Add these scripts to `package.json`:
 
 ### Step 14: Create Initial Components
 
-Create a basic Button atom as a starting point:
+Install Shadcn/UI to get the base components:
 
-**`src/components/atoms/Button/Button.tsx`:**
-```typescript
-import styles from './Button.module.css';
+```bash
+# Initialize Shadcn (if not already done)
+bun x shadcn@latest init
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger';
-  children: React.ReactNode;
-}
-
-export function Button({ variant = 'primary', children, ...props }: ButtonProps) {
-  return (
-    <button className={styles.button} data-variant={variant} {...props}>
-      {children}
-    </button>
-  );
-}
+# Add Button component
+bun x shadcn@latest add button
 ```
 
-**`src/components/atoms/Button/Button.module.css`:**
-```css
-.button {
-  padding: var(--space-sm) var(--space-md);
-  border: none;
-  border-radius: var(--radius-md);
-  font-family: var(--font-sans);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-base);
+This will create `src/components/ui/button.tsx`. You can then use this button directly or wrap it in `src/components/atoms` if functionality extension is needed.
+
+**Example of wrapping Shadcn Button in `src/components/atoms/Button.tsx`:**
+
+```typescript
+import { Button as ShadcnButton, type ButtonProps as ShadcnButtonProps } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface ButtonProps extends ShadcnButtonProps {
+  isLoading?: boolean;
 }
 
-.button[data-variant='primary'] {
-  background: var(--color-primary-500);
-  color: white;
-}
-
-.button[data-variant='primary']:hover {
-  background: var(--color-primary-600);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+export function Button({ isLoading, className, children, ...props }: ButtonProps) {
+  return (
+    <ShadcnButton 
+      disabled={isLoading || props.disabled} 
+      className={cn(className)} 
+      {...props}
+    >
+      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+      {children}
+    </ShadcnButton>
+  );
 }
 ```
 

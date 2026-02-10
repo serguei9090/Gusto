@@ -5,7 +5,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import type { UrgentReorderItem } from "../types";
 
 interface UrgentReordersCardProps {
-  items: UrgentReorderItem[];
+  readonly items: UrgentReorderItem[];
 }
 
 export function UrgentReordersCard({ items }: UrgentReordersCardProps) {
@@ -34,7 +34,7 @@ export function UrgentReordersCard({ items }: UrgentReordersCardProps) {
                 <div className="space-y-1">
                   <p className="font-medium leading-none">{item.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    Stock:{" "}
+                    {t("dashboard.stock")}:{" "}
                     <span className="text-destructive font-semibold">
                       {Number(item.currentStock.toFixed(2))}
                     </span>{" "}

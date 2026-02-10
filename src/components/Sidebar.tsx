@@ -128,7 +128,7 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
                 alt="Gusto Logo"
                 className="w-8 h-8 object-contain shrink-0"
               />
-              <span className="text-sm ml-2 font-bold">Gusto</span>
+              <span className="text-sm ml-2 font-bold">{t("app.name")}</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -218,7 +218,7 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
               exit={{ opacity: 0 }}
               className="text-[10px] text-muted-foreground text-center"
             >
-              v1.0
+              {t("app.version_label", { version: "1.0" })}
             </motion.div>
           ) : (
             <motion.div
@@ -227,7 +227,7 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
               exit={{ opacity: 0 }}
               className="text-[10px] text-muted-foreground text-center"
             >
-              Gusto v1.0.0
+              {t("app.version_full", { name: "Gusto", version: "1.0.0" })}
             </motion.div>
           )}
         </AnimatePresence>

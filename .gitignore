@@ -49,5 +49,6 @@ yarn-error.log*
 src-tauri/target
 
 # Misc
-*.tsbuildinfo
 docs
+coverage/
+*.tsbuildinfo

@@ -1,6 +1,7 @@
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import i18n from "@/lib/i18n";
 import { errorManager } from "@/services/error/ErrorManager";
 
 interface Props {
@@ -46,16 +47,17 @@ export class GlobalErrorBarrier extends Component<Props, State> {
             <AlertCircle size={32} />
           </div>
 
-          <h1 className="text-2xl font-bold mb-2">Something went wrong</h1>
+          <h1 className="text-2xl font-bold mb-2">
+            {i18n.t("error.barrier.title")}
+          </h1>
           <p className="text-muted-foreground max-w-md mb-8">
-            The application encountered an unexpected UI crash. A technical
-            report has been saved to your local logs.
+            {i18n.t("error.barrier.description")}
           </p>
 
           <div className="flex gap-4">
             <Button onClick={this.handleReset} className="gap-2">
               <RefreshCw size={16} />
-              Restart App
+              {i18n.t("error.barrier.restart")}
             </Button>
             <Button
               variant="outline"
@@ -63,14 +65,14 @@ export class GlobalErrorBarrier extends Component<Props, State> {
                 globalThis.location.href = "/";
               }}
             >
-              Go Home
+              {i18n.t("error.barrier.go_home")}
             </Button>
           </div>
 
           {import.meta.env.DEV && (
             <div className="mt-12 p-4 bg-muted rounded-md text-left max-w-2xl w-full overflow-auto">
               <p className="font-mono text-xs text-destructive mb-2 font-bold uppercase">
-                Dev Debug Info:
+                {i18n.t("error.barrier.dev_info")}
               </p>
               <pre className="font-mono text-[10px] leading-tight">
                 {this.state.errorDetail?.message}

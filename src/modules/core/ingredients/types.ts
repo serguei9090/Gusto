@@ -1,24 +1,7 @@
 import type { Currency } from "@/utils/currency";
 
-export type IngredientCategory =
-  | "protein"
-  | "vegetable"
-  | "dairy"
-  | "spice"
-  | "grain"
-  | "fruit"
-  | "condiment"
-  | "other";
-
-export type UnitOfMeasure =
-  | "kg"
-  | "g"
-  | "l"
-  | "ml"
-  | "piece"
-  | "cup"
-  | "tbsp"
-  | "tsp";
+export type IngredientCategory = string;
+export type UnitOfMeasure = string;
 
 export interface Ingredient {
   id: number;

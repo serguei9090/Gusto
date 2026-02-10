@@ -99,9 +99,7 @@ export const IngredientsPage = () => {
           <h2 className="text-3xl font-bold tracking-tight">
             {t("ingredients.title")}
           </h2>
-          <p className="text-muted-foreground">
-            Manage your ingredient inventory and track costs
-          </p>
+          <p className="text-muted-foreground">{t("ingredients.subtitle")}</p>
         </div>
         <div className="flex items-center space-x-2">
           <Button onClick={() => setIsFormOpen(true)}>
@@ -149,8 +147,8 @@ export const IngredientsPage = () => {
             </DialogTitle>
             <DialogDescription>
               {editingIngredient
-                ? "Update the ingredient details below."
-                : "Fill out the form below to add a new ingredient to your inventory."}
+                ? t("ingredients.prompts.update")
+                : t("ingredients.prompts.add")}
             </DialogDescription>
           </DialogHeader>
           <IngredientForm
@@ -166,11 +164,11 @@ export const IngredientsPage = () => {
       <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Archive Ingredient</DialogTitle>
+            <DialogTitle>{t("ingredients.archive.title")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to archive "{ingredientToDelete?.name}"? It
-              will be removed from the master list but will remain in existing
-              recipes.
+              {t("ingredients.archive.message", {
+                name: ingredientToDelete?.name,
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -178,14 +176,16 @@ export const IngredientsPage = () => {
               variant="ghost"
               onClick={() => setIsDeleteConfirmOpen(false)}
             >
-              Cancel
+              {t("common.actions.cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={confirmDelete}
               disabled={isLoading}
             >
-              {isLoading ? "Archiving..." : "Archive"}
+              {isLoading
+                ? t("ingredients.archive.progress")
+                : t("ingredients.archive.action")}
             </Button>
           </DialogFooter>
         </DialogContent>

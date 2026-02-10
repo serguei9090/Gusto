@@ -7,20 +7,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  UNIT_CATEGORY_LABELS,
+  UNIT_DISPLAY_ORDER,
+} from "@/lib/constants/units";
 import { useConfigStore } from "@/modules/core/settings/store/config.store";
-
-// Define the groups and order explicitly
-const UNIT_ORDER = {
-  mass: ["mg", "g", "oz", "lb", "kg"],
-  volume: ["ml", "tsp", "tbsp", "cup", "pt", "qt", "l", "gal"],
-  other: ["piece"],
-};
-
-const LABELS: Record<string, string> = {
-  mass: "Mass / Weight",
-  volume: "Volume",
-  other: "Other",
-};
 
 export interface UnitSelectProps {
   value?: string;
@@ -40,11 +31,11 @@ export function UnitSelect({
   const dynamicUnits = getUnits();
   const validUnits = new Set(dynamicUnits);
 
-  // Filter and group units
-  const groups = Object.entries(UNIT_ORDER).map(([key, units]) => {
+  // Filter and group units based on standardized display order
+  const groups = Object.entries(UNIT_DISPLAY_ORDER).map(([key, units]) => {
     const availableUnits = units.filter((u) => validUnits.has(u));
     return {
-      label: LABELS[key],
+      label: UNIT_CATEGORY_LABELS[key] || key,
       units: availableUnits,
     };
   });
@@ -55,7 +46,7 @@ export function UnitSelect({
 
   if (remainingUnits.length > 0) {
     groups.push({
-      label: "Misc",
+      label: UNIT_CATEGORY_LABELS.misc,
       units: remainingUnits,
     });
   }

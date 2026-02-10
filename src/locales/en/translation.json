@@ -1,4 +1,9 @@
 {
+  "app": {
+    "name": "Gusto",
+    "version_label": "v{{version}}",
+    "version_full": "{{name}} v{{version}}"
+  },
   "common": {
     "actions": {
       "save": "Save",
@@ -13,7 +18,9 @@
       "back": "Back",
       "next": "Next",
       "submit": "Submit",
-      "reset": "Reset"
+      "reset": "Reset",
+      "help": "Help",
+      "select": "Select"
     },
     "labels": {
       "name": "Name",
@@ -123,6 +130,17 @@
     "editIngredient": "Edit Ingredient",
     "deleteIngredient": "Delete Ingredient",
     "ingredientDetails": "Ingredient Details",
+    "subtitle": "Manage your ingredient inventory and track costs",
+    "prompts": {
+      "update": "Update the ingredient details below.",
+      "add": "Fill out the form below to add a new ingredient to your inventory."
+    },
+    "archive": {
+      "title": "Archive Ingredient",
+      "message": "Are you sure you want to archive \"{{name}}\"? It will be removed from the master list but will remain in existing recipes.",
+      "action": "Archive",
+      "progress": "Archiving..."
+    },
     "fields": {
       "currentPrice": "Current Price",
       "pricePerUnit": "Price per Unit",
@@ -158,20 +176,52 @@
     "editRecipe": "Edit Recipe",
     "deleteRecipe": "Delete Recipe",
     "recipeDetails": "Recipe Details",
+    "recipeDetailsDesc": "Basic information about the dish.",
+    "financials": "Financials",
+    "financialsDesc": "Costing and pricing targets.",
+    "allergens": "Allergen & Dietary Information",
+    "allergensDesc": "Mark dietary restrictions and common allergens.",
+    "commonAllergens": "Common Allergens",
+    "dietaryRestrictions": "Dietary Restrictions",
+    "ingredientsTitle": "Ingredients",
+    "ingredientsDesc": "Components of the recipe.",
+    "subRecipes": "Sub-Recipes",
+    "noMatches": "No matches found",
+    "addComponent": "+ Add Component",
+    "cost": "Cost",
+    "subtotal": "Subtotal",
+    "trueCost": "True Recipe Cost",
+    "suggestedPrice": "Suggested Price",
+    "actualCost": "Actual Food Cost",
+    "targetCost": "Target Food Cost",
+    "netMargin": "Net Profit Margin",
+    "targetMargin": "Target Profit Margin",
+    "default": "Default",
     "fields": {
       "servings": "Servings",
       "prepTime": "Prep Time (minutes)",
       "cookingInstructions": "Cooking Instructions",
       "sellingPrice": "Selling Price",
       "targetCostPercentage": "Target Cost %",
+      "wasteBuffer": "Waste Buffer %",
+      "batchYield": "Batch Yield",
+      "yieldUnit": "Yield Unit",
+      "calories": "Calories (kcal)",
       "totalCost": "Total Cost",
       "profitMargin": "Profit Margin",
       "addIngredient": "Add Ingredient"
     },
     "placeholders": {
       "searchRecipes": "Search recipes...",
-      "recipeName": "e.g. Margherita Pizza",
-      "briefOverview": "Brief overview..."
+      "recipeName": "e.g. Beef Burger",
+      "briefOverview": "Brief overview...",
+      "yield": "e.g. 5",
+      "yieldUnit": "e.g. kg",
+      "calories": "0",
+      "sellingPrice": "0.00",
+      "targetCost": "25",
+      "wasteBuffer": "0",
+      "searchComponents": "Search components..."
     },
     "help": {
       "name": "Enter a memorable name for this recipe. This will appear on your menu and reports.",
@@ -181,7 +231,10 @@
       "prepTime": "Estimated preparation time in minutes. Helps with kitchen scheduling and labor cost calculations.",
       "sellingPrice": "The menu price for this dish. Used to calculate profit margins.",
       "targetCostPercentage": "Your ideal food cost as a percentage of selling price (e.g., 30%). The system will alert you if actual costs exceed this.",
-      "wasteBuffer": "Add a percentage to account for ingredient waste, trimming, or spillage (e.g., 5-10%). This ensures more accurate cost calculations."
+      "wasteBuffer": "Add a percentage to account for ingredient waste, trimming, or spillage (e.g., 5-10%). This ensures more accurate cost calculations.",
+      "yield": "The total quantity this recipe produces (e.g. 5 for 5kg).",
+      "yieldUnit": "The unit for the batch yield (e.g. kg, L, pieces).",
+      "calories": "Estimated calorie count per serving."
     },
     "sections": {
       "basicInfo": "Basic Information",
@@ -276,5 +329,14 @@
   "currency": {
     "usd": "US Dollar",
     "eur": "Euro"
+  },
+  "error": {
+    "barrier": {
+      "title": "Something went wrong",
+      "description": "The application encountered an unexpected UI crash. A technical report has been saved to your local logs.",
+      "restart": "Restart App",
+      "go_home": "Go Home",
+      "dev_info": "Dev Debug Info:"
+    }
   }
 }

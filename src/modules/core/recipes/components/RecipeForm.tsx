@@ -276,19 +276,20 @@ export const RecipeForm = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Recipe Details</CardTitle>
-            <CardDescription>Basic information about the dish.</CardDescription>
+            <CardTitle>{t("recipes.recipeDetails")}</CardTitle>
+            <CardDescription>{t("recipes.recipeDetailsDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="flex items-center gap-2">
-                Recipe Name <span className="text-destructive">*</span>
+                {t("common.labels.name")}{" "}
+                <span className="text-destructive">*</span>
                 <FieldHelp helpText={t("recipes.help.name")} />
               </Label>
               <Input
                 id="name"
                 {...register("name")}
-                placeholder="e.g. Beef Burger"
+                placeholder={t("recipes.placeholders.recipeName")}
                 aria-invalid={!!errors.name}
               />
               {errors.name && (
@@ -301,7 +302,8 @@ export const RecipeForm = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="category" className="flex items-center gap-2">
-                  Category <span className="text-destructive">*</span>
+                  {t("common.labels.category")}{" "}
+                  <span className="text-destructive">*</span>
                   <FieldHelp helpText={t("recipes.help.category")} />
                 </Label>
                 <select
@@ -309,7 +311,7 @@ export const RecipeForm = ({
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive"
                   aria-invalid={!!errors.category}
                 >
-                  <option value="">Select...</option>
+                  <option value="">{t("common.actions.select")}...</option>
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
                       {t(`common.categories.${cat}`) !==
@@ -322,7 +324,8 @@ export const RecipeForm = ({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="servings" className="flex items-center gap-2">
-                  Servings <span className="text-destructive">*</span>
+                  {t("recipes.fields.servings")}{" "}
+                  <span className="text-destructive">*</span>
                   <FieldHelp helpText={t("recipes.help.servings")} />
                 </Label>
                 <Input
@@ -342,7 +345,8 @@ export const RecipeForm = ({
 
             <div className="space-y-2">
               <Label htmlFor="prepTime" className="flex items-center gap-2">
-                Prep Time (mins) <span className="text-destructive">*</span>
+                {t("recipes.fields.prepTime")}{" "}
+                <span className="text-destructive">*</span>
                 <FieldHelp helpText={t("recipes.help.prepTime")} />
               </Label>
               <Input
@@ -355,13 +359,13 @@ export const RecipeForm = ({
 
             <div className="space-y-2">
               <Label htmlFor="description" className="flex items-center gap-2">
-                Description
+                {t("common.labels.description")}
                 <FieldHelp helpText={t("recipes.help.description")} />
               </Label>
               <Textarea
                 id="description"
                 {...register("description")}
-                placeholder="Brief overview..."
+                placeholder={t("recipes.placeholders.briefOverview")}
                 className="min-h-[80px]"
               />
             </div>
@@ -372,7 +376,7 @@ export const RecipeForm = ({
                   htmlFor="yieldAmount"
                   className="flex items-center gap-2"
                 >
-                  Batch Yield
+                  {t("recipes.fields.batchYield")}
                   <FieldHelp helpText="The total quantity this recipe produces (e.g. 5 for 5kg)." />
                 </Label>
                 <Input
@@ -380,12 +384,12 @@ export const RecipeForm = ({
                   step="0.01"
                   id="yieldAmount"
                   {...register("yieldAmount", { valueAsNumber: true })}
-                  placeholder="e.g. 5"
+                  placeholder={t("recipes.placeholders.yield")}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="yieldUnit" className="flex items-center gap-2">
-                  Yield Unit
+                  {t("recipes.fields.yieldUnit")}
                   <FieldHelp helpText="The unit for the batch yield (e.g. kg, L, pieces)." />
                 </Label>
                 <Controller
@@ -395,7 +399,7 @@ export const RecipeForm = ({
                     <UnitSelect
                       value={field.value || ""}
                       onValueChange={field.onChange}
-                      placeholder="e.g. kg"
+                      placeholder={t("recipes.placeholders.yieldUnit")}
                       className="h-9"
                     />
                   )}
@@ -405,14 +409,14 @@ export const RecipeForm = ({
 
             <div className="space-y-2">
               <Label htmlFor="calories" className="flex items-center gap-2">
-                Calories (kcal)
+                {t("recipes.fields.calories")}
                 <FieldHelp helpText="Estimated calorie count per serving." />
               </Label>
               <Input
                 type="number"
                 id="calories"
                 {...register("calories", { valueAsNumber: true })}
-                placeholder="0"
+                placeholder={t("recipes.placeholders.calories")}
               />
             </div>
           </CardContent>
@@ -420,8 +424,8 @@ export const RecipeForm = ({
 
         <Card className="flex flex-col">
           <CardHeader>
-            <CardTitle>Financials</CardTitle>
-            <CardDescription>Costing and pricing targets.</CardDescription>
+            <CardTitle>{t("recipes.financials")}</CardTitle>
+            <CardDescription>{t("recipes.financialsDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="space-y-2">
@@ -438,7 +442,9 @@ export const RecipeForm = ({
                 id="sellingPrice"
                 {...register("sellingPrice", { valueAsNumber: true })}
                 placeholder={
-                  suggestedPrice > 0 ? suggestedPrice.toFixed(2) : "0.00"
+                  suggestedPrice > 0
+                    ? suggestedPrice.toFixed(2)
+                    : t("recipes.placeholders.sellingPrice")
                 }
               />
             </div>
@@ -454,13 +460,13 @@ export const RecipeForm = ({
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <Label htmlFor="targetCost" className="flex items-center gap-2">
-                  Target Food Cost %
+                  {t("recipes.fields.targetCostPercentage")}
                   <FieldHelp
                     helpText={t("recipes.help.targetCostPercentage")}
                   />
                 </Label>
                 <span className="text-[10px] font-mono text-muted-foreground">
-                  Default: 25%
+                  {t("recipes.default")}: 25%
                 </span>
               </div>
               <div className="flex gap-2">
@@ -493,11 +499,11 @@ export const RecipeForm = ({
                   htmlFor="wasteBuffer"
                   className="flex items-center gap-2"
                 >
-                  Waste Buffer %
+                  {t("recipes.fields.wasteBuffer")}
                   <FieldHelp helpText={t("recipes.help.wasteBuffer")} />
                 </Label>
                 <span className="text-[10px] font-mono text-muted-foreground">
-                  e.g. 5%
+                  {t("recipes.placeholders.yield")}%
                 </span>
               </div>
               <Input
@@ -510,7 +516,9 @@ export const RecipeForm = ({
 
             <div className="mt-6 p-4 bg-muted/30 border border-border/50 rounded-lg space-y-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Subtotal:</span>
+                <span className="text-muted-foreground">
+                  {t("recipes.subtotal")}:
+                </span>
                 <span className="font-medium">
                   {getCurrencySymbol(watch("currency") || "USD")}
                   {subtotal.toFixed(2)}
@@ -520,7 +528,8 @@ export const RecipeForm = ({
               {watchedWasteBuffer > 0 && (
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-muted-foreground">
-                    Waste Buffer ({watchedWasteBuffer}%):
+                    {t("recipes.fields.wasteBuffer").replace("%", "").trim()} (
+                    {watchedWasteBuffer}%):
                   </span>
                   <span className="font-medium text-orange-600">
                     +{getCurrencySymbol(watch("currency") || "USD")}
@@ -533,7 +542,7 @@ export const RecipeForm = ({
 
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground font-bold">
-                  True Recipe Cost:
+                  {t("recipes.trueCost")}:
                 </span>
                 <span className="font-bold text-lg">
                   {getCurrencySymbol(watch("currency") || "USD")}
@@ -543,7 +552,8 @@ export const RecipeForm = ({
 
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground">
-                  Suggested Price ({watchedTargetCost}% Cost):
+                  {t("recipes.suggestedPrice")} ({watchedTargetCost}%{" "}
+                  {t("recipes.cost")}):
                 </span>
                 <span className="font-semibold text-primary">
                   {getCurrencySymbol(watch("currency") || "USD")}
@@ -556,8 +566,9 @@ export const RecipeForm = ({
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground text-xs italic">
                   {watchedSellingPrice
-                    ? "Actual Food Cost:"
-                    : "Target Food Cost:"}
+                    ? t("recipes.actualCost")
+                    : t("recipes.targetCost")}
+                  :
                 </span>
                 <span
                   className={`font-medium ${getMarginColor(100 - currentFoodCost)}`}
@@ -568,8 +579,9 @@ export const RecipeForm = ({
               <div className="flex justify-between items-center text-sm">
                 <span className="text-muted-foreground font-medium">
                   {watchedSellingPrice
-                    ? "Net Profit Margin:"
-                    : "Target Profit Margin:"}
+                    ? t("recipes.netMargin")
+                    : t("recipes.targetMargin")}
+                  :
                 </span>
                 <span className={`font-bold ${getMarginColor(currentMargin)}`}>
                   {currentMargin.toFixed(1)}%
@@ -581,14 +593,14 @@ export const RecipeForm = ({
 
         <Card>
           <CardHeader>
-            <CardTitle>Allergen & Dietary Information</CardTitle>
-            <CardDescription>
-              Mark dietary restrictions and common allergens.
-            </CardDescription>
+            <CardTitle>{t("recipes.allergens")}</CardTitle>
+            <CardDescription>{t("recipes.allergensDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">
-              <Label className="text-sm font-semibold">Common Allergens</Label>
+              <Label className="text-sm font-semibold">
+                {t("recipes.commonAllergens")}
+              </Label>
               <div className="flex flex-wrap gap-2">
                 {ALLERGEN_OPTIONS.map((allergen) => {
                   const currentAllergens = watch("allergens") || [];
@@ -627,7 +639,7 @@ export const RecipeForm = ({
 
             <div className="space-y-3">
               <Label className="text-sm font-semibold">
-                Dietary Restrictions
+                {t("recipes.dietaryRestrictions")}
               </Label>
               <div className="flex flex-wrap gap-2">
                 {DIETARY_OPTIONS.map((diet) => {
@@ -671,22 +683,22 @@ export const RecipeForm = ({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>Ingredients</CardTitle>
-            <CardDescription>Components of the recipe.</CardDescription>
+            <CardTitle>{t("recipes.ingredientsTitle")}</CardTitle>
+            <CardDescription>{t("recipes.ingredientsDesc")}</CardDescription>
           </div>
           <Select
             onValueChange={handleAddIngredient}
             onOpenChange={(open) => !open && setComponentSearch("")}
           >
             <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder="+ Add Component" />
+              <SelectValue placeholder={t("recipes.addComponent")} />
             </SelectTrigger>
             <SelectContent>
               <div className="p-2 border-b sticky top-0 bg-popover z-20">
                 <div className="relative">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search components..."
+                    placeholder={t("recipes.placeholders.searchComponents")}
                     className="pl-8 h-8"
                     value={componentSearch}
                     onChange={(e) => setComponentSearch(e.target.value)}
@@ -697,7 +709,7 @@ export const RecipeForm = ({
               {filteredIngredients.length > 0 && (
                 <>
                   <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase bg-muted/50">
-                    Ingredients
+                    {t("navigation.ingredients")}
                   </div>
                   {filteredIngredients.map((ing) => (
                     <SelectItem key={ing.id} value={`ingredient:${ing.id}`}>
@@ -709,7 +721,7 @@ export const RecipeForm = ({
               {filteredRecipes.length > 0 && (
                 <>
                   <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase bg-muted/50 mt-2">
-                    Sub-Recipes
+                    {t("recipes.subRecipes")}
                   </div>
                   {filteredRecipes.map((r) => (
                     <SelectItem key={r.id} value={`recipe:${r.id}`}>
@@ -721,7 +733,7 @@ export const RecipeForm = ({
               {filteredIngredients.length === 0 &&
                 filteredRecipes.length === 0 && (
                   <div className="p-4 text-center text-xs text-muted-foreground">
-                    No matches found
+                    {t("recipes.noMatches")}
                   </div>
                 )}
             </SelectContent>
@@ -733,16 +745,16 @@ export const RecipeForm = ({
               <thead className="bg-muted/50">
                 <tr>
                   <th className="h-10 px-4 text-left font-medium text-muted-foreground">
-                    Ingredient
+                    {t("common.labels.name")}
                   </th>
                   <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[100px]">
-                    Qty
+                    {t("common.labels.quantity")}
                   </th>
                   <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[120px]">
-                    Unit
+                    {t("common.labels.unit")}
                   </th>
                   <th className="h-10 px-4 text-right font-medium text-muted-foreground">
-                    Cost
+                    {t("recipes.cost")}
                   </th>
                   <th className="h-10 px-4 w-[50px]"></th>
                 </tr>

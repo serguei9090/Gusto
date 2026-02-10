@@ -1,33 +1,8 @@
-# RestaurantManage - Project Wiki
+# Gusto - Project Wiki
 
-**Version:** 1.0.0  
+**Version:** 1.0.4  
 **Tech Stack:** Tauri v2 + React 19 + TypeScript + Kysely + SQLite  
-**Last Updated:** 2026-02-05
-
----
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Architecture](#architecture)
-3. [Features](#features)
-4. [Database Schema](#database-schema)
-5. [Testing Infrastructure](#testing-infrastructure)
-6. [Development Guide](#development-guide)
-7. [API Reference](#api-reference)
-
----
-
-## Overview
-
-RestaurantManage is a desktop application for restaurant cost management, recipe costing, inventory tracking, and prep sheet generation. Built with Tauri for native desktop performance and React for a modern UI.
-
-### Key Capabilities
-- **Recipe Costing:** Calculate ingredient costs, profit margins, and suggested pricing
-- **Inventory Management:** Track stock levels, log transactions, and detect low stock
-- **Supplier Management:** Maintain supplier database with contact information
-- **Prep Sheet Generation:** Create production prep lists from recipes
-- **Dashboard Analytics:** Real-time insights into inventory value, margins, and reorders
+**Last Updated:** 2026-02-09
 
 ---
 
@@ -39,144 +14,87 @@ RestaurantManage is a desktop application for restaurant cost management, recipe
 |-------|------------|---------|
 | **Desktop Runtime** | Tauri v2 | Native desktop app with web frontend |
 | **Frontend** | React 19 + TypeScript | UI components and state management |
-| **Styling** | Tailwind CSS 4 + shadcn/ui | Utility-first CSS + component library |
+| **Styling** | Tailwind CSS v4 + Shadcn/UI | Utility-first CSS + Modern component primitives |
 | **Database** | SQLite via Tauri SQL Plugin | Local data persistence |
 | **Query Builder** | Kysely | Type-safe SQL query construction |  
 | **State Management** | Zustand | Lightweight global state |
-| **Forms** | React Hook Form + Zod | Form validation and management |
+| **Animations** | Framer Motion | Fluid UI transitions |
 | **Testing** | Playwright + Vitest | E2E and unit testing |
 
-### Project Structure
+### Project Structure (Atomic Design + Modules)
 
 ```
-RestaurantManage/
+Gusto/
 ├── src/
-│   ├── components/          # UI components (Atomic Design)
-│   │   ├── ui/             # Base components (shadcn/ui)
-│   │   ├── atoms/          # Smallest units (buttons, inputs)
-│   │   ├── molecules/      # Composed units (search bars, cards)
-│   │   ├── organisms/      # Complex sections (tables, forms)
-│   │   └── pages/          # Full page components
-│   ├── features/           # Feature modules
-│   │   ├── ingredients/    # Ingredient management
-│   │   ├── recipes/        # Recipe management
-│   │   ├── inventory/      # Inventory tracking
-│   │   ├── suppliers/      # Supplier management
-│   │   ├── dashboard/      # Dashboard analytics
-│   │   └── prep-sheets/    # Prep sheet generation
-│   ├── lib/                # Core utilities
-│   │   └── db.ts          # Database client
-│   ├── services/           # Business logic layer
-│   │   └── database/       # Database service
-│   └── utils/              # Helper functions
-│       ├── costEngine.ts   # Cost calculations
-│       └── conversions.ts  # Unit conversions
+│   ├── components/          # Shared UI components (Atomic Design)
+│   │   ├── ui/             # Shadcn primitives (Base Layer)
+│   │   ├── atoms/          # Domain-specific smallest units
+│   │   ├── molecules/      # Composed units (Search, Row)
+│   │   ├── organisms/      # Complex sections (Tables, Forms)
+│   │   └── templates/      # Layout structures
+│   ├── modules/            # Feature-based business logic
+│   │   ├── core/           # Open-source features
+│   │   └── pro/            # Private extensions
+│   ├── lib/                # Core utilities & database config
+│   │   ├── db.ts           # Kysely client
+│   │   └── utils.ts        # cn() helper and others
+│   ├── services/           # Shared business logic services
+│   ├── hooks/              # Shared React hooks
+│   └── types/              # Global TypeScript definitions
 ├── e2e/                    # End-to-end tests
-│   ├── fixtures/           # Test database fixtures
-│   └── helpers/            # Test utilities
 ├── src-tauri/              # Tauri native layer
-│   ├── src/                # Rust backend
-│   ├── icons/              # App icons
-│   └── tauri.conf.json     # Tauri configuration
-└── docs/                   # Documentation
+└── docs/                   # Project documentation
 ```
 
-### Feature-Based Architecture
+### Modular "Open Core" Architecture
 
-Each feature module follows a consistent structure:
+The project uses a modular design to separate base functionality from professional extensions:
 
-```
-features/[feature-name]/
-├── components/         # UI components specific to this feature
-├── services/          # Business logic and data access
-│   └── [feature].repository.ts
-├── store/              # Zustand state management
-│   └── [feature].store.ts
-└── types.ts           # TypeScript type definitions
-```
+1. **Module Registry**: All modules must register their routes, icons, and metadata in `src/modules/all-modules.ts`.
+2. **Standard Interface**:
+   ```typescript
+   export interface Module {
+     id: string;
+     title: string;
+     icon: string;
+     component: React.ComponentType;
+     order: number;
+   }
+   ```
+3. **Core vs Pro**: 
+   - `core/`: Dashboard, Ingredients, Recipes, Suppliers.
+   - `pro/`: Advanced analytics, AI integration, Inventory forecasting (often gitignored in public core).
 
 ---
 
 ## Features
 
 ### 1. Ingredient Management
-**File:** [src/features/ingredients](file:///i:/01-Master_Code/Apps/RestaurantManage/src/features/ingredients)
+**Location:** `src/modules/core/ingredients`
 
-- Create, read, update, delete ingredients
-- Link ingredients to suppliers
-- Track current stock levels and minimum thresholds
-- Price per unit tracking
-- Category organization (protein, dairy, vegetable, etc.)
-- Unit of measure support (kg, g, L, mL, etc.)
+- CRUD operations for kitchen ingredients.
+- Real-time stock alerts and minimum threshold tracking.
+- Automated unit conversion engine.
 
-**Key Components:**
-- `IngredientForm`: Add/edit ingredient modal
-- `IngredientTable`: Searchable ingredient list
-- `IngredientsRepository`: Data access layer
+### 2. Recipe Costing
+**Location:** `src/modules/core/recipes`
 
-### 2. Recipe Management
-**File:** [src/features/recipes](file:///i:/01-Master_Code/Apps/RestaurantManage/src/features/recipes)
+- Dynamic cost calculation based on ingredient price changes.
+- Version history tracking and rollback.
+- Batch pricing and profit margin optimization.
 
-- Create recipes with multiple ingredients
-- Automatic cost calculation based on ingredient quantities
-- Profit margin and suggested pricing
-- Labor cost and overhead percentage
-- PDF export for recipe cost sheets
-- Yield and serving size tracking
-- **Version Control & History:**
-  - Automatically tracks every change (ingredients, instructions, costs)
-  - View full details of any past version
-  - Rollback to previous versions safely
-  - "Estimated Price" calculation for historic versions without fixed pricing
+### 3. Inventory Control
+**Location:** `src/modules/core/inventory`
 
-**Key Components:**
-- `RecipeForm`: Multi-step recipe creation
-- `RecipeTable`: Recipe listing with cost summary
-- `RecipeDetailModal`: Detailed view with tabs for Overview and History
-- `RecipeHistory`: List and rollback interface for version control
-- `RecipesRepository`: Recipe data access and calculations
+- Transactional logging (Purchase, Usage, Waste).
+- Automated stock adjustments linked to recipe production.
 
-### 3. Inventory Tracking
-**File:** [src/features/inventory](file:///i:/01-Master_Code/Apps/RestaurantManage/src/features/inventory)
+### 4. Dashboard Analytics
+**Location:** `src/modules/core/dashboard`
 
-- Log inventory transactions (purchase, usage, adjustment, waste)
-- Automatic stock level updates
-- Low stock detection and alerts
-- Transaction history with references
-- Cost tracking per transaction
-
-**Transaction Types:**
-- **Purchase:** Stock in from suppliers
-- **Usage:** Stock out for production
-- **Adjustment:** Manual stock corrections
-- **Waste:** Spoilage or loss tracking
-
-### 4. Supplier Management
-**File:** [src/features/suppliers](file:///i:/01-Master_Code/Apps/RestaurantManage/src/features/suppliers)
-
-- Supplier contact database
-- Email, phone, address tracking
-- Payment terms and notes
-- Link suppliers to ingredients
-
-### 5. Dashboard & Analytics
-**File:** [src/features/dashboard](file:///i:/01-Master_Code/Apps/RestaurantManage/src/features/dashboard)
-
-- **Total Inventory Value:** Sum of all ingredient stock × price
-- **Low Stock Count:** Ingredients below minimum threshold
-- **Average Profit Margin:** Across all recipes
-- **Total Recipes:** Recipe count
-- **Top Recipes:** Ranked by profit margin
-- **Urgent Reorders:** Ingredients needing immediate restocking
-
-### 6. Prep Sheets
-**File:** [src/features/prep-sheets](file:///i:/01-Master_Code/Apps/RestaurantManage/src/features/prep-sheets)
-
-- Generate prep lists from multiple recipes
-- Aggregate ingredient quantities
-- Save and load prep sheets
-- Date and shift tracking
-- Print-friendly format
+- Financial health overview.
+- Urgent reorder alerts.
+- Top performing recipes by margin.
 
 ---
 

@@ -6,6 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "@/hooks/useTranslation";
 import { cn } from "@/lib/utils";
 
 interface FieldHelpProps {
@@ -33,6 +34,7 @@ export const FieldHelp = ({
   className,
   side = "right",
 }: FieldHelpProps) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const isMountingRef = useRef(true);
 
@@ -68,7 +70,7 @@ export const FieldHelp = ({
               "cursor-help",
               className,
             )}
-            aria-label="Help"
+            aria-label={t("common.actions.help")}
           >
             <HelpCircle className="h-4 w-4" />
           </button>

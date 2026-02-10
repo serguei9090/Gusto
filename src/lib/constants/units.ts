@@ -1,3 +1,15 @@
+/**
+ * Reference catalog of standard measurement units.
+ *
+ * This file is NOT the runtime source of truth for available units.
+ * The user's active units are stored dynamically in the `configuration_items`
+ * database table and accessed via `useConfigStore().getUnits()`.
+ *
+ * This catalog is used exclusively for:
+ * - `UnitConfigModal`: presenting all toggleable units to the user.
+ * - `configRepository.restoreDefaults()`: re-seeding the DB with standard units.
+ * - `UnitSelect`: display ordering and category labels for the dropdown.
+ */
 export const STANDARD_UNITS = {
   Mass: [
     // Metric
@@ -43,6 +55,17 @@ export const STANDARD_UNITS = {
   Other: ["each", "piece"],
 } as const;
 
-export type UnitCategory = keyof typeof STANDARD_UNITS;
+// Display ordering for common units
+export const UNIT_DISPLAY_ORDER: Record<string, string[]> = {
+  mass: ["mg", "g", "oz", "lb", "kg"],
+  volume: ["ml", "tsp", "tbsp", "cup", "pt", "qt", "l", "gal"],
+  other: ["piece", "each"],
+};
 
-export const UNIT_CATEGORIES = Object.keys(STANDARD_UNITS) as UnitCategory[];
+export const UNIT_CATEGORY_LABELS: Record<string, string> = {
+  mass: "Mass / Weight",
+  volume: "Volume",
+  other: "Other",
+  length: "Length",
+  misc: "Misc",
+};
