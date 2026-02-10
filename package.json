@@ -1,7 +1,7 @@
 {
   "name": "gusto",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "release": "tauri build",
+    "release": "tauri build --config \"{\\\"productName\\\": \\\"Gusto Core\\\"}\"",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "type-check": "tsc --noEmit",
@@ -22,7 +22,7 @@
     "db:migrate": "bun run scripts/db-migrate.ts",
     "tauri:dev:pro": "cross-env VITE_APP_MODE=pro bun run tauri:dev",
     "build:pro": "cross-env VITE_APP_MODE=pro bun run build",
-    "release:pro": "cross-env VITE_APP_MODE=pro bun run release"
+    "release:pro": "cross-env VITE_APP_MODE=pro tauri build --config \"{\\\"productName\\\": \\\"Gusto Pro\\\"}\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

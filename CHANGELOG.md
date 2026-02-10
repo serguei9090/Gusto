@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2026-02-10
+
+### Added
+- **Differentiated Builds**: Implemented unique filenames and product names for Core and Pro versions (`Gusto Core` vs `Gusto Pro`).
+- **Dynamic Versioning**: Centralized version management in `package.json`, automatically syncing Tauri configuration and the in-app "About" dialog.
+
+### Changed
+- **Performance Optimization**: Implemented Code Splitting (lazy loading) for all major modules and manual chunking for vendor libraries, reducing initial bundle size by 50%.
+- **Import Standardization**: Resolved build warnings by converting core store dynamic imports to static imports.
+
+### Fixed
+- **Dashboard Stability**: Fixed a critical bug in `WidgetRegistry` where non-immutable updates caused infinite React re-renders and prevented widgets from appearing on initial load.
+- **Type Safety**: Eliminated multiple `any` type assertions across repository tests and stores, improving codebase reliability and lint compliance.
+- **UI Polishing**: Added loading spinners for lazy-loaded modules using React Suspense.
+
 ## [1.0.4] - 2026-02-09
 
 ### Added
