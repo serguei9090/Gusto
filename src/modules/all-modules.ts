@@ -1,6 +1,6 @@
 import { registry } from "@/lib/modules/registry";
-import { registerCoreMigrations } from "@/services/database/registerCoreMigrations";
 import type { ModuleDefinition } from "@/types/module";
+import { registerCoreMigrations } from "@/services/database/registerCoreMigrations";
 import { logger } from "@/utils/logger";
 import { calculatorsModule } from "./core/calculators";
 import { dashboardModule } from "./core/dashboard";
@@ -33,24 +33,32 @@ export function registerModules() {
   registry.register(settingsModule);
 
   // Register Pro Modules (Conditional)
-  logger.debug("VITE_APP_MODE =", import.meta.env.VITE_APP_MODE);
+  // We use import.meta.glob to safely check for the pro folder without crashing the build if it's missing (CI/CD)
+  const proImports = import.meta.glob("./pro/index.ts") as Record<string, () => Promise<{ proModules: ModuleDefinition[] }>>;
+  const proEntryPath = "./pro/index.ts";
+
   if (import.meta.env.VITE_APP_MODE === "pro") {
-    logger.info("Registering Pro modules...");
-    // biome-ignore lint: Pro modules are gitignored in CI
-    // @ts-ignore - Pro modules might not be present in all environments
-    import("./pro")
-      .then(({ proModules }) => {
-        logger.debug(
-          "Found Pro modules:",
-          proModules.map((m: ModuleDefinition) => m.id),
-        );
-        for (const module of proModules) {
-          registry.register(module);
-        }
-        logger.info("Pro modules registered successfully");
-      })
-      .catch((error) => {
-        logger.warn("Pro modules could not be loaded:", error);
-      });
+    const importFn = proImports[proEntryPath];
+
+    if (importFn) {
+      logger.info("Registering Pro modules...");
+      importFn()
+        .then((mod) => {
+          const { proModules } = mod;
+          logger.debug(
+            "Found Pro modules:",
+            proModules.map((m: ModuleDefinition) => m.id),
+          );
+          for (const module of proModules) {
+            registry.register(module);
+          }
+          logger.info("Pro modules registered successfully");
+        })
+        .catch((error) => {
+          logger.warn("Pro modules could not be loaded from entry:", error);
+        });
+    } else {
+      logger.warn("Pro directory not found, skipping Pro registration.");
+    }
   }
 }
