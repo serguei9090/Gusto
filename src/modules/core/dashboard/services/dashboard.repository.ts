@@ -1,5 +1,5 @@
 import { sql } from "kysely";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import type {
   DashboardSummary,
   TopRecipeItem,
@@ -10,7 +10,7 @@ import { calculateTotalWithConversions } from "@/utils/currencyConverter";
 class DashboardRepository {
   async getSummary(): Promise<DashboardSummary> {
     // 1. Fetch all ingredients with their stock, price, and currency
-    const ingredients = await db
+    const ingredients = await getDb()
       .selectFrom("ingredients")
       .select(["current_stock", "price_per_unit", "currency"])
       .where("is_active", "=", 1)
@@ -25,7 +25,7 @@ class DashboardRepository {
     );
 
     // 2. Low Stock Count
-    const lowStockResult = await db
+    const lowStockResult = await getDb()
       .selectFrom("ingredients")
       .select(sql<number>`COUNT(*)`.as("count"))
       .where("min_stock_level", "is not", null)
@@ -40,7 +40,7 @@ class DashboardRepository {
     // Let's assume we need to calculate it if it's not stored, but for efficiency,
     // let's check if we can just average the stored ones or if we need to join.
     // For now, let's assume simple selection from recipes table if it has these fields.
-    const recipeStatsResult = await db
+    const recipeStatsResult = await getDb()
       .selectFrom("recipes")
       .select([
         sql<number>`COUNT(*)`.as("count"),
@@ -60,7 +60,7 @@ class DashboardRepository {
   }
 
   async getUrgentReorders(limit = 5): Promise<UrgentReorderItem[]> {
-    const rows = await db
+    const rows = await getDb()
       .selectFrom("ingredients")
       .select([
         "id",
@@ -94,7 +94,7 @@ class DashboardRepository {
     // usually it's calculated. Let's use `target_cost_percentage` as proxy for now (lower cost = higher margin)
     // OR if we stored it. Let's select what we have.
 
-    const rows = await db
+    const rows = await getDb()
       .selectFrom("recipes")
       .select([
         "id",

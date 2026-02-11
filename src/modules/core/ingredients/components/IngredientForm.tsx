@@ -133,7 +133,7 @@ export const IngredientForm = ({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="flex items-center gap-2">
-                {t("common.labels.name")}{" "}
+                {t("common.labels.name")}
                 <span className="text-destructive">*</span>
                 <FieldHelp helpText={t("ingredients.help.name")} />
               </FormLabel>
