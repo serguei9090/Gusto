@@ -80,7 +80,7 @@ export const ModulesSection = () => {
                 key={moduleId}
                 value={moduleId}
                 className={`flex items-center justify-between p-3 bg-card border rounded-md cursor-move hover:bg-muted/50 transition-colors ${
-                  !meta.isCore ? "border-primary/30" : ""
+                  meta.isCore ? "" : "border-primary/30"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -96,7 +96,7 @@ export const ModulesSection = () => {
                       >
                         {meta.label}
                       </Label>
-                      {!meta.isCore && (
+                      {meta.isCore ? null : (
                         <Badge
                           variant="outline"
                           className="text-[10px] px-1.5 py-0 border-primary/50 text-primary font-bold"

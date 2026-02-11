@@ -705,7 +705,7 @@ export class RecipeVersionRepository {
       const str = String(value);
       // Escape quotes and wrap in quotes if contains comma, quote, or newline
       if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-        return `"${str.replace(/"/g, '""')}"`;
+        return `"${str.replaceAll('"', '""')}"`;
       }
       return str;
     };

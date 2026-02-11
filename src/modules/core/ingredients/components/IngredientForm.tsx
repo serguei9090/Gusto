@@ -68,13 +68,13 @@ export const IngredientForm = ({
       ...defaultValues,
       // Force 2 decimal places for display to avoid high-precision values from DB
       currentPrice:
-        defaultValues?.currentPrice !== undefined
-          ? Number(defaultValues.currentPrice.toFixed(2))
-          : (defaultValues?.currentPrice ?? 0),
+        defaultValues?.currentPrice === undefined
+          ? 0
+          : Number(defaultValues.currentPrice.toFixed(2)),
       pricePerUnit:
-        defaultValues?.pricePerUnit !== undefined
-          ? Number(defaultValues.pricePerUnit.toFixed(2))
-          : (defaultValues?.pricePerUnit ?? 0),
+        defaultValues?.pricePerUnit === undefined
+          ? 0
+          : Number(defaultValues.pricePerUnit.toFixed(2)),
     },
   });
 
@@ -172,11 +172,10 @@ export const IngredientForm = ({
                   <SelectContent>
                     {categories.map((category) => (
                       <SelectItem key={category} value={category}>
-                        {t(`common.categories.${category}`) !==
+                        {t(`common.categories.${category}`) ===
                         `common.categories.${category}`
-                          ? t(`common.categories.${category}`)
-                          : category.charAt(0).toUpperCase() +
-                            category.slice(1)}
+                          ? category.charAt(0).toUpperCase() + category.slice(1)
+                          : t(`common.categories.${category}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -246,7 +245,6 @@ export const IngredientForm = ({
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
                       Package Name
-                      {/* {t("ingredients.fields.purchaseUnit")} */}
                       <span className="text-destructive">*</span>
                       <FieldHelp helpText="e.g. Box, Case, Bag" />
                     </FormLabel>
@@ -269,7 +267,6 @@ export const IngredientForm = ({
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
                       Items per Package
-                      {/* {t("ingredients.fields.conversionRatio")} */}
                       <span className="text-destructive">*</span>
                       <FieldHelp helpText="How many base units are in this package?" />
                     </FormLabel>

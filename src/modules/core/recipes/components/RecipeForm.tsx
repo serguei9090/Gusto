@@ -349,10 +349,10 @@ export const RecipeForm = ({
                   <option value="">{t("common.actions.select")}...</option>
                   {categories.map((cat) => (
                     <option key={cat} value={cat}>
-                      {t(`common.categories.${cat}`) !==
+                      {t(`common.categories.${cat}`) ===
                       `common.categories.${cat}`
-                        ? t(`common.categories.${cat}`)
-                        : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        ? cat.charAt(0).toUpperCase() + cat.slice(1)
+                        : t(`common.categories.${cat}`)}
                     </option>
                   ))}
                 </select>

@@ -1,7 +1,6 @@
 import { Suspense, useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { GlobalErrorBarrier } from "@/components/error/GlobalErrorBarrier";
-import type { View } from "@/components/Sidebar";
 import { MainLayout } from "@/components/templates/MainLayout";
 import { useTranslation } from "@/hooks/useTranslation";
 import { initDb } from "@/lib/db";
@@ -10,7 +9,7 @@ import { CurrencySettingsPage } from "@/modules/core/settings/pages/CurrencySett
 
 function App() {
   const { t } = useTranslation();
-  const [currentView, setCurrentView] = useState<View>("dashboard");
+  const [currentView, setCurrentView] = useState<string>("dashboard");
   const reg = useRegistry();
 
   // Initialize database and modules on mount

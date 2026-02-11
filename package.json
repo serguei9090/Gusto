@@ -20,7 +20,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:all": "bun run test:unit && bun run test:e2e",
     "db:migrate": "bun run scripts/db-migrate.ts",
-    "sonar": "cross-env SONAR_HOST_URL=http://10.0.0.184:9000 SONAR_TOKEN=sqp_b851893f939dcd193258570422553fb14a130ad6 sonar-scanner",
+    "sonar": "sonar-scanner",
     "tauri:dev:pro": "cross-env VITE_APP_MODE=pro bun run tauri:dev",
     "build:pro": "cross-env VITE_APP_MODE=pro bun run build",
     "release:pro": "cross-env VITE_APP_MODE=pro tauri build --config \"{\\\"productName\\\": \\\"Gusto Pro\\\"}\""

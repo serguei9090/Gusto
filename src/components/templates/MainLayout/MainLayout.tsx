@@ -1,9 +1,9 @@
-import { Sidebar, type View } from "@/components/Sidebar";
+import { Sidebar } from "@/components/Sidebar";
 import styles from "./MainLayout.module.css";
 
 export interface MainLayoutProps {
-  currentView: View;
-  onChangeView: (view: View) => void;
+  currentView: string;
+  onChangeView: (view: string) => void;
   title?: string;
   children: React.ReactNode;
 }

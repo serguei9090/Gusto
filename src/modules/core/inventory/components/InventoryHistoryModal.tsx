@@ -33,7 +33,7 @@ export function InventoryHistoryModal({
   ingredient,
   open,
   onOpenChange,
-}: InventoryHistoryModalProps) {
+}: Readonly<InventoryHistoryModalProps>) {
   const [transactions, setTransactions] = useState<InventoryTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -162,12 +162,12 @@ export function InventoryHistoryModal({
                         : "-"}
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {tx.totalCost !== null
-                        ? formatCurrencyAmount(
+                      {tx.totalCost === null
+                        ? "-"
+                        : formatCurrencyAmount(
                             tx.totalCost,
                             ingredient.currency || "USD",
-                          )
-                        : "-"}
+                          )}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-xs">
                       {tx.reference || "-"}

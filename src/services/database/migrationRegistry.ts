@@ -7,7 +7,7 @@ export interface Migration {
 
 class MigrationRegistry {
   private static instance: MigrationRegistry;
-  private migrations: Migration[] = [];
+  private readonly migrations: Migration[] = [];
 
   private constructor() {}
 

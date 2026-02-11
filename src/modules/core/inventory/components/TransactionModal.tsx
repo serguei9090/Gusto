@@ -200,7 +200,7 @@ export function TransactionModal({
                   <div className="flex gap-2">
                     <Button
                       type="button"
-                      variant={!isUsingPurchaseUnit ? "default" : "outline"}
+                      variant={isUsingPurchaseUnit ? "outline" : "default"}
                       className="flex-1"
                       onClick={() => setIsUsingPurchaseUnit(false)}
                     >

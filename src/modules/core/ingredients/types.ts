@@ -1,13 +1,10 @@
 import type { Currency } from "@/utils/currency";
 
-export type IngredientCategory = string;
-export type UnitOfMeasure = string;
-
 export interface Ingredient {
   id: number;
   name: string;
-  category: IngredientCategory;
-  unitOfMeasure: UnitOfMeasure;
+  category: string;
+  unitOfMeasure: string;
   currentPrice: number;
   pricePerUnit: number;
   currency: Currency;
@@ -23,8 +20,8 @@ export interface Ingredient {
 
 export interface CreateIngredientInput {
   name: string;
-  category: IngredientCategory;
-  unitOfMeasure: UnitOfMeasure;
+  category: string;
+  unitOfMeasure: string;
   currentPrice: number;
   pricePerUnit: number;
   currency?: Currency;
@@ -39,8 +36,8 @@ export interface CreateIngredientInput {
 
 export interface UpdateIngredientInput {
   name?: string;
-  category?: IngredientCategory;
-  unitOfMeasure?: UnitOfMeasure;
+  category?: string;
+  unitOfMeasure?: string;
   currentPrice?: number;
   pricePerUnit?: number;
   currency?: Currency;

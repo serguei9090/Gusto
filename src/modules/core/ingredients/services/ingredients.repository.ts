@@ -4,13 +4,10 @@ import type { Database, IngredientsTable } from "@/types/db.types";
 
 export type IngredientRow = Selectable<IngredientsTable>;
 
-import type { Currency } from "@/utils/currency";
 import { logger } from "@/utils/logger";
 import type {
   CreateIngredientInput,
   Ingredient,
-  IngredientCategory,
-  UnitOfMeasure,
   UpdateIngredientInput,
 } from "../types";
 
@@ -208,11 +205,11 @@ export class IngredientsRepository {
     return {
       id: row.id,
       name: row.name,
-      category: row.category as IngredientCategory,
-      unitOfMeasure: row.unit_of_measure as UnitOfMeasure,
+      category: row.category,
+      unitOfMeasure: row.unit_of_measure,
       currentPrice: row.current_price,
       pricePerUnit: row.price_per_unit || 0, // Fallback if null in DB
-      currency: (row.currency || "USD") as Currency,
+      currency: row.currency || "USD",
       supplierId: row.supplier_id,
       minStockLevel: row.min_stock_level,
       currentStock: row.current_stock,

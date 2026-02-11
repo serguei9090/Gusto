@@ -39,8 +39,15 @@ export function getDb(): Kysely<Database> {
  */
 export const db = new Proxy({} as Kysely<Database>, {
   get(_target, prop) {
-    // biome-ignore lint/suspicious/noExplicitAny: Proxy requires dynamic property access
-    return (dbInstance as any)[prop];
+    // We must use Reflect.get and provide dbInstance as the receiver.
+    // Also, we must bind functions to dbInstance.
+    // This is required because Kysely uses true JS private fields (#fields).
+    // Accessing a private field on a Proxy will throw a TypeError unless 'this' is the original instance.
+    const value = Reflect.get(dbInstance, prop, dbInstance);
+    if (typeof value === "function") {
+      return value.bind(dbInstance);
+    }
+    return value;
   },
 });
 

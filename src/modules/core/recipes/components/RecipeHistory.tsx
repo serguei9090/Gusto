@@ -21,7 +21,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIngredientsStore } from "@/modules/core/ingredients/store/ingredients.store";
 import type { RecipeWithIngredients } from "@/types/ingredient.types";
 import { calculateSuggestedPrice } from "@/utils/costEngine";
-import type { Currency } from "@/utils/currency";
 import {
   type DetailedVersionDiff,
   type IngredientDiff,
@@ -136,7 +135,7 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
 
       // Get recipe name for filename
       const recipeName = versions[0]?.name || "recipe";
-      const fileName = `${recipeName.toLowerCase().replace(/\s+/g, "-")}-history.csv`;
+      const fileName = `${recipeName.toLowerCase().replaceAll(" ", "-")}-history.csv`;
 
       // Create blob and download
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -163,12 +162,12 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
       id: version.recipeId, // Use recipeId, not version.id (which is version primary key)
       name: version.name,
       description: version.description,
-      category: version.category as string,
+      category: version.category,
       servings: version.servings,
       prepTimeMinutes: version.prepTimeMinutes,
       cookingInstructions: version.cookingInstructions,
       sellingPrice: version.sellingPrice,
-      currency: version.currency as Currency,
+      currency: version.currency,
       targetCostPercentage: version.targetCostPercentage,
       wasteBufferPercentage: version.wasteBufferPercentage,
       totalCost: version.totalCost,
@@ -192,7 +191,7 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
             originalIngredient?.name ||
             `Unknown Ingredient (${snap.ingredient_id})`,
           currentPricePerUnit: originalIngredient?.pricePerUnit || 0,
-          ingredientUnit: (originalIngredient?.unitOfMeasure || "kg") as string,
+          ingredientUnit: originalIngredient?.unitOfMeasure || "kg",
           currency: originalIngredient?.currency || "USD",
         };
       }),

@@ -47,9 +47,10 @@ export async function convertCurrency(
     }
 
     // Try inverse rate (TO -> FROM) and calculate
+    const [searchFrom, searchTo] = [toCurrency, fromCurrency];
     const inverseRate = await currencyRepository.getExchangeRate(
-      toCurrency,
-      fromCurrency,
+      searchFrom,
+      searchTo,
     );
 
     if (inverseRate && inverseRate.rate !== 0) {

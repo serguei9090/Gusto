@@ -6,15 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useSettingsStore } from "@/modules/core/settings/store/settings.store";
 
-/**
- * View type for navigation.
- * Generalized to string to support dynamic modules.
- */
-export type View = string;
-
 interface SidebarProps {
-  currentView: View;
-  onChangeView: (view: View) => void;
+  currentView: string;
+  onChangeView: (view: string) => void;
 }
 
 import { useRegistry } from "@/lib/modules/registry";
