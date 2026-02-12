@@ -101,15 +101,7 @@ export const SuppliersPage = () => {
 
   return (
     <div className="h-full flex flex-col space-y-4 md:space-y-6 p-4 md:p-8 pb-24 md:pb-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-            {t("suppliers.title")}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {t("suppliers.subtitle")}
-          </p>
-        </div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-end">
         <Button
           onClick={() => setIsFormOpen(true)}
           className="w-full md:w-auto"

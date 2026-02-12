@@ -110,15 +110,7 @@ export const RecipesPage = () => {
 
   return (
     <div className="h-full flex flex-col space-y-4 md:space-y-6 p-4 md:p-8 pb-24 md:pb-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-            {t("recipes.title")}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {t("recipes.subtitle")}
-          </p>
-        </div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-end">
         <div className="flex items-center gap-2">
           <BulkRollbackDialog />
           <Button

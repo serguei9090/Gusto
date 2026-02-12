@@ -102,13 +102,7 @@ export const CalculatorsPage = () => {
   return (
     <div className="flex flex-col h-full bg-background md:p-8 p-0">
       {/* Desktop Header */}
-      <div className="hidden md:flex flex-col space-y-2 mb-6">
-        <h2 className="text-3xl font-bold tracking-tight">Math Helpers</h2>
-        <p className="text-muted-foreground">
-          Quick tools for kitchen math, pricing, and cost analysis without
-          modifying your inventory.
-        </p>
-      </div>
+      {/* Desktop Header - REMOVED */}
 
       {/* Mobile Header & Selector */}
       <div className="md:hidden flex flex-col space-y-2 border-b bg-muted/20 pb-2">

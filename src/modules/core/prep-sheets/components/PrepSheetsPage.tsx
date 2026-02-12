@@ -76,17 +76,6 @@ export const PrepSheetsPage = () => {
 
   return (
     <div className="h-full flex flex-col space-y-4 md:space-y-6 md:p-8 p-0">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between px-4 md:px-0 pt-4 md:pt-0">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-            {t("prepSheets.title")}
-          </h2>
-          <p className="text-sm md:text-base text-muted-foreground">
-            {t("prepSheets.subtitle")}
-          </p>
-        </div>
-      </div>
-
       <div className="flex-1 flex flex-col px-4 md:px-0">
         <Tabs
           value={activeTab}

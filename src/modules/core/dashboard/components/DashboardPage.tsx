@@ -1,12 +1,11 @@
 import { useEffect } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
+
 import { Slot } from "@/lib/slots/Slot";
 import { useDashboardWidgets } from "@/modules/core/dashboard/registry";
 import { useDashboardStore } from "@/modules/core/dashboard/store/dashboard.store";
 import { useCurrencyStore } from "@/modules/core/settings/store/currency.store";
 
 export const DashboardPage = () => {
-  const { t } = useTranslation();
   const widgets = useDashboardWidgets();
   const { fetchDashboardData, error, isLoading } = useDashboardStore();
 
@@ -34,20 +33,6 @@ export const DashboardPage = () => {
 
   return (
     <div className="flex-1 space-y-6 md:space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex flex-col space-y-1.5 md:flex-row md:items-center md:justify-between md:space-y-0">
-        <div className="space-y-1">
-          <h2 className="text-3xl font-black md:font-bold tracking-tight">
-            {t("dashboard.title")}
-          </h2>
-          <div className="flex items-center gap-2">
-            <div className="h-1 w-8 bg-primary rounded-full md:hidden" />
-            <p className="text-sm font-medium text-muted-foreground">
-              Welcome back to Gusto
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         {widgets.map((widget) => {
           const Component = widget.component;

@@ -79,17 +79,6 @@ export const InventoryPage = () => {
 
   return (
     <div className="h-full flex flex-col space-y-4 md:space-y-6 p-4 md:p-8 pb-24 md:pb-8">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-            {t("inventory.title")}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {t("inventory.subtitle")}
-          </p>
-        </div>
-      </div>
-
       {/* Stats Cards - Responsive Grid/Scroll */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>

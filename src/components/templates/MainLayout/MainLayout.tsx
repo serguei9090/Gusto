@@ -38,7 +38,7 @@ export const MainLayout = ({
         {/* Header - Desktop Only (Title) */}
         {title && (
           <header
-            className={`${styles.header} hidden md:flex px-8 text-2xl font-bold`}
+            className={`${styles.header} hidden md:flex items-center px-8 text-2xl font-bold`}
           >
             {title}
           </header>

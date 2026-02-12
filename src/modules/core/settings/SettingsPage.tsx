@@ -28,15 +28,7 @@ export const SettingsPage = ({
 
   return (
     <div className="h-full flex flex-col space-y-6 p-4 md:p-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-            {t("settings.title")}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {t("settings.subtitle")}
-          </p>
-        </div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-end">
         <Button
           variant="outline"
           size="default"

@@ -99,13 +99,7 @@ export const IngredientsPage = () => {
   return (
     <div className="flex flex-col h-full md:p-8 p-0">
       {/* Header - Desktop Only */}
-      <div className="hidden md:flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            {t("ingredients.title")}
-          </h2>
-          <p className="text-muted-foreground">{t("ingredients.subtitle")}</p>
-        </div>
+      <div className="hidden md:flex items-center md:justify-end mb-6">
         <Button onClick={() => setIsFormOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           {t("ingredients.addIngredient")}
