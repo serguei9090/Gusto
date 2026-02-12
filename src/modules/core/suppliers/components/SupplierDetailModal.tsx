@@ -1,8 +1,9 @@
-import { Mail, MapPin, Phone, Printer, User, Wallet, X } from "lucide-react";
-import { useEffect } from "react";
+import { Mail, MapPin, Phone, Printer, User, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { useMobile } from "@/hooks/useMobile";
 import type { Supplier } from "@/modules/core/suppliers/types";
 
 interface SupplierDetailModalProps {
@@ -14,42 +15,36 @@ export const SupplierDetailModal = ({
   supplier,
   onClose,
 }: SupplierDetailModalProps) => {
-  // Handle ESC key to close
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    globalThis.addEventListener("keydown", handleEsc);
-    return () => globalThis.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
+  const isMobile = useMobile();
 
   const handlePrint = () => {
     globalThis.print();
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 print:p-0 print:bg-white print:block">
-      <div className="w-full max-w-2xl bg-card border rounded-lg shadow-lg overflow-hidden max-h-[90vh] flex flex-col print:border-0 print:shadow-none print:max-h-none print:w-full print:max-w-none">
+    <Dialog open={!!supplier} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full" : "sm:max-w-2xl"} max-h-[90vh] overflow-y-auto flex flex-col p-0`}
+      >
         {/* Header */}
-        <div className="p-6 border-b flex items-center justify-between print:hidden">
+        <div className="p-6 border-b flex items-center justify-between print:hidden sticky top-0 bg-background/95 backdrop-blur z-10">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-full">
               <User className="h-6 w-6 text-primary" />
             </div>
-            <h2 className="text-xl font-semibold">Supplier Information</h2>
+            <DialogTitle className="text-xl font-semibold">
+              Supplier Information
+            </DialogTitle>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mr-6">
             <Button variant="outline" onClick={handlePrint} size="sm">
               <Printer className="mr-2 h-4 w-4" />
               Print
             </Button>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-5 w-5" />
-            </Button>
           </div>
         </div>
 
-        <div className="overflow-y-auto flex-1 p-8 print:p-0 print:overflow-visible">
+        <div className="overflow-y-auto flex-1 p-6 sm:p-8 print:p-0 print:overflow-visible pb-24">
           <div className="space-y-8" id="printable-supplier">
             {/* Main Info */}
             <div className="space-y-2">
@@ -169,7 +164,18 @@ export const SupplierDetailModal = ({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+
+        {isMobile && (
+          <div className="sticky bottom-0 bg-background/95 backdrop-blur p-4 border-t flex gap-2 pb-safe">
+            <Button
+              className="flex-1 h-12 text-base font-semibold"
+              onClick={onClose}
+            >
+              Close
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };

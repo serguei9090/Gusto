@@ -1,8 +1,15 @@
-import { Beaker, ChefHat, GitPullRequest, Printer, X } from "lucide-react";
+import { Beaker, ChefHat, GitPullRequest, Printer } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMobile } from "@/hooks/useMobile";
+import { Slot } from "@/lib/slots/Slot";
 import { useRecipeStore } from "../store/recipes.store";
 import { ExperimentBadge } from "./ExperimentBadge";
 import { RecipeHistory } from "./RecipeHistory";
@@ -17,6 +24,7 @@ export const RecipeDetailModal = ({
   recipeId,
   onClose,
 }: RecipeDetailModalProps) => {
+  const isMobile = useMobile();
   const {
     selectedRecipe,
     fetchFullRecipe,
@@ -29,15 +37,6 @@ export const RecipeDetailModal = ({
   useEffect(() => {
     if (recipeId) fetchFullRecipe(recipeId);
   }, [recipeId, fetchFullRecipe]);
-
-  // Handle ESC key to close
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    globalThis.addEventListener("keydown", handleEsc);
-    return () => globalThis.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
 
   const handlePrint = () => {
     globalThis.print();
@@ -53,8 +52,6 @@ export const RecipeDetailModal = ({
 
     try {
       const experiment = await createExperiment(selectedRecipe.id, name);
-      // Wait a moment and then fetch the new experiment to switch view?
-      // Or just notify. For now, we stay on parent.
       alert(`Experiment "${experiment.name}" created!`);
     } catch (err) {
       console.error(err);
@@ -96,14 +93,14 @@ export const RecipeDetailModal = ({
     if (selectedRecipe) {
       return (
         <Tabs defaultValue="overview" className="flex-1 flex flex-col">
-          <div className="px-0 pb-4 print:hidden">
-            <TabsList className="w-full justify-start">
+          <div className="px-0 pb-4 print:hidden px-4 md:px-0">
+            <TabsList className="w-full justify-start overflow-x-auto scrollbar-hide">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="history">Version History</TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="history" className="mt-0 h-full">
+          <TabsContent value="history" className="mt-0 h-full px-4 md:px-0">
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Change Log</h3>
               <RecipeHistory
@@ -113,7 +110,10 @@ export const RecipeDetailModal = ({
             </div>
           </TabsContent>
 
-          <TabsContent value="overview" className="mt-0 space-y-8 h-full">
+          <TabsContent
+            value="overview"
+            className="mt-0 space-y-8 h-full px-4 md:px-0"
+          >
             <RecipeOverview recipe={selectedRecipe} />
           </TabsContent>
         </Tabs>
@@ -125,21 +125,24 @@ export const RecipeDetailModal = ({
   if (!selectedRecipe && !isLoading) return null;
 
   return (
-    // We render a manual overlay/modal structure similar to what we did in the Page to ensure full control,
-    // or we could use the Dialog component. Let's use a custom overlay to match the previous behavior
-    // and ensure it handles the specific print layout well, or just use the Dialog primitive.
-    // For simplicity and consistency with the "Dialog" pattern but with custom print styles:
-    <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 print:p-0 print:bg-white print:block">
-      <div className="w-full max-w-4xl bg-card border rounded-lg shadow-lg overflow-hidden max-h-[90vh] flex flex-col print:border-0 print:shadow-none print:max-h-none print:w-full print:max-w-none">
-        {/* Header */}
-        <div className="p-6 border-b flex items-center justify-between print:hidden">
+    <Dialog open={!!recipeId} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className={`${
+          isMobile
+            ? "w-full max-w-full rounded-none border-x-0 p-0 top-16 translate-y-0 h-full"
+            : "sm:max-w-4xl p-0"
+        } max-h-[90vh] overflow-hidden flex flex-col`}
+      >
+        <DialogHeader className="p-6 border-b flex flex-row items-center justify-between print:hidden sticky top-0 bg-background z-10 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-full">
+            <div className="p-2 bg-primary/10 rounded-full hidden sm:block">
               <ChefHat className="h-6 w-6 text-primary" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-semibold">Recipe Detail</h2>
+                <DialogTitle className="text-xl font-semibold">
+                  Recipe Detail
+                </DialogTitle>
                 {selectedRecipe?.isExperiment && (
                   <ExperimentBadge
                     experimentName={selectedRecipe.experimentName}
@@ -158,6 +161,7 @@ export const RecipeDetailModal = ({
                 variant="outline"
                 onClick={handleCreateExperiment}
                 size="sm"
+                className="hidden sm:flex"
               >
                 <Beaker className="mr-2 h-4 w-4" />
                 New Experiment
@@ -167,26 +171,30 @@ export const RecipeDetailModal = ({
                 variant="default"
                 onClick={handleApplyToOriginal}
                 size="sm"
-                className="bg-amber-600 hover:bg-amber-700"
+                className="bg-amber-600 hover:bg-amber-700 hidden sm:flex"
               >
                 <GitPullRequest className="mr-2 h-4 w-4" />
                 Apply to Original
               </Button>
             )}
-            <Button variant="secondary" onClick={handlePrint} size="sm">
+            <Button
+              variant="secondary"
+              onClick={handlePrint}
+              size="sm"
+              className="hidden sm:flex"
+            >
               <Printer className="mr-2 h-4 w-4" />
-              Print Cost Sheet
-            </Button>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-5 w-5" />
+              Print
             </Button>
           </div>
-        </div>
+        </DialogHeader>
 
-        <div className="overflow-y-auto flex-1 p-6 print:p-0 print:overflow-visible">
+        <div className="overflow-y-auto flex-1 p-0 print:p-0 print:overflow-visible">
           {renderContent()}
         </div>
-      </div>
-    </div>
+
+        <Slot name="recipe-detail:footer" />
+      </DialogContent>
+    </Dialog>
   );
 };

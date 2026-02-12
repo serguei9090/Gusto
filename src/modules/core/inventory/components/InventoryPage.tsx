@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useMobileComponent } from "@/lib/mobile-registry";
 import { useIngredientsStore } from "@/modules/core/ingredients/store/ingredients.store";
 import { useInventoryStore } from "@/modules/core/inventory/store/inventory.store";
 import type { Ingredient } from "@/types/ingredient.types";
@@ -21,6 +23,8 @@ export const InventoryPage = () => {
     error,
   } = useInventoryStore();
   const { t } = useTranslation();
+  const isMobile = useMobile();
+  const MobileComponent = useMobileComponent("MobileInventory");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIngredient, setSelectedIngredient] =
@@ -62,8 +66,49 @@ export const InventoryPage = () => {
     setIsHistoryOpen(true);
   };
 
+  if (isMobile && MobileComponent) {
+    return (
+      <div className="h-full">
+        <MobileComponent
+          ingredients={filteredIngredients}
+          lowStockItems={lowStockItems}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          error={error}
+          t={t}
+          openTransactionModal={openTransactionModal}
+          openHistoryModal={openHistoryModal}
+        />
+
+        {selectedIngredient && (
+          <TransactionModal
+            ingredient={selectedIngredient}
+            open={isModalOpen}
+            onOpenChange={(val) => {
+              setIsModalOpen(val);
+              if (!val) setSelectedIngredient(null);
+            }}
+            onSubmit={handleTransaction}
+            isLoading={loadingInv}
+          />
+        )}
+
+        {historyIngredient && (
+          <InventoryHistoryModal
+            ingredient={historyIngredient}
+            open={isHistoryOpen}
+            onOpenChange={(val) => {
+              setIsHistoryOpen(val);
+              if (!val) setHistoryIngredient(null);
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full flex flex-col space-y-6 p-8">
+    <div className="h-full p-8 flex flex-col space-y-6">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">

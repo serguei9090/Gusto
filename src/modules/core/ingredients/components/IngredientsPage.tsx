@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useMobileComponent } from "@/lib/mobile-registry";
 import { useSuppliersStore } from "@/modules/core/suppliers/store/suppliers.store";
 import { useIngredientsStore } from "../store/ingredients.store";
 import type { CreateIngredientInput, Ingredient } from "../types";
@@ -20,6 +22,9 @@ import { IngredientTable } from "./IngredientTable";
 
 export const IngredientsPage = () => {
   const { t } = useTranslation();
+  const isMobile = useMobile();
+  const MobileComponent = useMobileComponent("MobileIngredients");
+
   const {
     ingredients,
     isLoading,
@@ -72,7 +77,7 @@ export const IngredientsPage = () => {
     setIsFormOpen(true);
   };
 
-  /*
+  /**
    * Replaced hard delete with archive to preserve recipe history
    * and avoid FK constraint errors.
    */
@@ -92,21 +97,95 @@ export const IngredientsPage = () => {
     }
   };
 
+  if (isMobile && MobileComponent) {
+    return (
+      <div className="h-full">
+        <MobileComponent
+          ingredients={ingredients}
+          searchQuery={searchQuery}
+          handleSearch={handleSearch}
+          setIsFormOpen={setIsFormOpen}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          error={error}
+          t={t}
+        />
+
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogContent className="w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="px-1 mb-2">
+              <DialogTitle>
+                {editingIngredient
+                  ? t("ingredients.editIngredient")
+                  : t("ingredients.addIngredient")}
+              </DialogTitle>
+              <DialogDescription>
+                {editingIngredient
+                  ? t("ingredients.prompts.update")
+                  : t("ingredients.prompts.add")}
+              </DialogDescription>
+            </DialogHeader>
+            <IngredientForm
+              defaultValues={editingIngredient ?? undefined}
+              onSubmit={handleCreateOrUpdate}
+              onCancel={handleCloseForm}
+              isLoading={isLoading}
+              isEdit={!!editingIngredient}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={isDeleteConfirmOpen}
+          onOpenChange={setIsDeleteConfirmOpen}
+        >
+          <DialogContent className="w-[90vw] rounded-2xl">
+            <DialogHeader>
+              <DialogTitle>{t("ingredients.archive.title")}</DialogTitle>
+              <DialogDescription>
+                {t("ingredients.archive.message", {
+                  name: ingredientToDelete?.name,
+                })}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex-col-reverse gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => setIsDeleteConfirmOpen(false)}
+                className="w-full"
+              >
+                {t("common.actions.cancel")}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmDelete}
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isLoading
+                  ? t("ingredients.archive.progress")
+                  : t("ingredients.archive.action")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full flex flex-col space-y-6 p-8">
-      <div className="flex items-center justify-between space-y-2">
+    <div className="flex flex-col space-y-6 h-full p-8">
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">
             {t("ingredients.title")}
           </h2>
           <p className="text-muted-foreground">{t("ingredients.subtitle")}</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button onClick={() => setIsFormOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            {t("ingredients.addIngredient")}
-          </Button>
-        </div>
+        <Button onClick={() => setIsFormOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          {t("ingredients.addIngredient")}
+        </Button>
       </div>
 
       <Separator />
@@ -138,7 +217,7 @@ export const IngredientsPage = () => {
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[600px] p-6 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingIngredient

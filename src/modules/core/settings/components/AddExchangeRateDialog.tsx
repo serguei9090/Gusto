@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMobile } from "@/hooks/useMobile";
 import { useCurrencyStore } from "@/modules/core/settings/store/currency.store";
 
 interface AddExchangeRateDialogProps {
@@ -29,6 +30,7 @@ export function AddExchangeRateDialog({
   open,
   onOpenChange,
 }: AddExchangeRateDialogProps) {
+  const isMobile = useMobile();
   const { currencies, addExchangeRate } = useCurrencyStore();
   const [fromCurrency, setFromCurrency] = useState("");
   const [toCurrency, setToCurrency] = useState("");
@@ -117,21 +119,23 @@ export function AddExchangeRateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent
+        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-[calc(100dvh-4rem)]" : "max-w-md"} max-h-[90vh] overflow-y-auto`}
+      >
         <DialogHeader>
           <DialogTitle>Add Exchange Rate</DialogTitle>
           <DialogDescription>
             Define a currency conversion rate for cost calculations
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="pb-20">
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="from">
                 From Currency <span className="text-destructive">*</span>
               </Label>
               <Select value={fromCurrency} onValueChange={setFromCurrency}>
-                <SelectTrigger id="from">
+                <SelectTrigger id="from" className="h-12">
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent>
@@ -149,7 +153,7 @@ export function AddExchangeRateDialog({
                 To Currency <span className="text-destructive">*</span>
               </Label>
               <Select value={toCurrency} onValueChange={setToCurrency}>
-                <SelectTrigger id="to">
+                <SelectTrigger id="to" className="h-12">
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent>
@@ -174,6 +178,7 @@ export function AddExchangeRateDialog({
                 value={rate}
                 onChange={(e) => setRate(e.target.value)}
                 required
+                className="h-12"
               />
               {fromCurrency && toCurrency && rate && (
                 <p className="text-sm text-muted-foreground">
@@ -190,6 +195,7 @@ export function AddExchangeRateDialog({
                 value={effectiveDate}
                 onChange={(e) => setEffectiveDate(e.target.value)}
                 required
+                className="h-12"
               />
             </div>
 
@@ -200,6 +206,7 @@ export function AddExchangeRateDialog({
                 placeholder="e.g., Manual entry, Bank rate"
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
+                className="h-12"
               />
             </div>
 
@@ -218,7 +225,9 @@ export function AddExchangeRateDialog({
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter
+            className={`${isMobile ? "sticky -bottom-4 -mx-4 px-4 pb-safe z-20 glass-footer flex flex-row gap-2 pt-4 border-t bg-background" : "mt-6 sm:justify-end"}`}
+          >
             <Button
               type="button"
               variant="outline"
@@ -227,10 +236,15 @@ export function AddExchangeRateDialog({
                 onOpenChange(false);
               }}
               disabled={isLoading}
+              className={isMobile ? "flex-1 h-12" : ""}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className={isMobile ? "flex-1 h-12" : ""}
+            >
               {isLoading ? "Adding..." : "Add Rate"}
             </Button>
           </DialogFooter>

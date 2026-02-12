@@ -7,6 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMobile } from "@/hooks/useMobile";
+import { useMobileComponent } from "@/lib/mobile-registry";
 import { InventoryTurnover } from "./components/InventoryTurnover";
 import { LaborCosting } from "./components/LaborCosting";
 import { PlateCostSandbox } from "./components/PlateCostSandbox";
@@ -18,6 +20,12 @@ import { YieldCalculator } from "./components/YieldCalculator";
 
 export const CalculatorsPage = () => {
   const [activeCalc, setActiveCalc] = useState("pricing");
+  const isMobile = useMobile();
+  const MobileCalculators = useMobileComponent("MobileCalculators");
+
+  if (isMobile && MobileCalculators) {
+    return <MobileCalculators />;
+  }
 
   const calculators = [
     {

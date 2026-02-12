@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useMobileComponent } from "@/lib/mobile-registry";
 import { useSuppliersStore } from "@/modules/core/suppliers/store/suppliers.store";
 import type {
   Supplier,
@@ -15,6 +17,8 @@ import { SupplierForm } from "./SupplierForm";
 import { SupplierTable } from "./SupplierTable";
 
 export const SuppliersPage = () => {
+  const isMobile = useMobile();
+  const MobileComponent = useMobileComponent("MobileSuppliers");
   const {
     suppliers,
     fetchSuppliers,
@@ -90,8 +94,41 @@ export const SuppliersPage = () => {
     setViewingSupplier(supplier);
   };
 
+  if (isMobile && MobileComponent) {
+    return (
+      <div className="h-full">
+        <MobileComponent
+          suppliers={filteredSuppliers}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          setIsFormOpen={setIsFormOpen}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          handleView={handleView}
+          error={error}
+          t={t}
+        />
+
+        <SupplierForm
+          initialData={editingSupplier}
+          open={isFormOpen}
+          onOpenChange={setIsFormOpen}
+          onSubmit={handleCreateOrUpdate}
+          isLoading={isLoading}
+        />
+
+        {viewingSupplier && (
+          <SupplierDetailModal
+            supplier={viewingSupplier}
+            onClose={() => setViewingSupplier(null)}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full flex flex-col space-y-6 p-8">
+    <div className="h-full p-8 flex flex-col space-y-6">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">

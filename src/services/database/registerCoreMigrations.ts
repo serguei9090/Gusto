@@ -346,7 +346,7 @@ export function registerCoreMigrations() {
   });
 
   migrationRegistry.register({
-    id: "20240209_add_config_order",
+    id: "20240209_z_add_config_order",
     up: async (db) => {
       const ignoreDuplicate = (e: unknown) => {
         if (String(e).includes("duplicate column name")) return;

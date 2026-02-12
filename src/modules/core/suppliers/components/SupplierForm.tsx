@@ -14,6 +14,7 @@ import { FieldHelp } from "@/components/ui/field-help";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import type {
   Supplier,
@@ -37,6 +38,7 @@ export function SupplierForm({
   isLoading,
 }: Readonly<SupplierFormProps>) {
   const { t } = useTranslation();
+  const isMobile = useMobile();
   const {
     register,
     handleSubmit,
@@ -86,7 +88,9 @@ export function SupplierForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full" : "sm:max-w-[425px]"} max-h-[90vh] overflow-y-auto`}
+      >
         <DialogHeader>
           <DialogTitle>
             {initialData ? "Edit Supplier" : "Add Supplier"}
@@ -97,7 +101,7 @@ export function SupplierForm({
               : "Enter the details for the new supplier."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pb-20">
           <div className="grid gap-4 py-2">
             {/* Name */}
             <div className="space-y-2">
@@ -109,6 +113,7 @@ export function SupplierForm({
                 id="name"
                 placeholder="e.g. Acme Food Supplies"
                 {...register("name")}
+                className="h-12"
               />
               {errors.name && (
                 <p className="text-sm text-destructive">
@@ -130,11 +135,12 @@ export function SupplierForm({
                 id="contactPerson"
                 placeholder="e.g. John Doe"
                 {...register("contactPerson")}
+                className="h-12"
               />
             </div>
 
             {/* Email & Phone Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center gap-2">
                   Email
@@ -145,6 +151,7 @@ export function SupplierForm({
                   type="email"
                   placeholder="sales@acme.com"
                   {...register("email")}
+                  className="h-12"
                 />
                 {errors.email && (
                   <p className="text-sm text-destructive">
@@ -161,6 +168,7 @@ export function SupplierForm({
                   id="phone"
                   placeholder="+1 234 567 890"
                   {...register("phone")}
+                  className="h-12"
                 />
               </div>
             </div>
@@ -175,11 +183,12 @@ export function SupplierForm({
                 id="address"
                 placeholder="Full business address"
                 {...register("address")}
+                className="h-12"
               />
             </div>
 
             {/* Payment Terms & Account Number Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label
                   htmlFor="paymentTerms"
@@ -192,6 +201,7 @@ export function SupplierForm({
                   id="paymentTerms"
                   placeholder="e.g. Net 30, COD"
                   {...register("paymentTerms")}
+                  className="h-12"
                 />
               </div>
               <div className="space-y-2">
@@ -200,6 +210,7 @@ export function SupplierForm({
                   id="accountNumber"
                   placeholder="AC-12345"
                   {...register("accountNumber")}
+                  className="h-12"
                 />
               </div>
             </div>
@@ -215,15 +226,26 @@ export function SupplierForm({
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter
+            className={`${
+              isMobile
+                ? "sticky -bottom-4 -mx-4 px-4 pb-safe z-20 glass-footer flex flex-row gap-2 pt-4 border-t bg-background"
+                : "sm:justify-end"
+            }`}
+          >
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className={isMobile ? "flex-1 h-12" : ""}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className={isMobile ? "flex-1 h-12" : ""}
+            >
               {isLoading
                 ? "Saving..."
                 : initialData

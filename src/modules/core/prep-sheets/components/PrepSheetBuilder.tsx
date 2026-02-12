@@ -1,9 +1,23 @@
-import { Plus, Trash2, Wand2 } from "lucide-react";
+import {
+  Check,
+  ChevronsUpDown,
+  Plus,
+  Search,
+  Trash2,
+  Wand2,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -11,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -21,6 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { useMobile } from "@/hooks/useMobile";
 import { usePrepSheetsStore } from "@/modules/core/prep-sheets/store/prep-sheets.store";
 import type { PrepSheetFormData } from "@/modules/core/prep-sheets/types";
 import { useRecipeStore } from "@/modules/core/recipes/store/recipes.store";
@@ -43,10 +57,27 @@ export function PrepSheetBuilder({
     setBuilderField,
   } = usePrepSheetsStore();
 
+  const isMobile = useMobile();
   const { recipes, fetchRecipes } = useRecipeStore();
 
   const { name, date, shift, prepCookName, notes } = builderFields;
-  const [selectedRecipeToAdd, setSelectedRecipeToAdd] = useState("");
+  const [recipeSearch, setRecipeSearch] = useState("");
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+
+  const filteredRecipes = useMemo(() => {
+    return recipes.filter((r) =>
+      r.name.toLowerCase().includes(recipeSearch.toLowerCase()),
+    );
+  }, [recipes, recipeSearch]);
+
+  const toggleRecipe = (recipeId: number, baseServings: number) => {
+    const isSelected = builderSelections.some((s) => s.recipeId === recipeId);
+    if (isSelected) {
+      removeRecipeFromBuilder(recipeId);
+    } else {
+      addRecipeToBuilder(recipeId, baseServings);
+    }
+  };
 
   useEffect(() => {
     fetchRecipes();
@@ -64,16 +95,6 @@ export function PrepSheetBuilder({
     });
   }, [builderSelections, recipes]);
 
-  const handleAddRecipe = () => {
-    if (!selectedRecipeToAdd) return;
-    const recipeId = Number.parseInt(selectedRecipeToAdd, 10);
-    const recipe = recipes.find((r) => r.id === recipeId);
-    if (recipe) {
-      addRecipeToBuilder(recipe.id, recipe.servings); // Default to base servings
-      setSelectedRecipeToAdd("");
-    }
-  };
-
   const handleSubmit = () => {
     onGenerate({
       name,
@@ -88,13 +109,15 @@ export function PrepSheetBuilder({
   const isValid = name && date && builderSelections.length > 0;
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
+    <div className="space-y-6 pb-32 sm:pb-0">
+      <Card className={isMobile ? "border-0 shadow-none" : ""}>
+        <CardHeader className={isMobile ? "px-0 pb-2" : ""}>
           <CardTitle>Prep Sheet Details</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
+        <CardContent className={isMobile ? "px-0" : ""}>
+          <div
+            className={`grid gap-4 ${isMobile ? "grid-cols-1" : "md:grid-cols-2"}`}
+          >
             <div className="space-y-2">
               <Label htmlFor="name">
                 Sheet Name <span className="text-destructive">*</span>
@@ -104,10 +127,13 @@ export function PrepSheetBuilder({
                 placeholder="e.g. Monday Morning Prep"
                 value={name}
                 onChange={(e) => setBuilderField("name", e.target.value)}
+                className={isMobile ? "h-12 text-base" : ""}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div
+              className={`grid gap-4 ${isMobile ? "grid-cols-1" : "grid-cols-2"}`}
+            >
               <div className="space-y-2">
                 <Label htmlFor="date">
                   Date <span className="text-destructive">*</span>
@@ -117,6 +143,7 @@ export function PrepSheetBuilder({
                   type="date"
                   value={date}
                   onChange={(e) => setBuilderField("date", e.target.value)}
+                  className={isMobile ? "h-12 text-base" : ""}
                 />
               </div>
               <div className="space-y-2">
@@ -127,7 +154,7 @@ export function PrepSheetBuilder({
                     setBuilderField("shift", val as "morning" | "evening")
                   }
                 >
-                  <SelectTrigger id="shift">
+                  <SelectTrigger id="shift" className={isMobile ? "h-12" : ""}>
                     <SelectValue placeholder="Select shift" />
                   </SelectTrigger>
                   <SelectContent>
@@ -147,6 +174,7 @@ export function PrepSheetBuilder({
                 onChange={(e) =>
                   setBuilderField("prepCookName", e.target.value)
                 }
+                className={isMobile ? "h-12 text-base" : ""}
               />
             </div>
 
@@ -157,110 +185,264 @@ export function PrepSheetBuilder({
                 placeholder="Special instructions..."
                 value={notes}
                 onChange={(e) => setBuilderField("notes", e.target.value)}
+                rows={isMobile ? 3 : 2}
+                className="text-base"
               />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Recipes to Prep</CardTitle>
-          <div className="flex gap-2">
-            <Select
-              value={selectedRecipeToAdd}
-              onValueChange={setSelectedRecipeToAdd}
-            >
-              <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder="Select recipe..." />
-              </SelectTrigger>
-              <SelectContent>
-                {recipes.map((recipe) => (
-                  <SelectItem key={recipe.id} value={recipe.id.toString()}>
-                    {recipe.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={handleAddRecipe} disabled={!selectedRecipeToAdd}>
-              <Plus className="mr-2 h-4 w-4" /> Add
-            </Button>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <Label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            Recipes to Prep
+          </Label>
+          <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+            {builderSelections.length} Selected
+          </span>
+        </div>
+
+        {/* Modern Searchable Dropdown Trigger */}
+        <Button
+          variant="outline"
+          onClick={() => setIsSelectorOpen(true)}
+          className={`w-full justify-between h-14 px-4 rounded-xl border-2 border-dashed hover:border-primary/50 hover:bg-primary/5 group ${isMobile ? "text-base" : ""}`}
+        >
+          <div className="flex items-center gap-3">
+            <Search className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            <span className="text-muted-foreground group-hover:text-foreground">
+              Tap to search & add recipes...
+            </span>
           </div>
-        </CardHeader>
-        <CardContent>
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+
+        {/* Selected Recipes List */}
+        <div className="space-y-3">
           {builderSelections.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground border-dashed border-2 rounded-md">
-              No recipes selected yet. Add recipes to generate a prep list.
+            <div className="text-center py-12 text-muted-foreground border-dashed border-2 rounded-xl bg-muted/5">
+              <p className="text-sm">No recipes selected. Tap above to add.</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Recipe Name</TableHead>
-                  <TableHead className="w-[150px]">Prep Servings</TableHead>
-                  <TableHead className="w-[100px] text-right">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {selectedRecipesData.map((item) => (
-                  <TableRow key={item.recipeId}>
-                    <TableCell className="font-medium">
-                      {item.name}
-                      <span className="text-xs text-muted-foreground block">
-                        Base: {item.baseServings} servings
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={item.servings}
-                        onChange={(e) =>
-                          updateBuilderServings(
-                            item.recipeId,
-                            Number.parseInt(e.target.value, 10) || 0,
-                          )
-                        }
-                        className="w-24"
-                      />
-                    </TableCell>
-                    <TableCell className="text-right">
+            <div className={isMobile ? "space-y-3" : ""}>
+              {!isMobile ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Recipe Name</TableHead>
+                      <TableHead className="w-[150px]">Prep Servings</TableHead>
+                      <TableHead className="w-[100px] text-right">
+                        Actions
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {selectedRecipesData.map((item) => (
+                      <TableRow key={item.recipeId}>
+                        <TableCell className="font-medium">
+                          {item.name}
+                          <span className="text-xs text-muted-foreground block">
+                            Base: {item.baseServings} servings
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            min="1"
+                            value={item.servings}
+                            onChange={(e) =>
+                              updateBuilderServings(
+                                item.recipeId,
+                                Number.parseInt(e.target.value, 10) || 0,
+                              )
+                            }
+                            className="w-24"
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              removeRecipeFromBuilder(item.recipeId)
+                            }
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                selectedRecipesData.map((item) => (
+                  <div
+                    key={item.recipeId}
+                    className="p-4 bg-background rounded-xl border shadow-sm flex items-center justify-between gap-4 animate-in fade-in slide-in-from-right-4 duration-300"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold truncate text-base">
+                        {item.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-tight">
+                        Base: {item.baseServings} units
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col items-center">
+                        <span className="text-[10px] text-muted-foreground uppercase mb-1 font-bold">
+                          Qty
+                        </span>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={item.servings}
+                          onChange={(e) =>
+                            updateBuilderServings(
+                              item.recipeId,
+                              Number.parseInt(e.target.value, 10) || 0,
+                            )
+                          }
+                          className="w-16 h-12 text-center font-black text-lg bg-muted/30 border-none"
+                        />
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => removeRecipeFromBuilder(item.recipeId)}
-                        className="text-destructive hover:text-destructive"
+                        className="text-destructive/50 hover:text-destructive/100 h-12 w-12"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-5 w-5" />
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-
-          <Separator className="my-6" />
-
-          <div className="flex justify-end">
-            <Button
-              size="lg"
-              onClick={() => handleSubmit()}
-              disabled={!isValid || isLoading}
-            >
-              {isLoading ? (
-                "Generating..."
-              ) : (
-                <>
-                  <Wand2 className="mr-2 h-4 w-4" /> Generate Prep Sheet
-                </>
+                    </div>
+                  </div>
+                ))
               )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Floating Action Button for Mobile / Right-aligned for Desktop */}
+      <div
+        className={
+          isMobile
+            ? "fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl z-[100] border-t glass-footer pb-safe"
+            : "flex justify-end pt-8"
+        }
+      >
+        <Button
+          size={isMobile ? "lg" : "default"}
+          onClick={() => handleSubmit()}
+          disabled={!isValid || isLoading}
+          className={
+            isMobile
+              ? "w-full h-14 text-lg font-bold shadow-2xl rounded-2xl"
+              : "px-8 py-6 text-base font-semibold"
+          }
+        >
+          {isLoading ? (
+            "Generating..."
+          ) : (
+            <>
+              <Wand2 className="mr-3 h-6 w-6" /> Generate Prep Sheet
+            </>
+          )}
+        </Button>
+      </div>
+
+      {/* Modern Searchable Selection Dialog */}
+      <Dialog open={isSelectorOpen} onOpenChange={setIsSelectorOpen}>
+        <DialogContent
+          className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-0 top-[15vh] translate-y-0 h-[85vh] flex flex-col" : "sm:max-w-[500px] h-[600px] flex flex-col p-0"}`}
+        >
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle>Search Recipes</DialogTitle>
+          </DialogHeader>
+
+          <div className="p-4 border-b bg-muted/30 sticky top-0 z-10">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                autoFocus
+                placeholder="Try 'Salsa' or 'Dough'..."
+                value={recipeSearch}
+                onChange={(e) => setRecipeSearch(e.target.value)}
+                className="pl-10 h-12 text-lg border-none bg-background rounded-xl focus-visible:ring-2 shadow-sm"
+              />
+            </div>
+          </div>
+
+          <ScrollArea className="flex-1 overflow-y-auto">
+            <div className="p-2 space-y-1">
+              {filteredRecipes.length === 0 ? (
+                <div className="py-20 text-center">
+                  <p className="text-muted-foreground">
+                    No recipes found matching "{recipeSearch}"
+                  </p>
+                </div>
+              ) : (
+                filteredRecipes.map((recipe) => {
+                  const isSelected = builderSelections.some(
+                    (s) => s.recipeId === recipe.id,
+                  );
+                  return (
+                    <button
+                      key={recipe.id}
+                      type="button"
+                      onClick={() => toggleRecipe(recipe.id, recipe.servings)}
+                      className={`w-full flex items-center justify-between p-4 rounded-xl transition-all text-left ${
+                        isSelected
+                          ? "bg-primary text-primary-foreground shadow-lg scale-[0.98]"
+                          : "hover:bg-accent active:scale-95"
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold truncate text-base">
+                          {recipe.name}
+                        </p>
+                        <p
+                          className={`text-xs uppercase tracking-widest ${isSelected ? "text-primary-foreground/70" : "text-muted-foreground"}`}
+                        >
+                          Base: {recipe.servings} units
+                        </p>
+                      </div>
+                      <div
+                        className={`h-8 w-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                          isSelected
+                            ? "bg-white border-white text-primary scale-110"
+                            : "border-muted-foreground/20"
+                        }`}
+                      >
+                        {isSelected ? (
+                          <Check className="h-5 w-5" />
+                        ) : (
+                          <Plus className="h-5 w-5 opacity-40" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
+
+          <div className="p-4 bg-muted/20 border-t flex justify-between items-center">
+            <span className="text-sm font-medium">
+              {builderSelections.length} recipes added
+            </span>
+            <Button
+              onClick={() => setIsSelectorOpen(false)}
+              size="sm"
+              className="rounded-full px-6"
+            >
+              Done
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

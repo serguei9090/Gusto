@@ -27,8 +27,8 @@ drizzle/
 .env.*.local
 
 # IDE
+# IDE
 .vscode/*
-!.vscode/settings.json
 !.vscode/extensions.json
 .idea
 *.swp
@@ -47,6 +47,8 @@ yarn-error.log*
 
 # Tauri
 src-tauri/target
+src-tauri/gen/android
+src-tauri/gen/apple
 
 # Misc
 docs

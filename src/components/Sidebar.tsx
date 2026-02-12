@@ -1,24 +1,26 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Settings } from "lucide-react";
+import { Menu, Settings, X } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/images/logo.png";
 import { Button } from "@/components/ui/button";
+import { SheetClose } from "@/components/ui/sheet";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useRegistry } from "@/lib/modules/registry";
 import { useSettingsStore } from "@/modules/core/settings/store/settings.store";
+import type { ModuleDefinition } from "@/types/module";
 
 interface SidebarProps {
   currentView: string;
   onChangeView: (view: string) => void;
 }
 
-import { useRegistry } from "@/lib/modules/registry";
-import type { ModuleDefinition } from "@/types/module";
-
 export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
   const { t } = useTranslation();
   const { modules, moduleOrder } = useSettingsStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const reg = useRegistry();
+  const isMobile = useMobile();
 
   // Filter and sort items based on order and visibility, excluding settings from main list
   const allRegistered = reg.getAll();
@@ -103,13 +105,20 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
       <div
         className={`h-16 flex items-center border-b text-primary font-bold text-lg transition-all duration-300 ${isCollapsed ? "justify-center px-0" : "justify-between px-4"} `}
       >
+        {isMobile && (
+          <SheetClose asChild>
+            <Button variant="ghost" size="icon" className="shrink-0 -ml-2">
+              <X className="h-6 w-6" />
+            </Button>
+          </SheetClose>
+        )}
         <AnimatePresence>
-          {isCollapsed ? null : (
+          {(isMobile || !isCollapsed) && (
             <motion.div
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
               exit={{ opacity: 0, width: 0 }}
-              className="flex items-center gap-2 overflow-hidden whitespace-nowrap"
+              className={`flex items-center gap-2 overflow-hidden whitespace-nowrap ${isMobile ? "ml-2" : ""}`}
             >
               <img
                 src={logo}
@@ -120,14 +129,16 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
             </motion.div>
           )}
         </AnimatePresence>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="shrink-0"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="shrink-0"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
       </div>
 
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto overflow-x-hidden">

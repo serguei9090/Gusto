@@ -63,5 +63,9 @@ export function registerModules() {
     } else {
       logger.warn("Pro directory not found, skipping Pro registration.");
     }
+  } else {
+    logger.info(
+      "Running in Core Mode (VITE_APP_MODE != 'pro'). Pro modules are disabled.",
+    );
   }
 }

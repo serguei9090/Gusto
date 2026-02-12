@@ -22,7 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
+import { Slot } from "@/lib/slots/Slot";
 import type {
   Ingredient,
   TransactionType,
@@ -48,6 +50,7 @@ export function TransactionModal({
   isLoading,
 }: TransactionModalProps) {
   const { t } = useTranslation();
+  const isMobile = useMobile();
   const {
     register,
     handleSubmit,
@@ -118,12 +121,14 @@ export function TransactionModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full" : "sm:max-w-[425px]"} max-h-[90vh] overflow-y-auto`}
+      >
         <DialogHeader>
           <DialogTitle>Update Stock: {ingredient.name}</DialogTitle>
           <DialogDescription>Record a stock transaction.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleTransact} className="space-y-4">
+        <form onSubmit={handleTransact} className="space-y-4 pb-20">
           <div className="grid gap-4 py-2">
             {/* Transaction Type */}
             <div className="space-y-2">
@@ -140,7 +145,7 @@ export function TransactionModal({
                 }
                 defaultValue="purchase"
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-12">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -201,7 +206,7 @@ export function TransactionModal({
                     <Button
                       type="button"
                       variant={isUsingPurchaseUnit ? "outline" : "default"}
-                      className="flex-1"
+                      className="flex-1 h-10"
                       onClick={() => setIsUsingPurchaseUnit(false)}
                     >
                       {ingredient.unitOfMeasure} (Base)
@@ -209,7 +214,7 @@ export function TransactionModal({
                     <Button
                       type="button"
                       variant={isUsingPurchaseUnit ? "default" : "outline"}
-                      className="flex-1"
+                      className="flex-1 h-10"
                       onClick={() => setIsUsingPurchaseUnit(true)}
                     >
                       {ingredient.purchaseUnit} (Case/Pack)
@@ -237,6 +242,8 @@ export function TransactionModal({
                 type="number"
                 step="any"
                 {...register("quantity", { valueAsNumber: true })}
+                className="h-12"
+                onFocus={(e) => e.target.select()}
               />
               {errors.quantity && (
                 <p className="text-sm text-destructive">
@@ -262,6 +269,8 @@ export function TransactionModal({
                 type="number"
                 step="0.01"
                 {...register("costPerUnit", { valueAsNumber: true })}
+                className="h-12"
+                onFocus={(e) => e.target.select()}
               />
               {isUsingPurchaseUnit && ingredient.conversionRatio && (
                 <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
@@ -321,6 +330,7 @@ export function TransactionModal({
                 id="reference"
                 placeholder="e.g. INV-12345"
                 {...register("reference")}
+                className="h-12"
               />
             </div>
 
@@ -338,17 +348,29 @@ export function TransactionModal({
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter
+            className={`${
+              isMobile
+                ? "sticky -bottom-4 -mx-4 px-4 pb-safe z-20 glass-footer flex-row gap-2 pt-4 border-t bg-background"
+                : "sm:justify-end"
+            }`}
+          >
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className={isMobile ? "flex-1" : ""}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className={isMobile ? "flex-1" : ""}
+            >
               {isLoading ? "Saving..." : "Save Transaction"}
             </Button>
+            <Slot name="transaction-modal:footer" />
           </DialogFooter>
         </form>
       </DialogContent>

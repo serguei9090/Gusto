@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { CurrencySelector } from "@/modules/core/settings/components/CurrencySelector";
 import { useConfigStore } from "@/modules/core/settings/store/config.store";
@@ -49,6 +50,7 @@ export const IngredientForm = ({
   isEdit = false,
 }: IngredientFormProps) => {
   const { t } = useTranslation();
+  const isMobile = useMobile();
   const { suppliers, fetchSuppliers } = useSuppliersStore();
   const { initialize: initializeCurrency } = useCurrencyStore();
   const { getIngredientCategories } = useConfigStore();
@@ -59,6 +61,8 @@ export const IngredientForm = ({
     resolver: zodResolver(createIngredientSchema) as any,
     defaultValues: {
       name: "",
+      category: defaultValues?.category || "",
+      unitOfMeasure: defaultValues?.unitOfMeasure || "",
       currentStock: 0,
       minStockLevel: 0,
       currency: "USD",
@@ -123,10 +127,7 @@ export const IngredientForm = ({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={submitHandler}
-        className="space-y-6 max-w-2xl mx-auto p-1"
-      >
+      <form onSubmit={submitHandler} className="space-y-4 pb-20">
         <FormField
           control={form.control}
           name="name"
@@ -142,6 +143,7 @@ export const IngredientForm = ({
                   placeholder={t("ingredients.placeholders.ingredientName")}
                   {...field}
                   value={field.value || ""}
+                  className="h-12"
                 />
               </FormControl>
               <FormMessage />
@@ -200,6 +202,7 @@ export const IngredientForm = ({
                     value={field.value}
                     onValueChange={field.onChange}
                     placeholder={t("ingredients.fields.unitOfMeasure")}
+                    className="h-12"
                   />
                 </FormControl>
                 <FormMessage />
@@ -210,28 +213,30 @@ export const IngredientForm = ({
 
         {/* Pricing Section */}
         <div className="space-y-4 border-t pt-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <Label className="text-base font-semibold">
               Pricing Configuration
             </Label>
-            <div className="flex bg-muted p-1 rounded-md">
+            <div
+              className={`grid grid-cols-2 gap-1 bg-muted p-1 rounded-md ${isMobile ? "w-full" : "w-auto"}`}
+            >
               <Button
                 type="button"
                 variant={pricingMode === "unit" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setPricingMode("unit")}
-                className="text-xs px-3 h-7"
+                className="text-xs px-3 h-8"
               >
-                Per Base Unit
+                Per Unit
               </Button>
               <Button
                 type="button"
                 variant={pricingMode === "package" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setPricingMode("package")}
-                className="text-xs px-3 h-7"
+                className="text-xs px-3 h-8"
               >
-                By Package / Bulk
+                By Package
               </Button>
             </div>
           </div>
@@ -275,7 +280,8 @@ export const IngredientForm = ({
                         type="number"
                         step="0.001"
                         {...field}
-                        value={field.value ?? ""}
+                        value={field.value === 0 ? "" : (field.value ?? "")}
+                        onFocus={(e) => e.target.select()}
                         onChange={(e) =>
                           field.onChange(
                             e.target.value === ""
@@ -305,7 +311,8 @@ export const IngredientForm = ({
                         type="number"
                         step="0.01"
                         {...field}
-                        value={field.value ?? ""}
+                        value={field.value === 0 ? "" : field.value}
+                        onFocus={(e) => e.target.select()}
                         onChange={(e) =>
                           field.onChange(
                             e.target.value === ""
@@ -351,7 +358,8 @@ export const IngredientForm = ({
                         type="number"
                         step="0.01"
                         {...field}
-                        value={field.value ?? ""}
+                        value={field.value === 0 ? "" : field.value}
+                        onFocus={(e) => e.target.select()}
                         onChange={(e) => {
                           field.onChange(
                             e.target.value === ""
@@ -407,7 +415,8 @@ export const IngredientForm = ({
                     step="0.01"
                     {...field}
                     disabled={isEdit}
-                    value={field.value ?? ""}
+                    value={field.value === 0 ? "" : field.value}
+                    onFocus={(e) => e.target.select()}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value === ""
@@ -436,7 +445,8 @@ export const IngredientForm = ({
                     type="number"
                     step="0.01"
                     {...field}
-                    value={field.value ?? ""}
+                    value={field.value === 0 ? "" : (field.value ?? "")}
+                    onFocus={(e) => e.target.select()}
                     onChange={(e) =>
                       field.onChange(
                         e.target.value === ""
@@ -459,7 +469,7 @@ export const IngredientForm = ({
           </Label>
           <select
             id="supplierId"
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-12 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             {...form.register("supplierId", {
               setValueAs: (v) => (v === "" ? null : Number.parseInt(v, 10)),
             })}
@@ -473,13 +483,28 @@ export const IngredientForm = ({
           </select>
         </div>
 
-        <div className="flex justify-end gap-4 pt-4">
+        <div
+          className={`${
+            isMobile
+              ? "sticky -bottom-4 -mx-4 px-4 pb-safe z-20 glass-footer flex flex-row gap-2 pt-4 border-t bg-background"
+              : "flex justify-end mt-8 gap-4"
+          }`}
+        >
           {onCancel && (
-            <Button type="button" variant="secondary" onClick={onCancel}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              className={isMobile ? "flex-1 h-12 text-base" : ""}
+            >
               {t("common.actions.cancel")}
             </Button>
           )}
-          <Button type="submit" disabled={isLoading}>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className={isMobile ? "flex-1 h-12 text-base" : ""}
+          >
             {isLoading ? t("common.messages.saving") : t("common.actions.save")}
           </Button>
         </div>

@@ -7,78 +7,71 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { CategoryConfigModal } from "../components/CategoryConfigModal";
 import { UnitConfigModal } from "../components/UnitConfigModal";
 
 export const ConfigSection = () => {
   const { t } = useTranslation();
+  const isMobile = useMobile();
   const [activeModal, setActiveModal] = useState<
     "units" | "ingredient_category" | "recipe_category" | null
   >(null);
 
+  const ConfigItem = ({
+    title,
+    description,
+    onClick,
+  }: {
+    title: string;
+    description: string;
+    onClick: () => void;
+  }) => (
+    <div
+      className={`flex ${isMobile ? "flex-col gap-4" : "items-center justify-between"} p-4 border rounded-xl bg-card/50 hover:bg-muted/30 transition-all duration-200 shadow-sm border-muted/50`}
+    >
+      <div className="space-y-1">
+        <h4 className="text-sm font-bold uppercase tracking-tight">{title}</h4>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </div>
+      <Button
+        onClick={onClick}
+        variant="secondary"
+        size={isMobile ? "default" : "sm"}
+        className={isMobile ? "w-full font-bold h-10" : "font-semibold"}
+      >
+        {t("settings.config.manage")}
+      </Button>
+    </div>
+  );
+
   return (
     <>
-      <Card>
-        <CardHeader>
+      <Card className={isMobile ? "border-0 shadow-none bg-transparent" : ""}>
+        <CardHeader className={isMobile ? "px-0" : ""}>
           <CardTitle>{t("settings.config.title")}</CardTitle>
           <CardDescription>{t("settings.config.description")}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className={isMobile ? "px-0" : "space-y-6"}>
           <div className="grid gap-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg bg-card/50 hover:bg-muted/30 transition-colors">
-              <div className="space-y-1">
-                <h4 className="text-sm font-semibold">
-                  {t("settings.config.units")}
-                </h4>
-                <p className="text-xs text-muted-foreground">
-                  {t("settings.config.unitsDesc")}
-                </p>
-              </div>
-              <Button
-                onClick={() => setActiveModal("units")}
-                variant="outline"
-                size="sm"
-              >
-                {t("settings.config.manage")}
-              </Button>
-            </div>
+            <ConfigItem
+              title={t("settings.config.units")}
+              description={t("settings.config.unitsDesc")}
+              onClick={() => setActiveModal("units")}
+            />
 
-            <div className="flex items-center justify-between p-4 border rounded-lg bg-card/50 hover:bg-muted/30 transition-colors">
-              <div className="space-y-1">
-                <h4 className="text-sm font-semibold">
-                  {t("settings.config.ingredientCategories")}
-                </h4>
-                <p className="text-xs text-muted-foreground">
-                  {t("settings.config.ingredientCategoriesDesc")}
-                </p>
-              </div>
-              <Button
-                onClick={() => setActiveModal("ingredient_category")}
-                variant="outline"
-                size="sm"
-              >
-                {t("settings.config.manage")}
-              </Button>
-            </div>
+            <ConfigItem
+              title={t("settings.config.ingredientCategories")}
+              description={t("settings.config.ingredientCategoriesDesc")}
+              onClick={() => setActiveModal("ingredient_category")}
+            />
 
-            <div className="flex items-center justify-between p-4 border rounded-lg bg-card/50 hover:bg-muted/30 transition-colors">
-              <div className="space-y-1">
-                <h4 className="text-sm font-semibold">
-                  {t("settings.config.recipeCategories")}
-                </h4>
-                <p className="text-xs text-muted-foreground">
-                  {t("settings.config.recipeCategoriesDesc")}
-                </p>
-              </div>
-              <Button
-                onClick={() => setActiveModal("recipe_category")}
-                variant="outline"
-                size="sm"
-              >
-                {t("settings.config.manage")}
-              </Button>
-            </div>
+            <ConfigItem
+              title={t("settings.config.recipeCategories")}
+              description={t("settings.config.recipeCategoriesDesc")}
+              onClick={() => setActiveModal("recipe_category")}
+            />
           </div>
         </CardContent>
       </Card>

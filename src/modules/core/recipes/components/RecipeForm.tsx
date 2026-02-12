@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { UnitSelect } from "@/modules/core/ingredients/components/UnitSelect";
 import { useIngredientsStore } from "@/modules/core/ingredients/store/ingredients.store";
@@ -83,6 +84,7 @@ export const RecipeForm = ({
   recipeId,
 }: RecipeFormProps) => {
   const { t } = useTranslation();
+  const isMobile = useMobile();
   const { ingredients: allIngredients, fetchIngredients } =
     useIngredientsStore();
   const { recipes: allRecipes, fetchRecipes } = useRecipeStore();
@@ -298,7 +300,7 @@ export const RecipeForm = ({
           <UnitSelect
             value={field.value}
             onValueChange={field.onChange}
-            className="h-8 w-full text-xs"
+            className="h-10 w-full"
           />
         )}
       />
@@ -307,7 +309,7 @@ export const RecipeForm = ({
   );
 
   return (
-    <form onSubmit={submitHandler} className="space-y-6">
+    <form onSubmit={submitHandler} className="space-y-4 pb-20">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -326,6 +328,7 @@ export const RecipeForm = ({
                 {...register("name")}
                 placeholder={t("recipes.placeholders.recipeName")}
                 aria-invalid={!!errors.name}
+                className="h-12"
               />
               {errors.name && (
                 <p className="text-sm text-destructive">
@@ -343,7 +346,7 @@ export const RecipeForm = ({
                 </Label>
                 <select
                   {...register("category")}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive"
+                  className="flex h-12 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive"
                   aria-invalid={!!errors.category}
                 >
                   <option value="">{t("common.actions.select")}...</option>
@@ -369,6 +372,8 @@ export const RecipeForm = ({
                   {...register("servings", { valueAsNumber: true })}
                   min={1}
                   aria-invalid={!!errors.servings}
+                  className="h-12"
+                  onFocus={(e) => e.target.select()}
                 />
                 {errors.servings && (
                   <p className="text-sm text-destructive">
@@ -389,6 +394,8 @@ export const RecipeForm = ({
                 id="prepTime"
                 {...register("prepTimeMinutes", { valueAsNumber: true })}
                 aria-invalid={!!errors.prepTimeMinutes}
+                className="h-12"
+                onFocus={(e) => e.target.select()}
               />
             </div>
 
@@ -420,6 +427,8 @@ export const RecipeForm = ({
                   id="yieldAmount"
                   {...register("yieldAmount", { valueAsNumber: true })}
                   placeholder={t("recipes.placeholders.yield")}
+                  className="h-12"
+                  onFocus={(e) => e.target.select()}
                 />
               </div>
               <div className="space-y-2">
@@ -435,7 +444,7 @@ export const RecipeForm = ({
                       value={field.value || ""}
                       onValueChange={field.onChange}
                       placeholder={t("recipes.placeholders.yieldUnit")}
-                      className="h-9"
+                      className="h-12"
                     />
                   )}
                 />
@@ -452,6 +461,8 @@ export const RecipeForm = ({
                 id="calories"
                 {...register("calories", { valueAsNumber: true })}
                 placeholder={t("recipes.placeholders.calories")}
+                className="h-12"
+                onFocus={(e) => e.target.select()}
               />
             </div>
           </CardContent>
@@ -481,6 +492,8 @@ export const RecipeForm = ({
                     ? suggestedPrice.toFixed(2)
                     : t("recipes.placeholders.sellingPrice")
                 }
+                className="h-12"
+                onFocus={(e) => e.target.select()}
               />
             </div>
 
@@ -510,6 +523,8 @@ export const RecipeForm = ({
                   id="targetCost"
                   {...register("targetCostPercentage", { valueAsNumber: true })}
                   placeholder="25"
+                  className="h-12"
+                  onFocus={(e) => e.target.select()}
                 />
                 <div className="flex gap-1">
                   {[20, 25, 30].map((val) => (
@@ -546,6 +561,8 @@ export const RecipeForm = ({
                 id="wasteBuffer"
                 {...register("wasteBufferPercentage", { valueAsNumber: true })}
                 placeholder="0"
+                className="h-12"
+                onFocus={(e) => e.target.select()}
               />
             </div>
 
@@ -725,7 +742,7 @@ export const RecipeForm = ({
             onValueChange={handleAddIngredient}
             onOpenChange={(open) => !open && setComponentSearch("")}
           >
-            <SelectTrigger className="w-[220px]">
+            <SelectTrigger className="w-[220px] h-12">
               <SelectValue placeholder={t("recipes.addComponent")} />
             </SelectTrigger>
             <SelectContent>
@@ -734,7 +751,7 @@ export const RecipeForm = ({
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder={t("recipes.placeholders.searchComponents")}
-                    className="pl-8 h-8"
+                    className="pl-8 h-12"
                     value={componentSearch}
                     onChange={(e) => setComponentSearch(e.target.value)}
                     onKeyDown={(e) => e.stopPropagation()}
@@ -814,10 +831,11 @@ export const RecipeForm = ({
                       <Input
                         type="number"
                         step="0.01"
-                        className="h-8"
+                        className="h-10"
                         {...register(`ingredients.${index}.quantity`, {
                           valueAsNumber: true,
                         })}
+                        onFocus={(e) => e.target.select()}
                       />
                     </td>
                     <td className="p-4 align-middle">
@@ -839,10 +857,10 @@ export const RecipeForm = ({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive/90"
+                        className="h-10 w-10 text-destructive hover:text-destructive/90"
                         onClick={() => remove(index)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-5 w-5" />
                       </Button>
                     </td>
                   </tr>
@@ -876,11 +894,26 @@ export const RecipeForm = ({
         </CardContent>
       </Card>
 
-      <div className="flex justify-end gap-4 pt-4">
-        <Button variant="outline" onClick={onCancel} type="button">
-          Cancel
+      <div
+        className={`${
+          isMobile
+            ? "sticky -bottom-4 -mx-4 px-4 pb-safe z-20 glass-footer flex flex-row gap-2 pt-4 border-t bg-background"
+            : "flex justify-end mt-8 gap-4"
+        }`}
+      >
+        <Button
+          variant="outline"
+          onClick={onCancel}
+          type="button"
+          className={isMobile ? "flex-1 h-12 text-base" : ""}
+        >
+          {t("common.actions.cancel")}
         </Button>
-        <Button type="submit" disabled={isLoading}>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className={isMobile ? "flex-1 h-12 text-base" : ""}
+        >
           {initialData?.name ? "Update Recipe" : "Save Recipe"}
         </Button>
       </div>

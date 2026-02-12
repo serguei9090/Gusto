@@ -9,7 +9,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useMobileComponent } from "@/lib/mobile-registry";
 import type { Recipe, UpdateRecipeInput } from "@/types/ingredient.types";
 import { useRecipeStore } from "../store/recipes.store";
 import { BulkRollbackDialog } from "./BulkRollbackDialog";
@@ -18,6 +20,8 @@ import { RecipeForm, type RecipeFormData } from "./RecipeForm";
 import { RecipeTable } from "./RecipeTable";
 
 export const RecipesPage = () => {
+  const isMobile = useMobile();
+  const MobileComponent = useMobileComponent("MobileRecipes");
   const {
     recipes,
     fetchRecipes,
@@ -100,8 +104,94 @@ export const RecipesPage = () => {
     }
   };
 
+  if (isMobile && MobileComponent) {
+    return (
+      <div className="h-full">
+        <MobileComponent
+          recipes={filteredRecipes}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          setIsFormOpen={setIsFormOpen}
+          setViewingRecipeId={setViewingRecipeId}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          error={error}
+          t={t}
+        />
+
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogContent className="w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingRecipeId
+                  ? t("recipes.editRecipe")
+                  : t("recipes.addRecipe")}
+              </DialogTitle>
+              <DialogDescription>
+                {editingRecipeId
+                  ? "Update the recipe details below."
+                  : "Fill out the form below to create a new recipe."}
+              </DialogDescription>
+            </DialogHeader>
+            {editingRecipeId && isLoading && !selectedRecipe ? (
+              <div className="flex items-center justify-center h-40">
+                <p className="text-muted-foreground italic">
+                  Loading recipe details...
+                </p>
+              </div>
+            ) : (
+              <RecipeForm
+                onSubmit={handleCreateOrUpdate}
+                recipeId={editingRecipeId || undefined}
+                initialData={
+                  editingRecipeId && selectedRecipe
+                    ? ({
+                        name: selectedRecipe.name,
+                        servings: selectedRecipe.servings,
+                        currency: selectedRecipe.currency,
+                        category: selectedRecipe.category || undefined,
+                        description: selectedRecipe.description || undefined,
+                        prepTimeMinutes:
+                          selectedRecipe.prepTimeMinutes || undefined,
+                        cookingInstructions:
+                          selectedRecipe.cookingInstructions || undefined,
+                        sellingPrice: selectedRecipe.sellingPrice || undefined,
+                        targetCostPercentage:
+                          selectedRecipe.targetCostPercentage || undefined,
+                        wasteBufferPercentage:
+                          selectedRecipe.wasteBufferPercentage || undefined,
+                        ingredients: selectedRecipe.ingredients.map((ing) => ({
+                          ingredientId: ing.ingredientId,
+                          quantity: ing.quantity,
+                          unit: ing.unit,
+                          name: ing.ingredientName,
+                          price: ing.currentPricePerUnit,
+                          ingredientUnit: ing.ingredientUnit,
+                          subRecipeId: ing.subRecipeId,
+                          isSubRecipe: !!ing.subRecipeId,
+                        })),
+                      } as Partial<RecipeFormData>)
+                    : undefined
+                }
+                onCancel={handleCloseForm}
+                isLoading={isLoading}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {viewingRecipeId && (
+          <RecipeDetailModal
+            recipeId={viewingRecipeId}
+            onClose={() => setViewingRecipeId(null)}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full flex flex-col space-y-6 p-8">
+    <div className="h-full p-8 flex flex-col space-y-6">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">

@@ -51,6 +51,10 @@ function App() {
   };
 
   const getTitle = () => {
+    if (currentView === "currency-settings") {
+      return t("settings.currency.title");
+    }
+
     const module = reg.get(currentView);
     if (!module) return "";
 

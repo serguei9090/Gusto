@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useCurrencyStore } from "../store/currency.store";
 
@@ -30,6 +31,7 @@ export function setNavigateToCurrencySettings(fn: () => void) {
 
 export const CurrencySection = () => {
   const { t } = useTranslation();
+  const isMobile = useMobile();
   const { currencies, baseCurrency, loadCurrencies, setBaseCurrency } =
     useCurrencyStore();
 
@@ -39,7 +41,9 @@ export const CurrencySection = () => {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader
+        className={`flex ${isMobile ? "flex-col gap-4" : "flex-row items-center justify-between"} space-y-0 pb-2`}
+      >
         <div className="space-y-1">
           <CardTitle>{t("settings.currency.title")}</CardTitle>
           <CardDescription>
@@ -47,30 +51,39 @@ export const CurrencySection = () => {
           </CardDescription>
         </div>
         {navigateToCurrencySettings && (
-          <Button onClick={navigateToCurrencySettings} variant="outline">
+          <Button
+            onClick={navigateToCurrencySettings}
+            variant="outline"
+            className={isMobile ? "w-full" : ""}
+          >
             Advanced Settings
           </Button>
         )}
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4">
-          <div className="space-y-2">
-            <Label>{t("settings.currency.baseLabel")}</Label>
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">
+              {t("settings.currency.baseLabel")}
+            </Label>
             <p className="text-sm text-muted-foreground">
               {t("settings.currency.baseHelp")}
             </p>
             <Select value={baseCurrency} onValueChange={setBaseCurrency}>
-              <SelectTrigger className="w-[240px]">
+              <SelectTrigger className={isMobile ? "w-full h-12" : "w-[240px]"}>
                 <SelectValue
                   placeholder={t("settings.currency.selectCurrency")}
                 />
               </SelectTrigger>
               <SelectContent>
                 {currencies
+                  // Sort by code for better UX
+                  .sort((a, b) => a.code.localeCompare(b.code))
                   .filter((c) => c.isActive)
                   .map((curr) => (
                     <SelectItem key={curr.code} value={curr.code}>
-                      {curr.code} - {curr.name} ({curr.symbol})
+                      <span className="font-bold">{curr.code}</span> -{" "}
+                      {curr.name} ({curr.symbol})
                     </SelectItem>
                   ))}
               </SelectContent>

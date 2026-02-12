@@ -3,6 +3,13 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -11,13 +18,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useMobileComponent } from "@/lib/mobile-registry";
 import { usePrepSheetsStore } from "@/modules/core/prep-sheets/store/prep-sheets.store";
 import type { PrepSheet } from "@/modules/core/prep-sheets/types";
 import { PrepSheetBuilder } from "./PrepSheetBuilder";
 import { PrepSheetView } from "./PrepSheetView";
 
 export const PrepSheetsPage = () => {
+  const isMobile = useMobile();
+  const MobileComponent = useMobileComponent("MobilePrepSheets");
   const {
     prepSheets,
     fetchPrepSheets,
@@ -32,7 +43,9 @@ export const PrepSheetsPage = () => {
   const { t } = useTranslation();
 
   const [viewingSheet, setViewingSheet] = useState<PrepSheet | null>(null);
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("create");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchPrepSheets();
@@ -57,9 +70,14 @@ export const PrepSheetsPage = () => {
       await saveSheet(viewingSheet);
       setViewingSheet(null);
       clearBuilder();
+      setIsBuilderOpen(false);
       setActiveTab("saved"); // Switch to saved sheets tab
     }
   };
+
+  const filteredPrepSheets = prepSheets.filter((s) =>
+    s.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   const handleDelete = async (id: number) => {
     if (confirm("Delete this prep sheet?")) {
@@ -67,8 +85,51 @@ export const PrepSheetsPage = () => {
     }
   };
 
+  if (isMobile && MobileComponent) {
+    return (
+      <div className="h-full">
+        <MobileComponent
+          prepSheets={filteredPrepSheets}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          setIsBuilderOpen={setIsBuilderOpen}
+          setViewingSheet={setViewingSheet}
+          handleDelete={handleDelete}
+          notification={notification}
+          clearNotification={clearNotification}
+          t={t}
+        />
+
+        {/* Builder Dialog for Mobile */}
+        <Dialog open={isBuilderOpen} onOpenChange={setIsBuilderOpen}>
+          <DialogContent className="w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{t("prepSheets.createNew")}</DialogTitle>
+              <DialogDescription>
+                Select recipes and servings to generate a new prep list.
+              </DialogDescription>
+            </DialogHeader>
+            <PrepSheetBuilder
+              onGenerate={handleGenerate}
+              isLoading={isLoading}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {viewingSheet && (
+          <PrepSheetView
+            sheet={viewingSheet}
+            onClose={() => setViewingSheet(null)}
+            onSave={handleSave}
+            showSaveButton={!viewingSheet.id} // Only show save if not already saved (has ID)
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full flex flex-col p-8 space-y-6">
+    <div className="h-full flex flex-col space-y-6 p-8">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">

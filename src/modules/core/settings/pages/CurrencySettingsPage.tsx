@@ -32,11 +32,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useMobile } from "@/hooks/useMobile";
+import { useMobileComponent } from "@/lib/mobile-registry";
 import { AddCurrencyDialog } from "@/modules/core/settings/components/AddCurrencyDialog";
 import { AddExchangeRateDialog } from "@/modules/core/settings/components/AddExchangeRateDialog";
 import { useCurrencyStore } from "@/modules/core/settings/store/currency.store";
 
 export function CurrencySettingsPage() {
+  const isMobile = useMobile();
+  const MobileComponent = useMobileComponent("MobileCurrencySettings");
+
   const {
     currencies,
     exchangeRates,
@@ -78,28 +83,58 @@ export function CurrencySettingsPage() {
       toast.error(
         error instanceof Error ? error.message : "Failed to delete currency",
       );
-      // Keep dialog open? No, maybe close and let toast show error.
-      // But user might want to try again? Error is typically "In Use", so trying again won't help.
       setCurrencyToDelete(null);
     }
   };
 
+  if (isMobile && MobileComponent) {
+    return (
+      <>
+        <MobileComponent
+          currencies={currencies}
+          exchangeRates={exchangeRates}
+          baseCurrency={baseCurrency}
+          selectedBaseCurrency={selectedBaseCurrency}
+          handleBaseCurrencyChange={handleBaseCurrencyChange}
+          toggleCurrencyStatus={toggleCurrencyStatus}
+          setCurrencyToDelete={setCurrencyToDelete}
+          setIsAddCurrencyOpen={setIsAddCurrencyOpen}
+          setIsAddRateOpen={setIsAddRateOpen}
+        />
+        <AddCurrencyDialog
+          open={isAddCurrencyOpen}
+          onOpenChange={setIsAddCurrencyOpen}
+        />
+        <AddExchangeRateDialog
+          open={isAddRateOpen}
+          onOpenChange={setIsAddRateOpen}
+        />
+        <DeleteConfirmDialog
+          currencyToDelete={currencyToDelete}
+          setCurrencyToDelete={setCurrencyToDelete}
+          handleDeleteCurrency={handleDeleteCurrency}
+        />
+      </>
+    );
+  }
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Currency Settings</h1>
-        <p className="text-muted-foreground">
-          Manage currencies and exchange rates for multi-currency support
-        </p>
+    <div className="container mx-auto space-y-6 p-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Currency Settings</h1>
+          <p className="text-muted-foreground">
+            Manage currencies and exchange rates
+          </p>
+        </div>
       </div>
 
       {/* Base Currency Selection */}
       <Card>
         <CardHeader>
-          <CardTitle>Base Currency</CardTitle>
+          <CardTitle className="text-lg">Base Currency</CardTitle>
           <CardDescription>
-            Select the default currency for your restaurant. All costs will be
-            converted to this currency for calculations.
+            Select the default currency for calculations.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -108,7 +143,7 @@ export function CurrencySettingsPage() {
               value={selectedBaseCurrency}
               onValueChange={handleBaseCurrencyChange}
             >
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[240px]">
                 <SelectValue placeholder="Select base currency" />
               </SelectTrigger>
               <SelectContent>
@@ -116,13 +151,15 @@ export function CurrencySettingsPage() {
                   .filter((c) => c.isActive)
                   .map((currency) => (
                     <SelectItem key={currency.code} value={currency.code}>
-                      {currency.symbol} {currency.code} - {currency.name}
+                      <span className="font-bold">{currency.code}</span> -{" "}
+                      {currency.name}
                     </SelectItem>
                   ))}
               </SelectContent>
             </Select>
             <span className="text-sm text-muted-foreground">
-              Current: {baseCurrency}
+              Current System Base:{" "}
+              <span className="font-bold text-foreground">{baseCurrency}</span>
             </span>
           </div>
         </CardContent>
@@ -131,11 +168,9 @@ export function CurrencySettingsPage() {
       {/* Currency Management */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Currencies</CardTitle>
-            <CardDescription>
-              Manage available currencies for ingredients and recipes
-            </CardDescription>
+          <div className="space-y-1">
+            <CardTitle className="text-lg">Available Currencies</CardTitle>
+            <CardDescription>Manage active currencies</CardDescription>
           </div>
           <Button onClick={() => setIsAddCurrencyOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -183,12 +218,11 @@ export function CurrencySettingsPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      className="text-destructive hover:bg-destructive/10 hover:text-destructive ml-2"
                       onClick={() => setCurrencyToDelete(currency.code)}
                       disabled={currency.code === baseCurrency}
                     >
                       <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -201,11 +235,9 @@ export function CurrencySettingsPage() {
       {/* Exchange Rates Management */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Exchange Rates</CardTitle>
-            <CardDescription>
-              Manage currency conversion rates for accurate cost calculations
-            </CardDescription>
+          <div className="space-y-1">
+            <CardTitle className="text-lg">Exchange Rates</CardTitle>
+            <CardDescription>Conversion rates for calculations</CardDescription>
           </div>
           <Button onClick={() => setIsAddRateOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -242,7 +274,7 @@ export function CurrencySettingsPage() {
                       {rate.fromCurrency}
                     </TableCell>
                     <TableCell>{rate.toCurrency}</TableCell>
-                    <TableCell>{rate.rate.toFixed(2)}</TableCell>
+                    <TableCell>{rate.rate.toFixed(4)}</TableCell>
                     <TableCell>{rate.effectiveDate}</TableCell>
                     <TableCell>{rate.source || "-"}</TableCell>
                     <TableCell className="text-right">
@@ -270,28 +302,48 @@ export function CurrencySettingsPage() {
         onOpenChange={setIsAddRateOpen}
       />
 
-      <Dialog
-        open={!!currencyToDelete}
-        onOpenChange={(open) => !open && setCurrencyToDelete(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Currency</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete {currencyToDelete}? This action
-              cannot be undone. References in exchange rates will be removed.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCurrencyToDelete(null)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteCurrency}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteConfirmDialog
+        currencyToDelete={currencyToDelete}
+        setCurrencyToDelete={setCurrencyToDelete}
+        handleDeleteCurrency={handleDeleteCurrency}
+      />
     </div>
+  );
+}
+
+interface DeleteConfirmDialogProps {
+  currencyToDelete: string | null;
+  setCurrencyToDelete: (code: string | null) => void;
+  handleDeleteCurrency: () => void;
+}
+
+function DeleteConfirmDialog({
+  currencyToDelete,
+  setCurrencyToDelete,
+  handleDeleteCurrency,
+}: DeleteConfirmDialogProps) {
+  return (
+    <Dialog
+      open={!!currencyToDelete}
+      onOpenChange={(open) => !open && setCurrencyToDelete(null)}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Currency</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete {currencyToDelete}? This action
+            cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setCurrencyToDelete(null)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={handleDeleteCurrency}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

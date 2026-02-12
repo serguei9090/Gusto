@@ -23,6 +23,7 @@
       "select": "Sélectionner"
     },
     "labels": {
+      "search": "Rechercher",
       "name": "Nom",
       "description": "Description",
       "category": "Catégorie",

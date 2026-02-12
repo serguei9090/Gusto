@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useMobile } from "@/hooks/useMobile";
 import { useCurrencyStore } from "@/modules/core/settings/store/currency.store";
 
 interface AddCurrencyDialogProps {
@@ -21,6 +22,7 @@ export function AddCurrencyDialog({
   open,
   onOpenChange,
 }: AddCurrencyDialogProps) {
+  const isMobile = useMobile();
   const { addCurrency } = useCurrencyStore();
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
@@ -81,14 +83,16 @@ export function AddCurrencyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent
+        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-[calc(100dvh-4rem)]" : "sm:max-w-[425px]"} max-h-[90vh] overflow-y-auto`}
+      >
         <DialogHeader>
           <DialogTitle>Add New Currency</DialogTitle>
           <DialogDescription>
             Add a custom currency to use for ingredients and recipes
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="pb-20">
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="code">
@@ -101,6 +105,7 @@ export function AddCurrencyDialog({
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 maxLength={3}
                 required
+                className="h-12"
               />
               <p className="text-sm text-muted-foreground">
                 3-letter ISO 4217 code (e.g., USD, EUR, GBP)
@@ -117,6 +122,7 @@ export function AddCurrencyDialog({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                className="h-12"
               />
             </div>
 
@@ -130,6 +136,7 @@ export function AddCurrencyDialog({
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value)}
                 required
+                className="h-12"
               />
             </div>
 
@@ -145,6 +152,7 @@ export function AddCurrencyDialog({
                   setDecimalPlaces(Number.parseInt(e.target.value, 10))
                 }
                 required
+                className="h-12"
               />
               <p className="text-sm text-muted-foreground">
                 Number of decimal places for this currency (0-4)
@@ -154,7 +162,9 @@ export function AddCurrencyDialog({
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
 
-          <DialogFooter className="mt-6">
+          <DialogFooter
+            className={`${isMobile ? "sticky -bottom-4 -mx-4 px-4 pb-safe z-20 glass-footer flex flex-row gap-2 pt-4 border-t bg-background" : "mt-6 sm:justify-end"}`}
+          >
             <Button
               type="button"
               variant="outline"
@@ -163,10 +173,15 @@ export function AddCurrencyDialog({
                 onOpenChange(false);
               }}
               disabled={isLoading}
+              className={isMobile ? "flex-1 h-12" : ""}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className={isMobile ? "flex-1 h-12" : ""}
+            >
               {isLoading ? "Adding..." : "Add Currency"}
             </Button>
           </DialogFooter>

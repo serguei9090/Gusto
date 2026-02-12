@@ -11,12 +11,14 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useRegistry } from "@/lib/modules/registry";
 import { useSettingsStore } from "../store/settings.store";
 
 export const ModulesSection = () => {
   const { t } = useTranslation();
+  const isMobile = useMobile();
   const { modules, moduleOrder, toggleModule, reorderModules } =
     useSettingsStore();
   const reg = useRegistry();
@@ -56,20 +58,20 @@ export const ModulesSection = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className={isMobile ? "border-0 shadow-none bg-transparent" : ""}>
+      <CardHeader className={isMobile ? "px-0" : ""}>
         <CardTitle>{t("settings.modules.title")}</CardTitle>
         <CardDescription>{t("settings.modules.description")}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="text-sm text-muted-foreground mb-4">
+      <CardContent className={isMobile ? "px-0" : "space-y-6"}>
+        <div className="text-sm text-muted-foreground mb-4 italic">
           {t("settings.modules.dragToReorder")}
         </div>
         <Reorder.Group
           axis="y"
           values={displayOrder}
           onReorder={reorderModules}
-          className="space-y-2"
+          className="space-y-3"
         >
           {displayOrder.map((moduleId) => {
             const meta = getModuleMeta(moduleId);
@@ -79,51 +81,60 @@ export const ModulesSection = () => {
               <Reorder.Item
                 key={moduleId}
                 value={moduleId}
-                className={`flex items-center justify-between p-3 bg-card border rounded-md cursor-move hover:bg-muted/50 transition-colors ${
+                className={`flex items-center justify-between p-4 bg-card border rounded-xl cursor-move hover:bg-muted/50 transition-colors shadow-sm active:scale-[0.98] ${
                   !meta.isCore ? "border-primary/30" : ""
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <GripVertical className="h-4 w-4 text-muted-foreground" />
-                  {Icon && (
-                    <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-                  )}
-                  <div className="flex flex-col">
+                <div className="flex items-center gap-4">
+                  <GripVertical className="h-5 w-5 text-muted-foreground opacity-50" />
+                  <div
+                    className={`h-10 w-10 rounded-full flex items-center justify-center ${meta.isCore ? "bg-muted" : "bg-primary/10"}`}
+                  >
+                    {Icon && (
+                      <Icon
+                        className={`h-5 w-5 ${meta.isCore ? "text-muted-foreground" : "text-primary"}`}
+                      />
+                    )}
+                  </div>
+                  <div className="flex flex-col min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <Label
                         htmlFor={`module-${moduleId}`}
-                        className="cursor-pointer font-medium"
+                        className="cursor-pointer font-bold text-base truncate"
                       >
                         {meta.label}
                       </Label>
                       {meta.isCore ? null : (
                         <Badge
                           variant="outline"
-                          className="text-[10px] px-1.5 py-0 border-primary/50 text-primary font-bold"
+                          className="text-[10px] px-1.5 py-0 border-primary/50 text-primary font-black shrink-0"
                         >
                           PRO
                         </Badge>
                       )}
                     </div>
                     {meta.description && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground line-clamp-1">
                         {meta.description}
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">
-                    {(modules[moduleId] ?? true)
-                      ? t("settings.modules.visible")
-                      : t("settings.modules.hidden")}
-                  </span>
+                <div className="flex items-center gap-3 shrink-0 ml-2">
+                  {!isMobile && (
+                    <span className="text-xs text-muted-foreground uppercase tracking-tighter font-bold">
+                      {(modules[moduleId] ?? true)
+                        ? t("settings.modules.visible")
+                        : t("settings.modules.hidden")}
+                    </span>
+                  )}
                   <Switch
                     id={`module-${moduleId}`}
                     checked={modules[moduleId] ?? true}
                     onCheckedChange={(checked) =>
                       toggleModule(moduleId, checked)
                     }
+                    className={isMobile ? "min-h-0 scale-125" : "scale-110"}
                   />
                 </div>
               </Reorder.Item>

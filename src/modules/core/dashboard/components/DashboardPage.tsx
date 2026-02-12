@@ -1,10 +1,14 @@
 import { useEffect } from "react";
+import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useMobileComponent } from "@/lib/mobile-registry";
 import { useDashboardWidgets } from "@/modules/core/dashboard/registry";
 import { useDashboardStore } from "@/modules/core/dashboard/store/dashboard.store";
 import { useCurrencyStore } from "@/modules/core/settings/store/currency.store";
 
 export const DashboardPage = () => {
+  const isMobile = useMobile();
+  const MobileComponent = useMobileComponent("MobileDashboard");
   const { t } = useTranslation();
   const widgets = useDashboardWidgets();
   const { fetchDashboardData, error, isLoading } = useDashboardStore();
@@ -31,6 +35,10 @@ export const DashboardPage = () => {
     );
   }
 
+  if (isMobile && MobileComponent) {
+    return <MobileComponent />;
+  }
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
@@ -42,11 +50,13 @@ export const DashboardPage = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {widgets.map((widget) => {
           const Component = widget.component;
+
+          // Mobile always takes 1 col, desktop respects colSpan
           const colSpanMap: Record<number, string> = {
             1: "col-span-1",
-            2: "lg:col-span-2 col-span-2",
-            3: "lg:col-span-3 col-span-3",
-            4: "lg:col-span-4 col-span-4",
+            2: "lg:col-span-2 md:col-span-2 col-span-1",
+            3: "lg:col-span-3 md:col-span-2 col-span-1",
+            4: "lg:col-span-4 md:col-span-2 col-span-1",
           };
           const colSpanClass = colSpanMap[widget.colSpan || 1] || "col-span-1";
 
