@@ -61,32 +61,28 @@ export const CategoryConfigModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-[calc(100dvh-4rem)]" : "max-w-md max-h-[90vh]"} flex flex-col p-0`}
+        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 top-16 translate-y-0 h-[calc(100dvh-4rem)]" : "max-w-md max-h-[90vh]"} flex flex-col p-0`}
       >
+        <DialogHeader className={isMobile ? "sr-only" : ""}>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+
         {isMobile && MobileComponent ? (
-          <div className="p-4">
-            <MobileComponent
-              title={title}
-              description={description}
-              items={filteredItems}
-              newValue={newValue}
-              setNewValue={setNewValue}
-              handleAdd={handleAdd}
-              handleRestore={handleRestore}
-              removeItem={removeItem}
-              reorder={reorder}
-              t={t}
-            />
-          </div>
+          <MobileComponent
+            title={title}
+            description={description}
+            items={filteredItems}
+            newValue={newValue}
+            setNewValue={setNewValue}
+            handleAdd={handleAdd}
+            handleRestore={handleRestore}
+            removeItem={removeItem}
+            reorder={reorder}
+            t={t}
+          />
         ) : (
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-6">
-            <DialogHeader>
-              <div className="flex items-center justify-between pr-8">
-                <DialogTitle>{title}</DialogTitle>
-              </div>
-              <DialogDescription>{description}</DialogDescription>
-            </DialogHeader>
-
             <div className="space-y-4 py-4">
               <div className="flex gap-2">
                 <Input

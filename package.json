@@ -24,10 +24,10 @@
     "sonar": "sonar-scanner",
     "build:pro": "cross-env VITE_APP_MODE=pro bun run build",
     "release:pro": "cross-env VITE_APP_MODE=pro tauri build --config \"{\\\"productName\\\": \\\"Gusto Pro\\\"}\"",
-    "tauri:mobile": "cross-env VITE_APP_MODE=core tauri android dev",
-    "tauri:mobile:pro": "cross-env VITE_APP_MODE=pro tauri android dev --config ./src/modules/pro/mobile/src-tauri/tauri.conf.json",
-    "release:mobile": "cross-env VITE_APP_MODE=core tauri android build",
-    "release:mobile:pro": "cross-env VITE_APP_MODE=pro tauri android build --config ./src/modules/pro/mobile/src-tauri/tauri.conf.json"
+    "tauri:mobile": "cross-env VITE_APP_MODE=mobile-core tauri android dev",
+    "tauri:mobile:pro": "cross-env VITE_APP_MODE=mobile-pro tauri android dev --config ./src/modules/pro/mobile/src-tauri/tauri.conf.json",
+    "release:mobile": "cross-env VITE_APP_MODE=mobile-core tauri android build",
+    "release:mobile:pro": "cross-env VITE_APP_MODE=mobile-pro tauri android build --config ./src/modules/pro/mobile/src-tauri/tauri.conf.json"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

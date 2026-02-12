@@ -41,7 +41,7 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <Slot name="common:dialog-content:after" />
+      <Slot name="common:dialog-content:after" className="contents" />
     </DialogPrimitive.Content>
   </DialogPortal>
 ));

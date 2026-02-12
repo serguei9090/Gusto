@@ -170,28 +170,26 @@ export const UnitConfigModal = ({ isOpen, onClose }: UnitConfigModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-[calc(100dvh-4rem)]" : "max-w-2xl h-[80vh]"} flex flex-col p-0`}
+        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 top-16 translate-y-0 h-[calc(100dvh-4rem)]" : "max-w-2xl h-[80vh]"} flex flex-col p-0`}
       >
+        <DialogHeader className={isMobile ? "sr-only" : ""}>
+          <DialogTitle>{t("settings.config.units")}</DialogTitle>
+          <DialogDescription>
+            {t("settings.config.unitsDesc")}
+          </DialogDescription>
+        </DialogHeader>
+
         {isMobile && MobileComponent ? (
-          <div className="p-4 h-full">
-            <MobileComponent
-              filterText={filterText}
-              setFilterText={setFilterText}
-              groupedUnits={groupedUnits}
-              activeUnitsMap={activeUnitsMap}
-              handleToggle={handleToggle}
-              t={t}
-            />
-          </div>
+          <MobileComponent
+            filterText={filterText}
+            setFilterText={setFilterText}
+            groupedUnits={groupedUnits}
+            activeUnitsMap={activeUnitsMap}
+            handleToggle={handleToggle}
+            t={t}
+          />
         ) : (
           <div className="flex flex-col flex-1 min-h-0 space-y-4 p-6">
-            <DialogHeader>
-              <DialogTitle>{t("settings.config.units")}</DialogTitle>
-              <DialogDescription>
-                {t("settings.config.unitsDesc")}
-              </DialogDescription>
-            </DialogHeader>
-
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
