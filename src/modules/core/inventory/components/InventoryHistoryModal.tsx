@@ -6,10 +6,10 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { MobileFormFooter } from "@/components/ui/mobile-form-footer";
 import {
   Table,
   TableBody,
@@ -189,7 +189,7 @@ export function InventoryHistoryModal({
             </>
           )}
         </div>
-        <DialogFooter className="sticky bottom-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t bg-background sm:static sm:border-0 sm:pt-4 sm:pb-4 sm:justify-end">
+        <MobileFormFooter>
           <Button
             className="w-full sm:w-auto h-12 sm:h-9 text-lg sm:text-sm font-bold"
             variant="outline"
@@ -198,7 +198,7 @@ export function InventoryHistoryModal({
             {t("common.actions.cancel")}
           </Button>
           <Slot name="inventory-history:footer" />
-        </DialogFooter>
+        </MobileFormFooter>
       </DialogContent>
     </Dialog>
   );

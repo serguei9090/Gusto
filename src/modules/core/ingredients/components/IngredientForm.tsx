@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MobileFormFooter } from "@/components/ui/mobile-form-footer";
 import {
   Select,
   SelectContent,
@@ -125,7 +126,7 @@ export const IngredientForm = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={submitHandler} className="space-y-4 pb-20">
+      <form onSubmit={submitHandler} className="space-y-4 pb-0">
         <FormField
           control={form.control}
           name="name"
@@ -479,13 +480,13 @@ export const IngredientForm = ({
           </select>
         </div>
 
-        <div className="flex flex-row gap-2 mt-8 md:justify-end sticky md:static bottom-0 md:bottom-auto -mx-4 md:mx-0 px-4 md:px-0 pb-safe md:pb-0 pt-4 md:pt-0 border-t md:border-t-0 bg-background md:bg-transparent z-20 md:z-auto">
+        <MobileFormFooter>
           {onCancel && (
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
-              className="flex-1 md:flex-none h-12 md:h-10 text-base md:text-sm"
+              className="flex-1 sm:flex-none h-12 sm:h-9"
             >
               {t("common.actions.cancel")}
             </Button>
@@ -493,11 +494,11 @@ export const IngredientForm = ({
           <Button
             type="submit"
             disabled={isLoading}
-            className="flex-1 md:flex-none h-12 md:h-10 text-base md:text-sm"
+            className="flex-1 sm:flex-none h-12 sm:h-9"
           >
             {isLoading ? t("common.messages.saving") : t("common.actions.save")}
           </Button>
-        </div>
+        </MobileFormFooter>
       </form>
     </Form>
   );

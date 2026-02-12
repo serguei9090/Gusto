@@ -224,8 +224,8 @@ export const RecipesPage = () => {
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-[900px] sm:top-[50%] sm:left-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-h-[90vh] sm:rounded-lg overflow-y-auto p-0 sm:p-6">
-          <DialogHeader className="p-4 sm:p-0">
+        <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-[900px] sm:top-[50%] sm:left-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-h-[90vh] sm:rounded-lg overflow-y-auto p-4 sm:p-6 pt-6">
+          <DialogHeader className="sm:p-0">
             <DialogTitle>
               {editingRecipeId
                 ? t("recipes.editRecipe")
@@ -237,7 +237,7 @@ export const RecipesPage = () => {
                 : "Fill out the form below to create a new recipe."}
             </DialogDescription>
           </DialogHeader>
-          <div className="p-4 sm:p-0">
+          <div className="sm:p-0">
             {editingRecipeId && isLoading && !selectedRecipe ? (
               <div className="flex items-center justify-center h-40">
                 <p className="text-muted-foreground italic">

@@ -216,8 +216,8 @@ export const IngredientsPage = () => {
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-[600px] sm:top-[50%] sm:left-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-h-[90vh] sm:rounded-lg overflow-y-auto p-0 sm:p-6 border-x-0 sm:border">
-          <DialogHeader className="p-4 md:p-0 mb-0 md:mb-4 bg-background sticky top-0 z-10 border-b md:border-0">
+        <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-[600px] sm:top-[50%] sm:left-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-h-[90vh] sm:rounded-lg overflow-y-auto p-4 sm:p-6 pt-6 border-x-0 sm:border">
+          <DialogHeader className="sm:p-0 md:bg-background md:border-0">
             <DialogTitle>
               {editingIngredient
                 ? t("ingredients.editIngredient")
@@ -229,7 +229,7 @@ export const IngredientsPage = () => {
                 : t("ingredients.prompts.add")}
             </DialogDescription>
           </DialogHeader>
-          <div className="p-4 md:p-0 pt-0">
+          <div className="sm:p-0">
             <IngredientForm
               defaultValues={editingIngredient ?? undefined}
               onSubmit={handleCreateOrUpdate}

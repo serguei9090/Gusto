@@ -6,13 +6,13 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FieldHelp } from "@/components/ui/field-help";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MobileFormFooter } from "@/components/ui/mobile-form-footer";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "@/hooks/useTranslation";
 import type {
@@ -225,7 +225,7 @@ export function SupplierForm({
             </div>
           </div>
 
-          <DialogFooter className="sticky -bottom-4 -mx-4 px-4 pb-safe pt-4 border-t bg-background sm:static sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:border-t-0 flex flex-row sm:justify-end gap-2">
+          <MobileFormFooter>
             <Button
               type="button"
               variant="outline"
@@ -245,7 +245,7 @@ export function SupplierForm({
                   ? "Update Supplier"
                   : "Create Supplier"}
             </Button>
-          </DialogFooter>
+          </MobileFormFooter>
         </form>
       </DialogContent>
     </Dialog>
