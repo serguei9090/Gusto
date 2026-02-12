@@ -47,7 +47,8 @@ i18n
         translation: fr,
       },
     },
-    lng: "en", // Default language
+    // Detect language from localStorage or default to 'en'
+    lng: localStorage.getItem("preferredLanguage") || "en",
     fallbackLng: "en", // Fallback to English if translation is missing
     interpolation: {
       escapeValue: false, // React already escapes values

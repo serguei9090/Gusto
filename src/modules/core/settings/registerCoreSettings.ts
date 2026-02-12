@@ -3,6 +3,7 @@ import {
   AboutSection,
   ConfigSection,
   CurrencySection,
+  DataManagementSection,
   GeneralSection,
   ModulesSection,
 } from "./sections";
@@ -59,6 +60,15 @@ export function registerCoreSettings(): void {
     description: "Application info and support",
     component: AboutSection,
     order: 50,
+    isCore: true,
+  });
+
+  settingsRegistry.register({
+    id: "data",
+    title: "Data Management",
+    description: "Backup and restore",
+    component: DataManagementSection,
+    order: 60,
     isCore: true,
   });
 }

@@ -1,7 +1,9 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -28,21 +30,21 @@ export const UnitSelect = ({
       <SelectContent>
         {category && UNIT_TYPES[category]
           ? UNIT_TYPES[category].map((u) => (
-              <SelectItem key={u} value={u}>
+              <SelectItem key={`${category}-${u}`} value={u}>
                 {u}
               </SelectItem>
             ))
           : Object.entries(UNIT_TYPES).map(([type, units]) => (
-              <div key={type}>
-                <div className="px-2 py-1 text-xs font-bold text-muted-foreground uppercase bg-muted/30">
+              <SelectGroup key={type}>
+                <SelectLabel className="px-2 py-1 text-xs font-bold text-muted-foreground uppercase bg-muted/30">
                   {type}
-                </div>
+                </SelectLabel>
                 {units.map((u) => (
-                  <SelectItem key={u} value={u}>
+                  <SelectItem key={`${type}-${u}`} value={u}>
                     {u}
                   </SelectItem>
                 ))}
-              </div>
+              </SelectGroup>
             ))}
       </SelectContent>
     </Select>

@@ -1,16 +1,25 @@
 import { Suspense, useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { GlobalErrorBarrier } from "@/components/error/GlobalErrorBarrier";
-import { MainLayout } from "@/components/templates/MainLayout";
 import { useTranslation } from "@/hooks/useTranslation";
 import { initDb } from "@/lib/db";
 import { useRegistry } from "@/lib/modules/registry";
 import { CurrencySettingsPage } from "@/modules/core/settings/pages/CurrencySettingsPage";
+import { WelcomeScreen } from "./components/onboarding/WelcomeScreen";
+import { MainLayout } from "./components/templates/MainLayout/MainLayout";
 
 function App() {
   const { t } = useTranslation();
   const [currentView, setCurrentView] = useState<string>("dashboard");
+  const [hasSeenWelcome, setHasSeenWelcome] = useState(() => {
+    return localStorage.getItem("hasSeenWelcome") === "true";
+  });
   const reg = useRegistry();
+
+  const handleWelcomeComplete = () => {
+    localStorage.setItem("hasSeenWelcome", "true");
+    setHasSeenWelcome(true);
+  };
 
   // Initialize database and modules on mount
   // biome-ignore lint/correctness/useExhaustiveDependencies: Initialize once on mount
@@ -21,6 +30,10 @@ function App() {
     };
     init();
   }, []); // Run once on mount
+
+  if (!hasSeenWelcome) {
+    return <WelcomeScreen onComplete={handleWelcomeComplete} />;
+  }
 
   const renderContent = () => {
     // Check for special internal views first

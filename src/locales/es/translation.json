@@ -130,7 +130,24 @@
       "standardLibrary": "Biblioteca Estándar",
       "myUnits": "Mis Unidades",
       "noUnitsEnabled": "No hay unidades habilitadas. Vaya a la Biblioteca Estándar para agregar algunas."
+    },
+    "dataManagement": {
+      "title": "Gestión de Datos",
+      "description": "Copia de seguridad y restauración.",
+      "export": "Exportar Datos",
+      "import": "Importar Datos",
+      "exportSuccess": "Datos exportados con éxito.",
+      "importSuccess": "Datos importados con éxito.",
+      "importWarning": "Esto sobrescribirá todos los datos actuales. ¿Estás seguro?",
+      "exportHelp": "Guardar una copia de seguridad de toda la base de datos en un archivo JSON.",
+      "importHelp": "Restaurar su base de datos desde un archivo de copia de seguridad anterior."
     }
+  },
+  "welcome": {
+    "title": "Bienvenido a Gusto",
+    "subtitle": "Su solución completa de gestión de cocina.",
+    "selectLanguage": "Seleccionar idioma / Select your language / Choisir la langue",
+    "getStarted": "Comenzar"
   },
   "ingredients": {
     "title": "Ingredientes",

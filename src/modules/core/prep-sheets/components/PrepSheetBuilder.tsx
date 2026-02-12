@@ -320,20 +320,19 @@ export function PrepSheetBuilder({
         </div>
       </div>
 
-      {/* Floating Action Button for Mobile / Right-aligned for Desktop */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl z-[100] border-t glass-footer pb-safe sm:static sm:bg-transparent sm:border-0 sm:p-0 sm:flex sm:justify-end sm:pt-8">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl z-30 border-t glass-footer pb-safe sm:static sm:bg-transparent sm:border-0 sm:p-0 sm:flex sm:justify-end sm:pt-8">
         <Button
           size="lg"
           onClick={() => handleSubmit()}
           disabled={!isValid || isLoading}
-          className="w-full h-14 text-lg font-bold shadow-2xl rounded-2xl sm:w-auto sm:h-10 sm:text-base sm:rounded-md sm:shadow-none sm:px-8"
+          className="w-full h-12 text-base font-bold shadow-lg rounded-xl mb-4 sm:mb-0 sm:w-auto sm:h-10 sm:text-base sm:rounded-md sm:shadow-none sm:px-8"
         >
           {isLoading ? (
             "Generating..."
           ) : (
             <>
-              <Wand2 className="mr-3 h-6 w-6 sm:h-4 sm:w-4 sm:mr-2" /> Generate
-              Prep Sheet
+              <Wand2 className="mr-2 h-5 w-5 sm:h-4 sm:w-4" /> Generate Prep
+              Sheet
             </>
           )}
         </Button>

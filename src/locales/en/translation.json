@@ -130,7 +130,24 @@
       "standardLibrary": "Standard Library",
       "myUnits": "My Units",
       "noUnitsEnabled": "No units enabled. Go to Standard Library to add some."
+    },
+    "dataManagement": {
+      "title": "Data Management",
+      "description": "Backup and restore your data.",
+      "export": "Export Data",
+      "import": "Import Data",
+      "exportSuccess": "Data exported successfully.",
+      "importSuccess": "Data imported successfully.",
+      "importWarning": "This will overwrite all current data. Are you sure?",
+      "exportHelp": "Save a backup of your entire database to a JSON file.",
+      "importHelp": "Restore your database from a previous backup file."
     }
+  },
+  "welcome": {
+    "title": "Welcome to Gusto",
+    "subtitle": "Your complete kitchen management solution.",
+    "selectLanguage": "Select your language / Choisir la langue / Seleccionar idioma",
+    "getStarted": "Get Started"
   },
   "ingredients": {
     "title": "Ingredients",
