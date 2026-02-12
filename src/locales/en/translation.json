@@ -20,7 +20,8 @@
       "submit": "Submit",
       "reset": "Reset",
       "help": "Help",
-      "select": "Select"
+      "select": "Select",
+      "done": "Done"
     },
     "labels": {
       "search": "Search",
@@ -114,7 +115,11 @@
       "calculatorsHelp": "Kitchen math and pricing tools.",
       "dragToReorder": "Drag to reorder items in the sidebar.",
       "visible": "Visible",
-      "hidden": "Hidden"
+      "hidden": "Hidden",
+      "manage": "Manage Modules",
+      "manageTitle": "Manage Modules",
+      "manageDescription": "Toggle visibility and drag to reorder modules in the sidebar.",
+      "noModulesEnabled": "No modules enabled. Click Manage Modules to enable some."
     },
     "config": {
       "title": "App Configuration",

@@ -20,7 +20,8 @@
       "submit": "Enviar",
       "reset": "Restablecer",
       "help": "Ayuda",
-      "select": "Seleccionar"
+      "select": "Seleccionar",
+      "done": "Listo"
     },
     "labels": {
       "search": "Buscar",
@@ -114,7 +115,11 @@
       "calculatorsHelp": "Herramientas de costos y matemáticas.",
       "dragToReorder": "Arrastre para reordenar los elementos en la barra lateral.",
       "visible": "Visible",
-      "hidden": "Oculto"
+      "hidden": "Oculto",
+      "manage": "Gestionar Módulos",
+      "manageTitle": "Gestionar Módulos",
+      "manageDescription": "Alternar visibilidad y arrastrar para reordenar los módulos en la barra lateral.",
+      "noModulesEnabled": "No hay módulos habilitados. Haga clic en Gestionar Módulos para habilitar algunos."
     },
     "config": {
       "title": "Configuración de la Aplicación",
