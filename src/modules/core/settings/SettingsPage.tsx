@@ -27,7 +27,7 @@ export const SettingsPage = ({
   }, [onNavigateToCurrencySettings]);
 
   return (
-    <div className="h-full flex flex-col space-y-6 p-4 md:p-8">
+    <div className="h-full flex flex-col space-y-6 p-4 md:p-8 pt-6 md:pt-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-end">
         <Button
           variant="outline"

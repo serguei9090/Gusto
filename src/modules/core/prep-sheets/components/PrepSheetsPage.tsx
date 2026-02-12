@@ -75,7 +75,7 @@ export const PrepSheetsPage = () => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-4 md:space-y-6 md:p-8 p-0">
+    <div className="h-full flex flex-col space-y-4 md:space-y-6 md:p-8 pt-6">
       <div className="flex-1 flex flex-col px-4 md:px-0">
         <Tabs
           value={activeTab}

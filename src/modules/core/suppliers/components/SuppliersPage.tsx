@@ -100,7 +100,7 @@ export const SuppliersPage = () => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-4 md:space-y-6 p-4 md:p-8 pb-24 md:pb-8">
+    <div className="h-full flex flex-col space-y-4 md:space-y-6 p-4 md:p-8 pt-6 md:pt-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-end">
         <Button
           onClick={() => setIsFormOpen(true)}

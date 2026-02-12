@@ -78,7 +78,7 @@ export const InventoryPage = () => {
   );
 
   return (
-    <div className="h-full flex flex-col space-y-4 md:space-y-6 p-4 md:p-8 pb-24 md:pb-8">
+    <div className="h-full flex flex-col space-y-4 md:space-y-6 p-4 md:p-8 pt-6 md:pt-8">
       {/* Stats Cards - Responsive Grid/Scroll */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
