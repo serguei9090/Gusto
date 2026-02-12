@@ -27,7 +27,9 @@
     "tauri:mobile": "cross-env VITE_APP_MODE=mobile-core tauri android dev",
     "tauri:mobile:pro": "cross-env VITE_APP_MODE=mobile-pro tauri android dev --config ./src/modules/pro/mobile/src-tauri/tauri.conf.json",
     "release:mobile": "cross-env VITE_APP_MODE=mobile-core tauri android build",
-    "release:mobile:pro": "cross-env VITE_APP_MODE=mobile-pro tauri android build --config ./src/modules/pro/mobile/src-tauri/tauri.conf.json"
+    "release:mobile:debug": "cross-env VITE_APP_MODE=mobile-core tauri android build --debug",
+    "release:mobile:pro": "cross-env VITE_APP_MODE=mobile-pro tauri android build --config ./src/modules/pro/mobile/src-tauri/tauri.conf.json",
+    "release:mobile:pro:debug": "cross-env VITE_APP_MODE=mobile-pro tauri android build --debug --config ./src/modules/pro/mobile/src-tauri/tauri.conf.json"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
