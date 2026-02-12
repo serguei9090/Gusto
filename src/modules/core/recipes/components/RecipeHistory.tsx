@@ -337,7 +337,7 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
         open={!!viewingVersion}
         onOpenChange={(open) => !open && setViewingVersion(null)}
       >
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto z-[200]">
+        <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-4xl sm:max-h-[90vh] overflow-y-auto sm:fixed sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border">
           <DialogHeader>
             <DialogTitle>
               Version {viewingVersion?.versionNumber} Details
@@ -353,7 +353,7 @@ export const RecipeHistory = ({ recipeId }: RecipeHistoryProps) => {
         open={!!comparingVersions}
         onOpenChange={(open) => !open && setComparingVersions(null)}
       >
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto z-[200]">
+        <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-6xl sm:max-h-[90vh] overflow-y-auto sm:fixed sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border">
           <DialogHeader>
             <DialogTitle>Version Comparison</DialogTitle>
           </DialogHeader>

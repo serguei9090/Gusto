@@ -1,6 +1,14 @@
-import { Plus } from "lucide-react";
+import {
+  ChefHat,
+  DollarSign,
+  Plus,
+  Search,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { DataCard, DataCardList } from "@/components/ui/data-card";
 import {
   Dialog,
   DialogContent,
@@ -9,9 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
-import { useMobileComponent } from "@/lib/mobile-registry";
 import type { Recipe, UpdateRecipeInput } from "@/types/ingredient.types";
 import { useRecipeStore } from "../store/recipes.store";
 import { BulkRollbackDialog } from "./BulkRollbackDialog";
@@ -20,8 +26,6 @@ import { RecipeForm, type RecipeFormData } from "./RecipeForm";
 import { RecipeTable } from "./RecipeTable";
 
 export const RecipesPage = () => {
-  const isMobile = useMobile();
-  const MobileComponent = useMobileComponent("MobileRecipes");
   const {
     recipes,
     fetchRecipes,
@@ -104,35 +108,144 @@ export const RecipesPage = () => {
     }
   };
 
-  if (isMobile && MobileComponent) {
-    return (
-      <div className="h-full">
-        <MobileComponent
-          recipes={filteredRecipes}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          setIsFormOpen={setIsFormOpen}
-          setViewingRecipeId={setViewingRecipeId}
-          handleEdit={handleEdit}
-          handleDelete={handleDelete}
-          error={error}
-          t={t}
-        />
+  return (
+    <div className="h-full flex flex-col space-y-4 md:space-y-6 p-4 md:p-8 pb-24 md:pb-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+            {t("recipes.title")}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {t("recipes.subtitle")}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <BulkRollbackDialog />
+          <Button
+            onClick={() => setIsFormOpen(true)}
+            className="w-full md:w-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {t("recipes.addRecipe")}
+          </Button>
+        </div>
+      </div>
 
-        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-          <DialogContent className="w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingRecipeId
-                  ? t("recipes.editRecipe")
-                  : t("recipes.addRecipe")}
-              </DialogTitle>
-              <DialogDescription>
-                {editingRecipeId
-                  ? "Update the recipe details below."
-                  : "Fill out the form below to create a new recipe."}
-              </DialogDescription>
-            </DialogHeader>
+      <div className="flex items-center space-x-2">
+        <div className="relative flex-1 md:max-w-sm">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("recipes.placeholders.searchRecipes")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+      </div>
+
+      {error && (
+        <div className="p-4 rounded-md bg-destructive/10 text-destructive text-sm font-medium">
+          {error}
+        </div>
+      )}
+
+      {/* Mobile ListView */}
+      <div className="md:hidden">
+        <DataCardList
+          items={filteredRecipes}
+          emptyMessage={t("recipes.noMatches")}
+          renderItem={(recipe) => (
+            <DataCard
+              key={recipe.id}
+              title={recipe.name}
+              subtitle={recipe.category || "General"}
+              onClick={() => setViewingRecipeId(recipe.id)}
+              onEdit={() => handleEdit(recipe)}
+              onDelete={() => handleDelete(recipe.id)}
+              details={[
+                {
+                  label: "Servings",
+                  value: (
+                    <div className="flex items-center gap-1">
+                      <Users className="h-3 w-3 text-muted-foreground" />
+                      <span className="font-bold">{recipe.servings}</span>
+                    </div>
+                  ),
+                },
+                {
+                  label: "Total Cost",
+                  value: (
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="h-3 w-3 text-muted-foreground" />
+                      <span className="font-bold text-primary">
+                        {recipe.currency}{" "}
+                        {recipe.totalCost?.toFixed(2) || "0.00"}
+                      </span>
+                    </div>
+                  ),
+                },
+                {
+                  label: "Margin",
+                  value: (
+                    <div className="flex items-center gap-1">
+                      <TrendingUp
+                        className={`h-3 w-3 ${
+                          Number(recipe.profitMargin) > 50
+                            ? "text-green-500"
+                            : "text-amber-500"
+                        }`}
+                      />
+                      <span
+                        className={`font-black ${
+                          Number(recipe.profitMargin) > 50
+                            ? "text-green-600"
+                            : "text-amber-600"
+                        }`}
+                      >
+                        {recipe.profitMargin?.toFixed(1) || "-"}%
+                      </span>
+                    </div>
+                  ),
+                },
+              ]}
+            />
+          )}
+        />
+        {filteredRecipes.length === 0 && searchQuery && (
+          <div className="flex flex-col items-center justify-center py-12 text-center opacity-40">
+            <div className="w-12 h-12 rounded-full border-2 border-dashed border-current flex items-center justify-center mb-4">
+              <ChefHat className="w-6 h-6" />
+            </div>
+            <p className="font-bold text-base">{t("common.messages.noData")}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop TableView */}
+      <div className="hidden md:block flex-1 overflow-auto bg-card rounded-md border shadow-sm">
+        <RecipeTable
+          recipes={filteredRecipes}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onView={(r) => setViewingRecipeId(r.id)}
+        />
+      </div>
+
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-[900px] sm:top-[50%] sm:left-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-h-[90vh] sm:rounded-lg overflow-y-auto p-0 sm:p-6">
+          <DialogHeader className="p-4 sm:p-0">
+            <DialogTitle>
+              {editingRecipeId
+                ? t("recipes.editRecipe")
+                : t("recipes.addRecipe")}
+            </DialogTitle>
+            <DialogDescription>
+              {editingRecipeId
+                ? "Update the recipe details below."
+                : "Fill out the form below to create a new recipe."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-4 sm:p-0">
             {editingRecipeId && isLoading && !selectedRecipe ? (
               <div className="flex items-center justify-center h-40">
                 <p className="text-muted-foreground italic">
@@ -177,119 +290,7 @@ export const RecipesPage = () => {
                 isLoading={isLoading}
               />
             )}
-          </DialogContent>
-        </Dialog>
-
-        {viewingRecipeId && (
-          <RecipeDetailModal
-            recipeId={viewingRecipeId}
-            onClose={() => setViewingRecipeId(null)}
-          />
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div className="h-full p-8 flex flex-col space-y-6">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            {t("recipes.title")}
-          </h2>
-          <p className="text-muted-foreground">{t("recipes.subtitle")}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <BulkRollbackDialog />
-          <Button onClick={() => setIsFormOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            {t("recipes.addRecipe")}
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Input
-          className="w-full max-w-sm"
-          placeholder={t("recipes.placeholders.searchRecipes")}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
-      {error && (
-        <div className="p-4 rounded-md bg-destructive/10 text-destructive text-sm font-medium">
-          {error}
-        </div>
-      )}
-
-      <div className="flex-1 overflow-auto bg-card rounded-md border shadow-sm">
-        <RecipeTable
-          recipes={filteredRecipes}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onView={(r) => setViewingRecipeId(r.id)}
-        />
-      </div>
-
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingRecipeId
-                ? t("recipes.editRecipe")
-                : t("recipes.addRecipe")}
-            </DialogTitle>
-            <DialogDescription>
-              {editingRecipeId
-                ? "Update the recipe details below."
-                : "Fill out the form below to create a new recipe."}
-            </DialogDescription>
-          </DialogHeader>
-          {editingRecipeId && isLoading && !selectedRecipe ? (
-            <div className="flex items-center justify-center h-40">
-              <p className="text-muted-foreground italic">
-                Loading recipe details...
-              </p>
-            </div>
-          ) : (
-            <RecipeForm
-              onSubmit={handleCreateOrUpdate}
-              recipeId={editingRecipeId || undefined}
-              initialData={
-                editingRecipeId && selectedRecipe
-                  ? ({
-                      name: selectedRecipe.name,
-                      servings: selectedRecipe.servings,
-                      currency: selectedRecipe.currency,
-                      category: selectedRecipe.category || undefined,
-                      description: selectedRecipe.description || undefined,
-                      prepTimeMinutes:
-                        selectedRecipe.prepTimeMinutes || undefined,
-                      cookingInstructions:
-                        selectedRecipe.cookingInstructions || undefined,
-                      sellingPrice: selectedRecipe.sellingPrice || undefined,
-                      targetCostPercentage:
-                        selectedRecipe.targetCostPercentage || undefined,
-                      wasteBufferPercentage:
-                        selectedRecipe.wasteBufferPercentage || undefined,
-                      ingredients: selectedRecipe.ingredients.map((ing) => ({
-                        ingredientId: ing.ingredientId,
-                        quantity: ing.quantity,
-                        unit: ing.unit,
-                        name: ing.ingredientName,
-                        price: ing.currentPricePerUnit,
-                        ingredientUnit: ing.ingredientUnit,
-                        subRecipeId: ing.subRecipeId,
-                        isSubRecipe: !!ing.subRecipeId,
-                      })),
-                    } as Partial<RecipeFormData>)
-                  : undefined
-              }
-              onCancel={handleCloseForm}
-              isLoading={isLoading}
-            />
-          )}
+          </div>
         </DialogContent>
       </Dialog>
 

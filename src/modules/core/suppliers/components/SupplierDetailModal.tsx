@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useMobile } from "@/hooks/useMobile";
 import type { Supplier } from "@/modules/core/suppliers/types";
 
 interface SupplierDetailModalProps {
@@ -15,17 +14,13 @@ export const SupplierDetailModal = ({
   supplier,
   onClose,
 }: SupplierDetailModalProps) => {
-  const isMobile = useMobile();
-
   const handlePrint = () => {
     globalThis.print();
   };
 
   return (
     <Dialog open={!!supplier} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent
-        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full" : "sm:max-w-2xl"} max-h-[90vh] overflow-y-auto flex flex-col p-0`}
-      >
+      <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-2xl sm:translate-x-[-50%] sm:translate-y-[-50%] rounded-none sm:rounded-lg border-x-0 sm:border p-0 sm:max-h-[85vh] overflow-y-auto flex flex-col">
         {/* Header */}
         <div className="p-6 border-b flex items-center justify-between print:hidden sticky top-0 bg-background/95 backdrop-blur z-10">
           <div className="flex items-center gap-3">
@@ -165,16 +160,15 @@ export const SupplierDetailModal = ({
           </div>
         </div>
 
-        {isMobile && (
-          <div className="sticky bottom-0 bg-background/95 backdrop-blur p-4 border-t flex gap-2 pb-safe">
-            <Button
-              className="flex-1 h-12 text-base font-semibold"
-              onClick={onClose}
-            >
-              Close
-            </Button>
-          </div>
-        )}
+        {/* Mobile Footer (visible on small screens) */}
+        <div className="sticky bottom-0 bg-background/95 backdrop-blur p-4 border-t flex gap-2 pb-safe md:hidden">
+          <Button
+            className="flex-1 h-12 text-base font-semibold"
+            onClick={onClose}
+          >
+            Close
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

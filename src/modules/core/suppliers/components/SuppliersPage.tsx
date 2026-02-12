@@ -1,12 +1,19 @@
-import { Plus, Search, Users } from "lucide-react";
+import {
+  Building2,
+  Mail,
+  MapPin,
+  Phone,
+  Plus,
+  Search,
+  Users,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataCard, DataCardList } from "@/components/ui/data-card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
-import { useMobileComponent } from "@/lib/mobile-registry";
 import { useSuppliersStore } from "@/modules/core/suppliers/store/suppliers.store";
 import type {
   Supplier,
@@ -17,8 +24,6 @@ import { SupplierForm } from "./SupplierForm";
 import { SupplierTable } from "./SupplierTable";
 
 export const SuppliersPage = () => {
-  const isMobile = useMobile();
-  const MobileComponent = useMobileComponent("MobileSuppliers");
   const {
     suppliers,
     fetchSuppliers,
@@ -94,53 +99,23 @@ export const SuppliersPage = () => {
     setViewingSupplier(supplier);
   };
 
-  if (isMobile && MobileComponent) {
-    return (
-      <div className="h-full">
-        <MobileComponent
-          suppliers={filteredSuppliers}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          setIsFormOpen={setIsFormOpen}
-          handleEdit={handleEdit}
-          handleDelete={handleDelete}
-          handleView={handleView}
-          error={error}
-          t={t}
-        />
-
-        <SupplierForm
-          initialData={editingSupplier}
-          open={isFormOpen}
-          onOpenChange={setIsFormOpen}
-          onSubmit={handleCreateOrUpdate}
-          isLoading={isLoading}
-        />
-
-        {viewingSupplier && (
-          <SupplierDetailModal
-            supplier={viewingSupplier}
-            onClose={() => setViewingSupplier(null)}
-          />
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div className="h-full p-8 flex flex-col space-y-6">
-      <div className="flex items-center justify-between space-y-2">
+    <div className="h-full flex flex-col space-y-4 md:space-y-6 p-4 md:p-8 pb-24 md:pb-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
             {t("suppliers.title")}
           </h2>
-          <p className="text-muted-foreground">{t("suppliers.subtitle")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("suppliers.subtitle")}
+          </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button onClick={() => setIsFormOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> {t("suppliers.addSupplier")}
-          </Button>
-        </div>
+        <Button
+          onClick={() => setIsFormOpen(true)}
+          className="w-full md:w-auto"
+        >
+          <Plus className="mr-2 h-4 w-4" /> {t("suppliers.addSupplier")}
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -160,10 +135,10 @@ export const SuppliersPage = () => {
         </Card>
       </div>
 
-      <Separator />
+      <Separator className="hidden md:block" />
 
       <div className="flex items-center space-x-2">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1 md:max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t("suppliers.searchPlaceholder")}
@@ -180,7 +155,68 @@ export const SuppliersPage = () => {
         </div>
       )}
 
-      <div className="flex-1 overflow-auto bg-card rounded-md border shadow-sm">
+      {/* Mobile ListView */}
+      <div className="md:hidden">
+        <DataCardList
+          items={filteredSuppliers}
+          emptyMessage={t("common.messages.noData")}
+          renderItem={(supplier) => (
+            <DataCard
+              key={supplier.id}
+              title={supplier.name}
+              subtitle={supplier.contactPerson || "No contact person"}
+              onEdit={() => handleEdit(supplier)}
+              onDelete={() => handleDelete(supplier.id)}
+              onClick={() => handleView(supplier)}
+              details={[
+                {
+                  label: "Contact",
+                  value: (
+                    <div className="flex flex-col gap-1 mt-1">
+                      {supplier.phone && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <Phone className="h-3 w-3 text-primary" />
+                          <span className="font-medium">{supplier.phone}</span>
+                        </div>
+                      )}
+                      {supplier.email && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <Mail className="h-3 w-3 text-primary" />
+                          <span className="font-medium truncate max-w-[150px]">
+                            {supplier.email}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ),
+                },
+                {
+                  label: "Location",
+                  value: (
+                    <div className="flex items-center gap-1 mt-1">
+                      <MapPin className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-xs font-medium truncate max-w-[100px]">
+                        {supplier.address || "N/A"}
+                      </span>
+                    </div>
+                  ),
+                },
+              ]}
+            />
+          )}
+        />
+        {filteredSuppliers.length === 0 && searchQuery && (
+          <div className="flex flex-col items-center justify-center py-12 text-center opacity-40">
+            <div className="w-12 h-12 rounded-full border-2 border-dashed border-current flex items-center justify-center mb-4">
+              <Building2 className="w-6 h-6" />
+            </div>
+            <p className="font-bold text-base">{t("common.messages.noData")}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop TableView */}
+      <div className="hidden md:block flex-1 overflow-auto bg-card rounded-md border shadow-sm">
         <SupplierTable
           suppliers={filteredSuppliers}
           onView={handleView}

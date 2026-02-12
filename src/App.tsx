@@ -25,7 +25,7 @@ function App() {
   const renderContent = () => {
     // Check for special internal views first
     if (currentView === "currency-settings") {
-      return <CurrencySettingsPage />;
+      return <CurrencySettingsPage onBack={() => setCurrentView("settings")} />;
     }
 
     const module = reg.get(currentView);
@@ -33,12 +33,14 @@ function App() {
       if (module.id === "settings") {
         const SettingsComp = module.component as React.ComponentType<{
           onNavigateToCurrencySettings: () => void;
+          onBack?: () => void;
         }>;
         return (
           <SettingsComp
             onNavigateToCurrencySettings={() =>
               setCurrentView("currency-settings")
             }
+            onBack={() => setCurrentView("dashboard")}
           />
         );
       }

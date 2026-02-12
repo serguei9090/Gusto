@@ -13,12 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 
 export const GeneralSection = () => {
   const { t, changeLanguage, currentLanguage } = useTranslation();
-  const isMobile = useMobile();
 
   return (
     <Card>
@@ -27,9 +25,7 @@ export const GeneralSection = () => {
         <CardDescription>{t("settings.general.description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div
-          className={`flex ${isMobile ? "flex-col space-y-4" : "items-center justify-between space-x-2"}`}
-        >
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-x-2 sm:space-y-0">
           <div className="flex flex-col space-y-1">
             <Label htmlFor="language">
               {t("settings.general.languageLabel")}
@@ -42,7 +38,7 @@ export const GeneralSection = () => {
             value={currentLanguage}
             onValueChange={(val) => changeLanguage(val as "en" | "es" | "fr")}
           >
-            <SelectTrigger className={isMobile ? "w-full h-12" : "w-[180px]"}>
+            <SelectTrigger className="w-full h-12 sm:w-[180px] sm:h-10">
               <SelectValue placeholder={t("settings.general.selectLanguage")} />
             </SelectTrigger>
             <SelectContent>

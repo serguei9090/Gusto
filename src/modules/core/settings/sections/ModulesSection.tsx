@@ -11,14 +11,12 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useRegistry } from "@/lib/modules/registry";
 import { useSettingsStore } from "../store/settings.store";
 
 export const ModulesSection = () => {
   const { t } = useTranslation();
-  const isMobile = useMobile();
   const { modules, moduleOrder, toggleModule, reorderModules } =
     useSettingsStore();
   const reg = useRegistry();
@@ -58,12 +56,12 @@ export const ModulesSection = () => {
   };
 
   return (
-    <Card className={isMobile ? "border-0 shadow-none bg-transparent" : ""}>
-      <CardHeader className={isMobile ? "px-0" : ""}>
+    <Card className="border-0 shadow-none bg-transparent sm:bg-card sm:border sm:shadow-sm">
+      <CardHeader className="px-0 sm:px-6">
         <CardTitle>{t("settings.modules.title")}</CardTitle>
         <CardDescription>{t("settings.modules.description")}</CardDescription>
       </CardHeader>
-      <CardContent className={isMobile ? "px-0" : "space-y-6"}>
+      <CardContent className="px-0 sm:px-6 space-y-6">
         <div className="text-sm text-muted-foreground mb-4 italic">
           {t("settings.modules.dragToReorder")}
         </div>
@@ -121,20 +119,18 @@ export const ModulesSection = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0 ml-2">
-                  {!isMobile && (
-                    <span className="text-xs text-muted-foreground uppercase tracking-tighter font-bold">
-                      {(modules[moduleId] ?? true)
-                        ? t("settings.modules.visible")
-                        : t("settings.modules.hidden")}
-                    </span>
-                  )}
+                  <span className="hidden sm:inline text-xs text-muted-foreground uppercase tracking-tighter font-bold">
+                    {(modules[moduleId] ?? true)
+                      ? t("settings.modules.visible")
+                      : t("settings.modules.hidden")}
+                  </span>
                   <Switch
                     id={`module-${moduleId}`}
                     checked={modules[moduleId] ?? true}
                     onCheckedChange={(checked) =>
                       toggleModule(moduleId, checked)
                     }
-                    className={isMobile ? "min-h-0 scale-125" : "scale-110"}
+                    className="min-h-0 scale-125 sm:scale-110"
                   />
                 </div>
               </Reorder.Item>

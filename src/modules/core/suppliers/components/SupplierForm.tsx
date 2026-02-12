@@ -14,7 +14,6 @@ import { FieldHelp } from "@/components/ui/field-help";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import type {
   Supplier,
@@ -38,7 +37,6 @@ export function SupplierForm({
   isLoading,
 }: Readonly<SupplierFormProps>) {
   const { t } = useTranslation();
-  const isMobile = useMobile();
   const {
     register,
     handleSubmit,
@@ -88,9 +86,7 @@ export function SupplierForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full" : "sm:max-w-[425px]"} max-h-[90vh] overflow-y-auto`}
-      >
+      <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-[425px] sm:translate-x-[-50%] sm:translate-y-[-50%] rounded-none sm:rounded-lg border-x-0 sm:border p-4 pt-6 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {initialData ? "Edit Supplier" : "Add Supplier"}
@@ -101,7 +97,10 @@ export function SupplierForm({
               : "Enter the details for the new supplier."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pb-20">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4 pb-0 sm:pb-0"
+        >
           <div className="grid gap-4 py-2">
             {/* Name */}
             <div className="space-y-2">
@@ -226,25 +225,19 @@ export function SupplierForm({
             </div>
           </div>
 
-          <DialogFooter
-            className={`${
-              isMobile
-                ? "sticky -bottom-4 -mx-4 px-4 pb-safe z-20 glass-footer flex flex-row gap-2 pt-4 border-t bg-background"
-                : "sm:justify-end"
-            }`}
-          >
+          <DialogFooter className="sticky -bottom-4 -mx-4 px-4 pb-safe pt-4 border-t bg-background sm:static sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:border-t-0 flex flex-row sm:justify-end gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className={isMobile ? "flex-1 h-12" : ""}
+              className="flex-1 sm:flex-none h-12 sm:h-9"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
-              className={isMobile ? "flex-1 h-12" : ""}
+              className="flex-1 sm:flex-none h-12 sm:h-9"
             >
               {isLoading
                 ? "Saving..."

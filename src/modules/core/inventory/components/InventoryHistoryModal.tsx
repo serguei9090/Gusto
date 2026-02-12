@@ -1,7 +1,6 @@
 import { format } from "date-fns";
-import { ArrowDownLeft, ArrowUpRight, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
-import { MobileCard } from "@/components/mobile/MobileCardList";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,13 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Slot } from "@/lib/slots/Slot";
 import { inventoryRepository } from "@/modules/core/inventory/services/inventory.repository";
 import type {
   Ingredient,
   InventoryTransaction,
+  TransactionType,
 } from "@/modules/core/inventory/types";
 import { formatCurrencyAmount } from "@/utils/currencyConverter";
 
@@ -35,13 +34,27 @@ interface InventoryHistoryModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const getTransactionColor = (type: TransactionType) => {
+  switch (type) {
+    case "purchase":
+      return "bg-green-100 text-green-700 border-green-200 hover:bg-green-100";
+    case "usage":
+      return "bg-red-100 text-red-700 border-red-200 hover:bg-red-100";
+    case "waste":
+      return "bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100";
+    case "adjustment":
+      return "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100";
+    default:
+      return "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-100";
+  }
+};
+
 export function InventoryHistoryModal({
   ingredient,
   open,
   onOpenChange,
 }: Readonly<InventoryHistoryModalProps>) {
   const { t } = useTranslation();
-  const isMobile = useMobile();
   const [transactions, setTransactions] = useState<InventoryTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -66,222 +79,123 @@ export function InventoryHistoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full" : "sm:max-w-[700px]"} max-h-[90vh] overflow-y-auto`}
-      >
-        <DialogHeader>
+      <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] max-w-none translate-x-0 translate-y-0 rounded-none border-0 bg-background sm:fixed sm:left-[50%] sm:top-[50%] sm:z-[200] sm:w-full sm:max-w-4xl sm:h-auto sm:max-h-[80vh] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:p-0 flex flex-col gap-0 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95 sm:data-[state=closed]:slide-out-to-left-1/2 sm:data-[state=closed]:slide-out-to-top-[48%] sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%]">
+        <DialogHeader className="p-4 sm:p-6 border-b shrink-0">
           <DialogTitle>Stock History: {ingredient.name}</DialogTitle>
           <DialogDescription>
             View past transactions for this ingredient.
           </DialogDescription>
         </DialogHeader>
 
-        <div
-          className={`overflow-auto border rounded-md ${isMobile ? "border-0" : "max-h-[60vh]"}`}
-        >
-          {isMobile ? (
-            <div className="space-y-3 pb-safe">
-              {isLoading && <div className="p-4 text-center">Loading...</div>}
-              {!isLoading && transactions.length === 0 && (
-                <div className="p-4 text-center text-muted-foreground">
-                  No transactions found.
-                </div>
-              )}
-              {!isLoading &&
-                transactions.map((tx) => {
-                  const isDebit =
-                    tx.transactionType === "usage" ||
-                    tx.transactionType === "waste" ||
-                    (tx.transactionType === "adjustment" && tx.quantity < 0);
-
-                  let prefix = "";
-                  if (
-                    tx.transactionType !== "adjustment" &&
-                    !isDebit &&
-                    tx.quantity > 0
-                  ) {
-                    prefix = "+";
-                  }
-
-                  return (
-                    <MobileCard
-                      key={tx.id}
-                      title={format(
-                        new Date(tx.createdAt),
-                        "MMM d, yyyy HH:mm",
-                      )}
-                      subtitle={tx.transactionType}
-                      details={[
-                        {
-                          label: "Quantity",
-                          value: (
-                            <span
-                              className={
-                                isDebit
-                                  ? "text-destructive font-bold"
-                                  : "text-green-600 font-bold"
-                              }
-                            >
-                              {prefix}
-                              {Number(tx.quantity.toFixed(2))}{" "}
-                              {ingredient.unitOfMeasure}
-                            </span>
-                          ),
-                        },
-                        {
-                          label: "Cost",
-                          value: tx.costPerUnit
-                            ? formatCurrencyAmount(
-                                tx.costPerUnit,
-                                ingredient.currency || "USD",
-                              )
-                            : "-",
-                        },
-                        {
-                          label: "Ref",
-                          value: tx.reference || "-",
-                        },
-                      ]}
-                    />
-                  );
-                })}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-0">
+          {isLoading ? (
+            <div className="h-40 flex items-center justify-center text-muted-foreground">
+              Loading history...
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="h-40 flex items-center justify-center text-muted-foreground">
+              No transactions found.
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Cost/Unit</TableHead>
-                  <TableHead>Total Value</TableHead>
-                  <TableHead>Reference</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center h-24">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
-                )}
-
-                {!isLoading && transactions.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center h-24">
-                      No transactions found.
-                    </TableCell>
-                  </TableRow>
-                )}
-
-                {!isLoading &&
-                  transactions.map((tx) => {
-                    const isDebit =
-                      tx.transactionType === "usage" ||
-                      tx.transactionType === "waste" ||
-                      (tx.transactionType === "adjustment" && tx.quantity < 0);
-
-                    let prefix = "";
-                    if (
-                      tx.transactionType !== "adjustment" &&
-                      !isDebit &&
-                      tx.quantity > 0
-                    ) {
-                      prefix = "+";
-                    }
-
-                    return (
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden sm:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead className="text-right">Change</TableHead>
+                      <TableHead className="text-right">Unit Cost</TableHead>
+                      <TableHead className="text-right">Total Value</TableHead>
+                      <TableHead>Ref / Notes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions.map((tx) => (
                       <TableRow key={tx.id}>
                         <TableCell>
                           {format(new Date(tx.createdAt), "MMM d, yyyy HH:mm")}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            {tx.transactionType === "purchase" && (
-                              <div
-                                className="p-1 rounded-full bg-green-100 text-green-700"
-                                title="Purchase"
-                              >
-                                <ArrowUpRight className="h-4 w-4" />
-                              </div>
-                            )}
-                            {(tx.transactionType === "usage" ||
-                              tx.transactionType === "waste") && (
-                              <div
-                                className="p-1 rounded-full bg-red-100 text-red-700"
-                                title={tx.transactionType}
-                              >
-                                <ArrowDownLeft className="h-4 w-4" />
-                              </div>
-                            )}
-                            {tx.transactionType === "adjustment" && (
-                              <div
-                                className="p-1 rounded-full bg-blue-100 text-blue-700"
-                                title="Stock Count"
-                              >
-                                <RefreshCw className="h-4 w-4" />
-                              </div>
-                            )}
-                            <span className="capitalize">
-                              {tx.transactionType === "adjustment"
-                                ? "Stock Count"
-                                : tx.transactionType}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span
-                            className={
-                              isDebit
-                                ? "text-destructive font-medium"
-                                : "text-green-600 font-medium"
-                            }
+                          <Badge
+                            variant="outline"
+                            className={getTransactionColor(tx.transactionType)}
                           >
-                            {prefix}
-                            {Number(tx.quantity.toFixed(2))}{" "}
-                            {ingredient.unitOfMeasure}
-                          </span>
+                            {tx.transactionType}
+                          </Badge>
                         </TableCell>
-                        <TableCell>
-                          {tx.costPerUnit
-                            ? formatCurrencyAmount(
-                                tx.costPerUnit,
-                                ingredient.currency || "USD",
-                              )
-                            : "-"}
+                        <TableCell className="text-right font-medium">
+                          {tx.quantity > 0 ? "+" : ""}
+                          {tx.quantity} {ingredient.unitOfMeasure}
                         </TableCell>
-                        <TableCell className="font-mono text-xs">
-                          {tx.totalCost === null
-                            ? "-"
-                            : formatCurrencyAmount(
-                                tx.totalCost,
-                                ingredient.currency || "USD",
-                              )}
+                        <TableCell className="text-right">
+                          {formatCurrencyAmount(
+                            tx.costPerUnit || 0,
+                            tx.currency || "USD",
+                          )}
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-xs">
-                          {tx.reference || "-"}
+                        <TableCell className="text-right">
+                          {formatCurrencyAmount(
+                            tx.totalCost || 0,
+                            tx.currency || "USD",
+                          )}
+                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate text-muted-foreground">
+                          {tx.reference || tx.notes || "-"}
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
-              </TableBody>
-            </Table>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile List View */}
+              <div className="sm:hidden space-y-4">
+                {transactions.map((tx) => (
+                  <div key={tx.id} className="border-b pb-4 last:border-0">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="outline"
+                            className={getTransactionColor(tx.transactionType)}
+                          >
+                            {tx.transactionType}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(tx.createdAt), "MMM d, HH:mm")}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">
+                          {tx.quantity > 0 ? "+" : ""}
+                          {tx.quantity} {ingredient.unitOfMeasure}
+                        </div>
+                      </div>
+                    </div>
+                    {(tx.reference || tx.notes) && (
+                      <div className="text-sm text-muted-foreground bg-muted/30 p-2 rounded">
+                        {tx.reference && (
+                          <span className="font-mono mr-2">{tx.reference}</span>
+                        )}
+                        {tx.notes}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
-        <DialogFooter
-          className={`${
-            isMobile
-              ? "sticky -bottom-4 -mx-4 px-4 pb-safe z-20 glass-footer flex flex-row gap-2 pt-4 border-t bg-background"
-              : "sm:justify-end border-t pt-4"
-          }`}
-        >
+        <DialogFooter className="sticky bottom-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t bg-background sm:static sm:border-0 sm:pt-4 sm:pb-4 sm:justify-end">
           <Button
-            className={isMobile ? "flex-1 h-12" : ""}
-            variant={isMobile ? "default" : "outline"}
+            className="w-full sm:w-auto h-12 sm:h-9 text-lg sm:text-sm font-bold"
+            variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            {isMobile ? "Close History" : t("common.labels.close")}
+            {t("common.actions.cancel")}
           </Button>
           <Slot name="inventory-history:footer" />
         </DialogFooter>

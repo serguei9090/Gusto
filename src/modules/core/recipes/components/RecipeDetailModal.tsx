@@ -8,7 +8,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMobile } from "@/hooks/useMobile";
 import { Slot } from "@/lib/slots/Slot";
 import { useRecipeStore } from "../store/recipes.store";
 import { ExperimentBadge } from "./ExperimentBadge";
@@ -24,7 +23,6 @@ export const RecipeDetailModal = ({
   recipeId,
   onClose,
 }: RecipeDetailModalProps) => {
-  const isMobile = useMobile();
   const {
     selectedRecipe,
     fetchFullRecipe,
@@ -126,13 +124,7 @@ export const RecipeDetailModal = ({
 
   return (
     <Dialog open={!!recipeId} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent
-        className={`${
-          isMobile
-            ? "w-full max-w-full rounded-none border-x-0 p-0 top-16 translate-y-0 h-full"
-            : "sm:max-w-4xl p-0"
-        } max-h-[90vh] overflow-hidden flex flex-col`}
-      >
+      <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-4xl sm:translate-x-[-50%] sm:translate-y-[-50%] rounded-none sm:rounded-lg border-x-0 sm:border p-0 sm:max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="p-6 border-b flex flex-row items-center justify-between print:hidden sticky top-0 bg-background z-10 shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-full hidden sm:block">

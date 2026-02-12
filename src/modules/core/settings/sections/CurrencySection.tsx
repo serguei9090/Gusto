@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useCurrencyStore } from "../store/currency.store";
 
@@ -31,7 +30,6 @@ export function setNavigateToCurrencySettings(fn: () => void) {
 
 export const CurrencySection = () => {
   const { t } = useTranslation();
-  const isMobile = useMobile();
   const { currencies, baseCurrency, loadCurrencies, setBaseCurrency } =
     useCurrencyStore();
 
@@ -41,9 +39,7 @@ export const CurrencySection = () => {
 
   return (
     <Card>
-      <CardHeader
-        className={`flex ${isMobile ? "flex-col gap-4" : "flex-row items-center justify-between"} space-y-0 pb-2`}
-      >
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between space-y-0 pb-2">
         <div className="space-y-1">
           <CardTitle>{t("settings.currency.title")}</CardTitle>
           <CardDescription>
@@ -54,7 +50,7 @@ export const CurrencySection = () => {
           <Button
             onClick={navigateToCurrencySettings}
             variant="outline"
-            className={isMobile ? "w-full" : ""}
+            className="w-full sm:w-auto"
           >
             Advanced Settings
           </Button>
@@ -70,7 +66,7 @@ export const CurrencySection = () => {
               {t("settings.currency.baseHelp")}
             </p>
             <Select value={baseCurrency} onValueChange={setBaseCurrency}>
-              <SelectTrigger className={isMobile ? "w-full h-12" : "w-[240px]"}>
+              <SelectTrigger className="w-full h-12 sm:w-[240px] sm:h-10">
                 <SelectValue
                   placeholder={t("settings.currency.selectCurrency")}
                 />

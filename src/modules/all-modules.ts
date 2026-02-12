@@ -37,7 +37,6 @@ export function registerModules() {
   const proExtensions = import.meta.glob("./pro/index.ts") as Record<
     string,
     () => Promise<{
-      registerProMobileUI: () => void;
       getProModules: () => ModuleDefinition[];
     }>
   >;
@@ -47,16 +46,10 @@ export function registerModules() {
   if (importFn) {
     importFn()
       .then((mod) => {
-        const { registerProMobileUI, getProModules } = mod;
+        const { getProModules } = mod;
         const mode = import.meta.env.VITE_APP_MODE;
 
-        // 1. ALWAYS register Pro Mobile UI for any mobile build
-        if (mode?.startsWith("mobile-") && registerProMobileUI) {
-          logger.info("Initializing Pro Mobile UI Layer...");
-          registerProMobileUI();
-        }
-
-        // 2. Register Pro Feature Modules only for 'pro' or 'mobile-pro' modes
+        // Register Pro Feature Modules only for 'pro' or 'mobile-pro' modes
         if (mode === "pro" || mode === "mobile-pro") {
           const proModules = getProModules?.() || [];
           logger.info(

@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DataCard, DataCardList } from "@/components/ui/data-card";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -90,7 +91,8 @@ export const PlateCostSandbox = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="border rounded-md overflow-hidden">
+        {/* Desktop Table View */}
+        <div className="hidden md:block border rounded-md overflow-hidden">
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow>
@@ -165,6 +167,88 @@ export const PlateCostSandbox = () => {
               )}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Mobile DataCard View */}
+        <div className="md:hidden">
+          <DataCardList
+            items={items}
+            emptyMessage="No ingredients added. Tap 'Add Ingredient' to start."
+            renderItem={(item) => (
+              <DataCard
+                key={item.id}
+                title={item.name || "New Ingredient"}
+                actions={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeItem(item.id)}
+                    className="text-destructive h-8 w-8 -mr-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                }
+                details={[
+                  {
+                    label: "Name",
+                    value: (
+                      <Input
+                        className="h-8 text-sm"
+                        value={item.name}
+                        placeholder="Ingredient Name"
+                        onChange={(e) =>
+                          updateItem(item.id, "name", e.target.value)
+                        }
+                      />
+                    ),
+                    className: "col-span-2 pb-2",
+                  },
+                  {
+                    label: "Quantity",
+                    value: (
+                      <div className="flex gap-2">
+                        <SmartNumericInput
+                          value={item.quantity}
+                          className="h-8 flex-1"
+                          onChange={(val) =>
+                            updateItem(item.id, "quantity", val)
+                          }
+                        />
+                        <UnitSelect
+                          value={item.unit}
+                          onValueChange={(val) =>
+                            updateItem(item.id, "unit", val)
+                          }
+                          className="h-8 w-[70px]"
+                        />
+                      </div>
+                    ),
+                    className: "col-span-2",
+                  },
+                  {
+                    label: "Price / Unit",
+                    value: (
+                      <SmartNumericInput
+                        value={item.pricePerUnit}
+                        className="h-8"
+                        onChange={(val) =>
+                          updateItem(item.id, "pricePerUnit", val)
+                        }
+                      />
+                    ),
+                  },
+                  {
+                    label: "Total Cost",
+                    value: (
+                      <div className="h-8 flex items-center font-mono font-bold">
+                        ${(item.quantity * item.pricePerUnit).toFixed(2)}
+                      </div>
+                    ),
+                  },
+                ]}
+              />
+            )}
+          />
         </div>
 
         <div className="flex justify-between items-center text-sm pt-2">

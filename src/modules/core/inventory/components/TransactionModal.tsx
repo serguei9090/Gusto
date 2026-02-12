@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Slot } from "@/lib/slots/Slot";
 import type {
@@ -50,7 +49,6 @@ export function TransactionModal({
   isLoading,
 }: TransactionModalProps) {
   const { t } = useTranslation();
-  const isMobile = useMobile();
   const {
     register,
     handleSubmit,
@@ -121,14 +119,12 @@ export function TransactionModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full" : "sm:max-w-[425px]"} max-h-[90vh] overflow-y-auto`}
-      >
+      <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-[425px] sm:translate-x-[-50%] sm:translate-y-[-50%] rounded-none sm:rounded-lg border-x-0 sm:border p-4 pt-6 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Update Stock: {ingredient.name}</DialogTitle>
           <DialogDescription>Record a stock transaction.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleTransact} className="space-y-4 pb-20">
+        <form onSubmit={handleTransact} className="space-y-4 pb-20 sm:pb-0">
           <div className="grid gap-4 py-2">
             {/* Transaction Type */}
             <div className="space-y-2">
@@ -145,7 +141,7 @@ export function TransactionModal({
                 }
                 defaultValue="purchase"
               >
-                <SelectTrigger className="h-12">
+                <SelectTrigger className="h-12 sm:h-10">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -242,7 +238,7 @@ export function TransactionModal({
                 type="number"
                 step="any"
                 {...register("quantity", { valueAsNumber: true })}
-                className="h-12"
+                className="h-12 sm:h-10"
                 onFocus={(e) => e.target.select()}
               />
               {errors.quantity && (
@@ -269,7 +265,7 @@ export function TransactionModal({
                 type="number"
                 step="0.01"
                 {...register("costPerUnit", { valueAsNumber: true })}
-                className="h-12"
+                className="h-12 sm:h-10"
                 onFocus={(e) => e.target.select()}
               />
               {isUsingPurchaseUnit && ingredient.conversionRatio && (
@@ -330,7 +326,7 @@ export function TransactionModal({
                 id="reference"
                 placeholder="e.g. INV-12345"
                 {...register("reference")}
-                className="h-12"
+                className="h-12 sm:h-10"
               />
             </div>
 
@@ -348,25 +344,19 @@ export function TransactionModal({
             </div>
           </div>
 
-          <DialogFooter
-            className={`${
-              isMobile
-                ? "sticky -bottom-4 -mx-4 px-4 pb-safe z-20 glass-footer flex-row gap-2 pt-4 border-t bg-background"
-                : "sm:justify-end"
-            }`}
-          >
+          <DialogFooter className="sticky -bottom-4 -mx-4 px-4 pb-safe pt-4 border-t bg-background sm:static sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:border-t-0 flex flex-row sm:justify-end gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className={isMobile ? "flex-1" : ""}
+              className="flex-1 sm:flex-none h-12 sm:h-9"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
-              className={isMobile ? "flex-1" : ""}
+              className="flex-1 sm:flex-none h-12 sm:h-9"
             >
               {isLoading ? "Saving..." : "Save Transaction"}
             </Button>

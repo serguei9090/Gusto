@@ -7,14 +7,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { CategoryConfigModal } from "../components/CategoryConfigModal";
 import { UnitConfigModal } from "../components/UnitConfigModal";
 
 export const ConfigSection = () => {
   const { t } = useTranslation();
-  const isMobile = useMobile();
+
   const [activeModal, setActiveModal] = useState<
     "units" | "ingredient_category" | "recipe_category" | null
   >(null);
@@ -28,9 +27,7 @@ export const ConfigSection = () => {
     description: string;
     onClick: () => void;
   }) => (
-    <div
-      className={`flex ${isMobile ? "flex-col gap-4" : "items-center justify-between"} p-4 border rounded-xl bg-card/50 hover:bg-muted/30 transition-all duration-200 shadow-sm border-muted/50`}
-    >
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-xl bg-card/50 hover:bg-muted/30 transition-all duration-200 shadow-sm border-muted/50 gap-4">
       <div className="space-y-1">
         <h4 className="text-sm font-bold uppercase tracking-tight">{title}</h4>
         <p className="text-xs text-muted-foreground">{description}</p>
@@ -38,8 +35,8 @@ export const ConfigSection = () => {
       <Button
         onClick={onClick}
         variant="secondary"
-        size={isMobile ? "default" : "sm"}
-        className={isMobile ? "w-full font-bold h-10" : "font-semibold"}
+        size="sm"
+        className="w-full sm:w-auto font-bold h-10 sm:h-9"
       >
         {t("settings.config.manage")}
       </Button>
@@ -48,12 +45,12 @@ export const ConfigSection = () => {
 
   return (
     <>
-      <Card className={isMobile ? "border-0 shadow-none bg-transparent" : ""}>
-        <CardHeader className={isMobile ? "px-0" : ""}>
+      <Card className="border-0 shadow-none bg-transparent sm:border sm:shadow-sm sm:bg-card">
+        <CardHeader className="px-0 sm:px-6">
           <CardTitle>{t("settings.config.title")}</CardTitle>
           <CardDescription>{t("settings.config.description")}</CardDescription>
         </CardHeader>
-        <CardContent className={isMobile ? "px-0" : "space-y-6"}>
+        <CardContent className="px-0 sm:px-6 space-y-6">
           <div className="grid gap-4">
             <ConfigItem
               title={t("settings.config.units")}

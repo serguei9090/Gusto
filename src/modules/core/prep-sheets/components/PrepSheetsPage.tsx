@@ -1,14 +1,9 @@
-import { ClipboardList, Eye, History, Trash2 } from "lucide-react";
+import { ClipboardList, Eye, History, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { DataCard, DataCardList } from "@/components/ui/data-card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -18,17 +13,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
-import { useMobileComponent } from "@/lib/mobile-registry";
 import { usePrepSheetsStore } from "@/modules/core/prep-sheets/store/prep-sheets.store";
 import type { PrepSheet } from "@/modules/core/prep-sheets/types";
 import { PrepSheetBuilder } from "./PrepSheetBuilder";
 import { PrepSheetView } from "./PrepSheetView";
 
 export const PrepSheetsPage = () => {
-  const isMobile = useMobile();
-  const MobileComponent = useMobileComponent("MobilePrepSheets");
   const {
     prepSheets,
     fetchPrepSheets,
@@ -43,7 +34,6 @@ export const PrepSheetsPage = () => {
   const { t } = useTranslation();
 
   const [viewingSheet, setViewingSheet] = useState<PrepSheet | null>(null);
-  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("create");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -70,7 +60,6 @@ export const PrepSheetsPage = () => {
       await saveSheet(viewingSheet);
       setViewingSheet(null);
       clearBuilder();
-      setIsBuilderOpen(false);
       setActiveTab("saved"); // Switch to saved sheets tab
     }
   };
@@ -85,172 +74,201 @@ export const PrepSheetsPage = () => {
     }
   };
 
-  if (isMobile && MobileComponent) {
-    return (
-      <div className="h-full">
-        <MobileComponent
-          prepSheets={filteredPrepSheets}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          setIsBuilderOpen={setIsBuilderOpen}
-          setViewingSheet={setViewingSheet}
-          handleDelete={handleDelete}
-          notification={notification}
-          clearNotification={clearNotification}
-          t={t}
-        />
+  return (
+    <div className="h-full flex flex-col space-y-4 md:space-y-6 md:p-8 p-0">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between px-4 md:px-0 pt-4 md:pt-0">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+            {t("prepSheets.title")}
+          </h2>
+          <p className="text-sm md:text-base text-muted-foreground">
+            {t("prepSheets.subtitle")}
+          </p>
+        </div>
+      </div>
 
-        {/* Builder Dialog for Mobile */}
-        <Dialog open={isBuilderOpen} onOpenChange={setIsBuilderOpen}>
-          <DialogContent className="w-full max-w-full rounded-none border-x-0 p-4 pt-6 top-16 translate-y-0 h-full max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{t("prepSheets.createNew")}</DialogTitle>
-              <DialogDescription>
-                Select recipes and servings to generate a new prep list.
-              </DialogDescription>
-            </DialogHeader>
+      <div className="flex-1 flex flex-col px-4 md:px-0">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="flex-1 flex flex-col space-y-4"
+        >
+          <TabsList className="w-full md:w-auto">
+            <TabsTrigger value="create" className="flex-1 md:flex-none">
+              {t("prepSheets.createNew")}
+            </TabsTrigger>
+            <TabsTrigger value="saved" className="flex-1 md:flex-none">
+              <History className="mr-2 h-4 w-4" />
+              {t("prepSheets.savedSheets")} ({prepSheets.length})
+            </TabsTrigger>
+          </TabsList>
+
+          {notification && (
+            <div
+              className={`p-4 rounded-md flex items-center justify-between transition-all animate-in fade-in slide-in-from-top-4 ${
+                notification.type === "success"
+                  ? "bg-green-100 text-green-800 border-green-200"
+                  : "bg-red-100 text-red-800 border-red-200"
+              } border`}
+            >
+              <span>{notification.message}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearNotification}
+                className="h-auto p-1"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          <TabsContent value="create" className="space-y-4 flex-1">
             <PrepSheetBuilder
               onGenerate={handleGenerate}
               isLoading={isLoading}
             />
-          </DialogContent>
-        </Dialog>
+          </TabsContent>
 
-        {viewingSheet && (
-          <PrepSheetView
-            sheet={viewingSheet}
-            onClose={() => setViewingSheet(null)}
-            onSave={handleSave}
-            showSaveButton={!viewingSheet.id} // Only show save if not already saved (has ID)
-          />
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div className="h-full flex flex-col space-y-6 p-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            {t("prepSheets.title")}
-          </h2>
-          <p className="text-muted-foreground">{t("prepSheets.subtitle")}</p>
-        </div>
-      </div>
-
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="space-y-4"
-      >
-        <TabsList>
-          <TabsTrigger value="create">{t("prepSheets.createNew")}</TabsTrigger>
-          <TabsTrigger value="saved">
-            <History className="mr-2 h-4 w-4" />
-            {t("prepSheets.savedSheets")} ({prepSheets.length})
-          </TabsTrigger>
-        </TabsList>
-
-        {notification && (
-          <div
-            className={`p-4 rounded-md flex items-center justify-between transition-all animate-in fade-in slide-in-from-top-4 ${
-              notification.type === "success"
-                ? "bg-green-100 text-green-800 border-green-200"
-                : "bg-red-100 text-red-800 border-red-200"
-            } border`}
-          >
-            <span>{notification.message}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearNotification}
-              className="h-auto p-1"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-
-        <TabsContent value="create" className="space-y-4">
-          <PrepSheetBuilder onGenerate={handleGenerate} isLoading={isLoading} />
-        </TabsContent>
-
-        <TabsContent value="saved">
-          {prepSheets.length === 0 ? (
-            <div className="text-center py-12 border rounded-md bg-muted/10">
-              <ClipboardList className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
-              <h3 className="text-lg font-medium">
-                {t("prepSheets.noSavedSheets")}
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                {t("prepSheets.generatePrompt")}
-              </p>
+          <TabsContent value="saved" className="space-y-4 flex-1">
+            {/* Search for Saved Sheets */}
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t("common.labels.search")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8"
+              />
             </div>
-          ) : (
-            <div className="rounded-md border bg-card">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("common.labels.name")}</TableHead>
-                    <TableHead>{t("common.labels.date")}</TableHead>
-                    <TableHead>{t("prepSheets.shift")}</TableHead>
-                    <TableHead>{t("prepSheets.recipes")}</TableHead>
-                    <TableHead className="text-right">
-                      {t("prepSheets.actions")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {prepSheets.map((sheet) => (
-                    <TableRow key={sheet.id}>
-                      <TableCell className="font-medium">
-                        {sheet.name}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(sheet.date).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        {sheet.shift ? (
-                          <Badge variant="outline" className="capitalize">
-                            {sheet.shift}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">
-                            -
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>{sheet.recipes.length} recipes</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+
+            {prepSheets.length === 0 ? (
+              <div className="text-center py-12 border rounded-md bg-muted/10">
+                <ClipboardList className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
+                <h3 className="text-lg font-medium">
+                  {t("prepSheets.noSavedSheets")}
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  {t("prepSheets.generatePrompt")}
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Mobile List View */}
+                <div className="md:hidden">
+                  <DataCardList
+                    items={filteredPrepSheets}
+                    emptyMessage={t("prepSheets.noSavedSheets")}
+                    renderItem={(sheet) => (
+                      <DataCard
+                        key={sheet.id}
+                        title={sheet.name}
+                        subtitle={new Date(sheet.date).toLocaleDateString()}
+                        onClick={() => setViewingSheet(sheet)}
+                        actions={
                           <Button
                             variant="ghost"
-                            size="sm"
-                            onClick={() => setViewingSheet(sheet)}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />{" "}
-                            {t("prepSheets.view")}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            // biome-ignore lint/style/noNonNullAssertion: ID is guaranteed
-                            onClick={() => handleDelete(sheet.id!)}
-                            className="text-destructive"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // biome-ignore lint/style/noNonNullAssertion: ID is guaranteed
+                              handleDelete(sheet.id!);
+                            }}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+                        }
+                        details={[
+                          {
+                            label: "Shift",
+                            value: sheet.shift ? (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] h-5"
+                              >
+                                {sheet.shift}
+                              </Badge>
+                            ) : (
+                              "-"
+                            ),
+                          },
+                          {
+                            label: "Recipes",
+                            value: `${sheet.recipes.length} recipes`,
+                          },
+                        ]}
+                      />
+                    )}
+                  />
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block rounded-md border bg-card">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t("common.labels.name")}</TableHead>
+                        <TableHead>{t("common.labels.date")}</TableHead>
+                        <TableHead>{t("prepSheets.shift")}</TableHead>
+                        <TableHead>{t("prepSheets.recipes")}</TableHead>
+                        <TableHead className="text-right">
+                          {t("prepSheets.actions")}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPrepSheets.map((sheet) => (
+                        <TableRow key={sheet.id}>
+                          <TableCell className="font-medium">
+                            {sheet.name}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(sheet.date).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            {sheet.shift ? (
+                              <Badge variant="outline" className="capitalize">
+                                {sheet.shift}
+                              </Badge>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">
+                                -
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell>{sheet.recipes.length} recipes</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setViewingSheet(sheet)}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />{" "}
+                                {t("prepSheets.view")}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                // biome-ignore lint/style/noNonNullAssertion: ID is guaranteed
+                                onClick={() => handleDelete(sheet.id!)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {viewingSheet && (
         <PrepSheetView

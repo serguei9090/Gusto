@@ -1,35 +1,36 @@
 import { RotateCcw } from "lucide-react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useSettingsSections } from "./registry";
+import { setNavigateToCurrencySettings } from "./sections/CurrencySection";
 import { useSettingsStore } from "./store/settings.store";
 
 interface SettingsPageProps {
   onNavigateToCurrencySettings?: () => void;
   onNavigateToAppConfig?: () => void;
+  onBack?: () => void;
 }
 
 export const SettingsPage = ({
-  onNavigateToCurrencySettings: _onNavigateToCurrencySettings,
-  onNavigateToAppConfig: _onNavigateToAppConfig,
+  onNavigateToCurrencySettings,
 }: SettingsPageProps) => {
   const { t } = useTranslation();
-  const isMobile = useMobile();
   const { resetDefaults } = useSettingsStore();
   const sections = useSettingsSections();
 
+  // Wire up the navigation for the CurrencySection
+  useEffect(() => {
+    if (onNavigateToCurrencySettings) {
+      setNavigateToCurrencySettings(onNavigateToCurrencySettings);
+    }
+  }, [onNavigateToCurrencySettings]);
+
   return (
-    <div
-      className={`h-full flex flex-col space-y-6 ${isMobile ? "p-4" : "p-8"}`}
-    >
-      <div
-        className={`flex justify-between items-center ${isMobile ? "flex-col items-start gap-4" : ""}`}
-      >
+    <div className="h-full flex flex-col space-y-6 p-4 md:p-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
-          <h2
-            className={`${isMobile ? "text-2xl" : "text-3xl"} font-bold tracking-tight`}
-          >
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
             {t("settings.title")}
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -38,9 +39,9 @@ export const SettingsPage = ({
         </div>
         <Button
           variant="outline"
-          size={isMobile ? "default" : "sm"}
+          size="default"
           onClick={resetDefaults}
-          className={isMobile ? "w-full" : ""}
+          className="w-full md:w-auto md:h-9 md:px-3"
         >
           <RotateCcw className="mr-2 h-4 w-4" />
           {t("settings.currency.resetDefaults")}

@@ -9,13 +9,19 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useRegistry } from "@/lib/modules/registry";
 import { useSettingsStore } from "@/modules/core/settings/store/settings.store";
 import type { ModuleDefinition } from "@/types/module";
+import packageJson from "../../package.json";
 
 interface SidebarProps {
   currentView: string;
   onChangeView: (view: string) => void;
+  isSheet?: boolean;
 }
 
-export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
+export const Sidebar = ({
+  currentView,
+  onChangeView,
+  isSheet,
+}: SidebarProps) => {
   const { t } = useTranslation();
   const { modules, moduleOrder } = useSettingsStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -103,9 +109,9 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
       className="bg-card border-r flex flex-col h-full shadow-sm overflow-hidden"
     >
       <div
-        className={`h-16 flex items-center border-b text-primary font-bold text-lg transition-all duration-300 ${isCollapsed ? "justify-center px-0" : "justify-between px-4"} `}
+        className={`h-16 flex items-center border-b text-primary font-bold text-lg transition-all duration-300 ${isCollapsed ? "justify-center px-0" : "justify-between px-4"}`}
       >
-        {isMobile && (
+        {isSheet && (
           <SheetClose asChild>
             <Button variant="ghost" size="icon" className="shrink-0 -ml-2">
               <X className="h-6 w-6" />
@@ -207,26 +213,16 @@ export const Sidebar = ({ currentView, onChangeView }: SidebarProps) => {
         </button>
       </div>
 
-      {/* Version Footer */}
       <div className="p-3 border-t bg-muted/30">
         <AnimatePresence>
-          {isCollapsed ? (
+          {!isCollapsed && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="text-[10px] text-muted-foreground text-center"
             >
-              {t("app.version_label", { version: "1.0" })}
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-[10px] text-muted-foreground text-center"
-            >
-              {t("app.version_full", { name: "Gusto", version: "1.0.0" })}
+              Gusto v{packageJson.version}
             </motion.div>
           )}
         </AnimatePresence>

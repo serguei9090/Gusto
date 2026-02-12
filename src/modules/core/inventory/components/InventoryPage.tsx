@@ -1,11 +1,19 @@
-import { AlertTriangle, Package, Search } from "lucide-react";
+import {
+  AlertTriangle,
+  DollarSign,
+  Edit3,
+  History,
+  Package,
+  Search,
+} from "lucide-react";
 import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataCard, DataCardList } from "@/components/ui/data-card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
-import { useMobileComponent } from "@/lib/mobile-registry";
 import { useIngredientsStore } from "@/modules/core/ingredients/store/ingredients.store";
 import { useInventoryStore } from "@/modules/core/inventory/store/inventory.store";
 import type { Ingredient } from "@/types/ingredient.types";
@@ -23,8 +31,6 @@ export const InventoryPage = () => {
     error,
   } = useInventoryStore();
   const { t } = useTranslation();
-  const isMobile = useMobile();
-  const MobileComponent = useMobileComponent("MobileInventory");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIngredient, setSelectedIngredient] =
@@ -66,59 +72,26 @@ export const InventoryPage = () => {
     setIsHistoryOpen(true);
   };
 
-  if (isMobile && MobileComponent) {
-    return (
-      <div className="h-full">
-        <MobileComponent
-          ingredients={filteredIngredients}
-          lowStockItems={lowStockItems}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          error={error}
-          t={t}
-          openTransactionModal={openTransactionModal}
-          openHistoryModal={openHistoryModal}
-        />
-
-        {selectedIngredient && (
-          <TransactionModal
-            ingredient={selectedIngredient}
-            open={isModalOpen}
-            onOpenChange={(val) => {
-              setIsModalOpen(val);
-              if (!val) setSelectedIngredient(null);
-            }}
-            onSubmit={handleTransaction}
-            isLoading={loadingInv}
-          />
-        )}
-
-        {historyIngredient && (
-          <InventoryHistoryModal
-            ingredient={historyIngredient}
-            open={isHistoryOpen}
-            onOpenChange={(val) => {
-              setIsHistoryOpen(val);
-              if (!val) setHistoryIngredient(null);
-            }}
-          />
-        )}
-      </div>
-    );
-  }
+  const totalValue = ingredients.reduce(
+    (acc, curr) => acc + curr.currentStock * curr.pricePerUnit,
+    0,
+  );
 
   return (
-    <div className="h-full p-8 flex flex-col space-y-6">
+    <div className="h-full flex flex-col space-y-4 md:space-y-6 p-4 md:p-8 pb-24 md:pb-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
             {t("inventory.title")}
           </h2>
-          <p className="text-muted-foreground">{t("inventory.subtitle")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("inventory.subtitle")}
+          </p>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Stats Cards - Responsive Grid/Scroll */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -149,12 +122,30 @@ export const InventoryPage = () => {
             </p>
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Inventory Value
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              $
+              {totalValue.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">Total Assets</p>
+          </CardContent>
+        </Card>
       </div>
 
       <Separator />
 
       <div className="flex items-center space-x-2">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1 md:max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t("inventory.searchPlaceholder")}
@@ -171,7 +162,94 @@ export const InventoryPage = () => {
         </div>
       )}
 
-      <div className="flex-1 overflow-auto bg-card rounded-md border">
+      {/* Mobile ListView */}
+      <div className="md:hidden">
+        <DataCardList
+          items={filteredIngredients}
+          emptyMessage="No ingredients found."
+          renderItem={(ingredient) => {
+            const isLow =
+              ingredient.minStockLevel !== null &&
+              ingredient.currentStock <= ingredient.minStockLevel;
+
+            return (
+              <DataCard
+                key={ingredient.id}
+                title={ingredient.name}
+                subtitle={ingredient.category}
+                className={
+                  isLow ? "border-destructive/50 bg-destructive/5" : ""
+                }
+                actions={
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openTransactionModal(ingredient);
+                      }}
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openHistoryModal(ingredient);
+                      }}
+                    >
+                      <History className="h-4 w-4" />
+                    </Button>
+                  </div>
+                }
+                details={[
+                  {
+                    label: "Stock",
+                    value: (
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`font-bold ${isLow ? "text-destructive" : ""}`}
+                        >
+                          {Number(ingredient.currentStock.toFixed(2))}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {ingredient.unitOfMeasure}
+                        </span>
+                      </div>
+                    ),
+                  },
+                  {
+                    label: "Value",
+                    value: `$${(ingredient.currentStock * ingredient.pricePerUnit).toFixed(2)}`,
+                  },
+                  ...(isLow
+                    ? [
+                        {
+                          label: "Status",
+                          value: (
+                            <Badge
+                              variant="destructive"
+                              className="h-5 text-[10px] px-2 uppercase rounded-full"
+                            >
+                              Low Stock
+                            </Badge>
+                          ),
+                        },
+                      ]
+                    : []),
+                ]}
+              />
+            );
+          }}
+        />
+      </div>
+
+      {/* Desktop TableView */}
+      <div className="hidden md:block flex-1 overflow-auto bg-card rounded-md border text-sm">
         <InventoryTable
           ingredients={filteredIngredients}
           onRecordTransaction={openTransactionModal}

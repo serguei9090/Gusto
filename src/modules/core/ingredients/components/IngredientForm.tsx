@@ -21,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { CurrencySelector } from "@/modules/core/settings/components/CurrencySelector";
 import { useConfigStore } from "@/modules/core/settings/store/config.store";
@@ -50,7 +49,6 @@ export const IngredientForm = ({
   isEdit = false,
 }: IngredientFormProps) => {
   const { t } = useTranslation();
-  const isMobile = useMobile();
   const { suppliers, fetchSuppliers } = useSuppliersStore();
   const { initialize: initializeCurrency } = useCurrencyStore();
   const { getIngredientCategories } = useConfigStore();
@@ -217,9 +215,7 @@ export const IngredientForm = ({
             <Label className="text-base font-semibold">
               Pricing Configuration
             </Label>
-            <div
-              className={`grid grid-cols-2 gap-1 bg-muted p-1 rounded-md ${isMobile ? "w-full" : "w-auto"}`}
-            >
+            <div className="grid grid-cols-2 gap-1 bg-muted p-1 rounded-md w-full md:w-auto">
               <Button
                 type="button"
                 variant={pricingMode === "unit" ? "default" : "ghost"}
@@ -483,19 +479,13 @@ export const IngredientForm = ({
           </select>
         </div>
 
-        <div
-          className={`${
-            isMobile
-              ? "sticky -bottom-4 -mx-4 px-4 pb-safe z-20 glass-footer flex flex-row gap-2 pt-4 border-t bg-background"
-              : "flex justify-end mt-8 gap-4"
-          }`}
-        >
+        <div className="flex flex-row gap-2 mt-8 md:justify-end sticky md:static bottom-0 md:bottom-auto -mx-4 md:mx-0 px-4 md:px-0 pb-safe md:pb-0 pt-4 md:pt-0 border-t md:border-t-0 bg-background md:bg-transparent z-20 md:z-auto">
           {onCancel && (
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
-              className={isMobile ? "flex-1 h-12 text-base" : ""}
+              className="flex-1 md:flex-none h-12 md:h-10 text-base md:text-sm"
             >
               {t("common.actions.cancel")}
             </Button>
@@ -503,7 +493,7 @@ export const IngredientForm = ({
           <Button
             type="submit"
             disabled={isLoading}
-            className={isMobile ? "flex-1 h-12 text-base" : ""}
+            className="flex-1 md:flex-none h-12 md:h-10 text-base md:text-sm"
           >
             {isLoading ? t("common.messages.saving") : t("common.actions.save")}
           </Button>

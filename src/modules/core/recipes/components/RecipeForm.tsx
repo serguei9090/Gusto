@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useMobile } from "@/hooks/useMobile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { UnitSelect } from "@/modules/core/ingredients/components/UnitSelect";
 import { useIngredientsStore } from "@/modules/core/ingredients/store/ingredients.store";
@@ -84,7 +83,6 @@ export const RecipeForm = ({
   recipeId,
 }: RecipeFormProps) => {
   const { t } = useTranslation();
-  const isMobile = useMobile();
   const { ingredients: allIngredients, fetchIngredients } =
     useIngredientsStore();
   const { recipes: allRecipes, fetchRecipes } = useRecipeStore();
@@ -894,25 +892,19 @@ export const RecipeForm = ({
         </CardContent>
       </Card>
 
-      <div
-        className={`${
-          isMobile
-            ? "sticky -bottom-4 -mx-4 px-4 pb-safe z-20 glass-footer flex flex-row gap-2 pt-4 border-t bg-background"
-            : "flex justify-end mt-8 gap-4"
-        }`}
-      >
+      <div className="sticky -bottom-4 -mx-4 px-4 pb-safe pt-4 border-t bg-background sm:static sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:border-t-0 flex flex-row gap-2 mt-8 sm:justify-end sm:gap-4">
         <Button
           variant="outline"
           onClick={onCancel}
           type="button"
-          className={isMobile ? "flex-1 h-12 text-base" : ""}
+          className="flex-1 sm:flex-none h-12 sm:h-9 text-base sm:text-sm"
         >
           {t("common.actions.cancel")}
         </Button>
         <Button
           type="submit"
           disabled={isLoading}
-          className={isMobile ? "flex-1 h-12 text-base" : ""}
+          className="flex-1 sm:flex-none h-12 sm:h-9 text-base sm:text-sm"
         >
           {initialData?.name ? "Update Recipe" : "Save Recipe"}
         </Button>

@@ -34,7 +34,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { useMobile } from "@/hooks/useMobile";
 import { usePrepSheetsStore } from "@/modules/core/prep-sheets/store/prep-sheets.store";
 import type { PrepSheetFormData } from "@/modules/core/prep-sheets/types";
 import { useRecipeStore } from "@/modules/core/recipes/store/recipes.store";
@@ -57,7 +56,6 @@ export function PrepSheetBuilder({
     setBuilderField,
   } = usePrepSheetsStore();
 
-  const isMobile = useMobile();
   const { recipes, fetchRecipes } = useRecipeStore();
 
   const { name, date, shift, prepCookName, notes } = builderFields;
@@ -110,14 +108,12 @@ export function PrepSheetBuilder({
 
   return (
     <div className="space-y-6 pb-32 sm:pb-0">
-      <Card className={isMobile ? "border-0 shadow-none" : ""}>
-        <CardHeader className={isMobile ? "px-0 pb-2" : ""}>
+      <Card className="border-0 shadow-none sm:border sm:shadow-sm">
+        <CardHeader className="px-0 pb-2 sm:px-6 sm:pb-6">
           <CardTitle>Prep Sheet Details</CardTitle>
         </CardHeader>
-        <CardContent className={isMobile ? "px-0" : ""}>
-          <div
-            className={`grid gap-4 ${isMobile ? "grid-cols-1" : "md:grid-cols-2"}`}
-          >
+        <CardContent className="px-0 sm:px-6">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">
                 Sheet Name <span className="text-destructive">*</span>
@@ -127,13 +123,11 @@ export function PrepSheetBuilder({
                 placeholder="e.g. Monday Morning Prep"
                 value={name}
                 onChange={(e) => setBuilderField("name", e.target.value)}
-                className={isMobile ? "h-12 text-base" : ""}
+                className="h-12 text-base sm:h-10 sm:text-sm"
               />
             </div>
 
-            <div
-              className={`grid gap-4 ${isMobile ? "grid-cols-1" : "grid-cols-2"}`}
-            >
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="date">
                   Date <span className="text-destructive">*</span>
@@ -143,7 +137,7 @@ export function PrepSheetBuilder({
                   type="date"
                   value={date}
                   onChange={(e) => setBuilderField("date", e.target.value)}
-                  className={isMobile ? "h-12 text-base" : ""}
+                  className="h-12 text-base sm:h-10 sm:text-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -154,7 +148,7 @@ export function PrepSheetBuilder({
                     setBuilderField("shift", val as "morning" | "evening")
                   }
                 >
-                  <SelectTrigger id="shift" className={isMobile ? "h-12" : ""}>
+                  <SelectTrigger id="shift" className="h-12 sm:h-10">
                     <SelectValue placeholder="Select shift" />
                   </SelectTrigger>
                   <SelectContent>
@@ -174,7 +168,7 @@ export function PrepSheetBuilder({
                 onChange={(e) =>
                   setBuilderField("prepCookName", e.target.value)
                 }
-                className={isMobile ? "h-12 text-base" : ""}
+                className="h-12 text-base sm:h-10 sm:text-sm"
               />
             </div>
 
@@ -185,8 +179,8 @@ export function PrepSheetBuilder({
                 placeholder="Special instructions..."
                 value={notes}
                 onChange={(e) => setBuilderField("notes", e.target.value)}
-                rows={isMobile ? 3 : 2}
-                className="text-base"
+                rows={3}
+                className="text-base sm:text-sm min-h-[80px]"
               />
             </div>
           </div>
@@ -207,7 +201,7 @@ export function PrepSheetBuilder({
         <Button
           variant="outline"
           onClick={() => setIsSelectorOpen(true)}
-          className={`w-full justify-between h-14 px-4 rounded-xl border-2 border-dashed hover:border-primary/50 hover:bg-primary/5 group ${isMobile ? "text-base" : ""}`}
+          className="w-full justify-between h-14 px-4 rounded-xl border-2 border-dashed hover:border-primary/50 hover:bg-primary/5 group text-base sm:text-sm"
         >
           <div className="flex items-center gap-3">
             <Search className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -225,8 +219,8 @@ export function PrepSheetBuilder({
               <p className="text-sm">No recipes selected. Tap above to add.</p>
             </div>
           ) : (
-            <div className={isMobile ? "space-y-3" : ""}>
-              {!isMobile ? (
+            <div className="space-y-3 sm:space-y-0">
+              <div className="hidden sm:block">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -276,8 +270,9 @@ export function PrepSheetBuilder({
                     ))}
                   </TableBody>
                 </Table>
-              ) : (
-                selectedRecipesData.map((item) => (
+              </div>
+              <div className="sm:hidden space-y-3">
+                {selectedRecipesData.map((item) => (
                   <div
                     key={item.recipeId}
                     className="p-4 bg-background rounded-xl border shadow-sm flex items-center justify-between gap-4 animate-in fade-in slide-in-from-right-4 duration-300"
@@ -318,36 +313,27 @@ export function PrepSheetBuilder({
                       </Button>
                     </div>
                   </div>
-                ))
-              )}
+                ))}
+              </div>
             </div>
           )}
         </div>
       </div>
 
       {/* Floating Action Button for Mobile / Right-aligned for Desktop */}
-      <div
-        className={
-          isMobile
-            ? "fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl z-[100] border-t glass-footer pb-safe"
-            : "flex justify-end pt-8"
-        }
-      >
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl z-[100] border-t glass-footer pb-safe sm:static sm:bg-transparent sm:border-0 sm:p-0 sm:flex sm:justify-end sm:pt-8">
         <Button
-          size={isMobile ? "lg" : "default"}
+          size="lg"
           onClick={() => handleSubmit()}
           disabled={!isValid || isLoading}
-          className={
-            isMobile
-              ? "w-full h-14 text-lg font-bold shadow-2xl rounded-2xl"
-              : "px-8 py-6 text-base font-semibold"
-          }
+          className="w-full h-14 text-lg font-bold shadow-2xl rounded-2xl sm:w-auto sm:h-10 sm:text-base sm:rounded-md sm:shadow-none sm:px-8"
         >
           {isLoading ? (
             "Generating..."
           ) : (
             <>
-              <Wand2 className="mr-3 h-6 w-6" /> Generate Prep Sheet
+              <Wand2 className="mr-3 h-6 w-6 sm:h-4 sm:w-4 sm:mr-2" /> Generate
+              Prep Sheet
             </>
           )}
         </Button>
@@ -355,9 +341,7 @@ export function PrepSheetBuilder({
 
       {/* Modern Searchable Selection Dialog */}
       <Dialog open={isSelectorOpen} onOpenChange={setIsSelectorOpen}>
-        <DialogContent
-          className={`${isMobile ? "w-full max-w-full rounded-none border-x-0 p-0 top-[15vh] translate-y-0 h-[85vh] flex flex-col" : "sm:max-w-[500px] h-[600px] flex flex-col p-0"}`}
-        >
+        <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 rounded-none border-x-0 p-0 flex flex-col sm:max-w-[500px] sm:h-[600px] sm:fixed sm:top-1/2 sm:left-1/2 sm:-translate-y-1/2 sm:-translate-x-1/2 sm:rounded-lg sm:border">
           <DialogHeader className="p-4 border-b">
             <DialogTitle>Search Recipes</DialogTitle>
           </DialogHeader>
