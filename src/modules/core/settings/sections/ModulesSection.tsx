@@ -28,7 +28,11 @@ export const ModulesSection = () => {
 
   const displayOrder = useMemo(() => {
     // Start with the stored order (excluding "settings" which has its own section)
-    const stored = moduleOrder.filter((id) => id !== "settings");
+    // AND filter against currently registered modules to avoid showing "ghost" Pro modules in Core mode
+    const stored = moduleOrder.filter((id) => {
+      if (id === "settings") return false;
+      return allModules.some((m) => m.id.toLowerCase() === id.toLowerCase());
+    });
 
     // Discover modules registered at runtime but not yet in the store
     const discovered = allModules
