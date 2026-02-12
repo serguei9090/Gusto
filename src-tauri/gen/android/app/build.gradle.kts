@@ -77,7 +77,7 @@ android.applicationVariants.all {
         val mode = System.getenv("VITE_APP_MODE") ?: "core"
         val appName = if (mode.contains("pro")) "Gusto-Pro" else "Gusto"
         
-        val version = tauriProperties.getProperty("tauri.android.versionName", "1.0.5")
+        val version = tauriProperties.getProperty("tauri.android.versionName", "1.0.6")
         output.outputFileName = "${appName}-${variantName}-${version}.apk"
     }
 }
