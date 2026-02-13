@@ -24,7 +24,7 @@ network: defaults
 
 engine:
   id: copilot
-  model: gpt-4o # Upgrading to a more robust model for complex logic
+  model: gpt-5.3-codex # Using a high-capability model supported by the environment
 
 safe-outputs:
   create-issue:
