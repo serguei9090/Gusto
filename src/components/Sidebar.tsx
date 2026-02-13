@@ -148,12 +148,13 @@ export const Sidebar = ({
       </div>
 
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto overflow-x-hidden">
-        {displayItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => onChangeView(item.id)}
-            type="button"
-            className={`
+        {displayItems.map((item) => {
+          const ButtonContent = (
+            <button
+              key={item.id}
+              onClick={() => onChangeView(item.id)}
+              type="button"
+              className={`
               w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors relative
               ${
                 currentView === item.id
@@ -162,31 +163,44 @@ export const Sidebar = ({
               }
               ${isCollapsed ? "justify-center" : ""}
             `}
-            title={isCollapsed ? item.label : undefined}
-          >
-            <item.icon size={20} className="shrink-0" />
-            <AnimatePresence>
-              {isCollapsed ? null : (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  className="whitespace-nowrap overflow-hidden"
-                >
-                  {item.label}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </button>
-        ))}
+              title={isCollapsed ? item.label : undefined}
+            >
+              <item.icon size={20} className="shrink-0" />
+              <AnimatePresence>
+                {isCollapsed ? null : (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="whitespace-nowrap overflow-hidden"
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+          );
+
+          if (isSheet) {
+            return (
+              <SheetClose key={item.id} asChild>
+                {ButtonContent}
+              </SheetClose>
+            );
+          }
+
+          return ButtonContent;
+        })}
       </nav>
 
       {/* Settings Button */}
       <div className="p-2 border-t">
-        <button
-          onClick={() => onChangeView("settings")}
-          type="button"
-          className={`
+        {(() => {
+          const SettingsButton = (
+            <button
+              onClick={() => onChangeView("settings")}
+              type="button"
+              className={`
             w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors relative
             ${
               currentView === "settings"
@@ -195,22 +209,30 @@ export const Sidebar = ({
             }
             ${isCollapsed ? "justify-center" : ""}
           `}
-          title={isCollapsed ? settingsConfig.label : undefined}
-        >
-          <settingsConfig.icon size={20} className="shrink-0" />
-          <AnimatePresence>
-            {isCollapsed ? null : (
-              <motion.span
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                className="whitespace-nowrap overflow-hidden"
-              >
-                {settingsConfig.label}
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </button>
+              title={isCollapsed ? settingsConfig.label : undefined}
+            >
+              <settingsConfig.icon size={20} className="shrink-0" />
+              <AnimatePresence>
+                {isCollapsed ? null : (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="whitespace-nowrap overflow-hidden"
+                  >
+                    {settingsConfig.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+          );
+
+          if (isSheet) {
+            return <SheetClose asChild>{SettingsButton}</SheetClose>;
+          }
+
+          return SettingsButton;
+        })()}
       </div>
 
       <div className="p-3 border-t bg-muted/30">
