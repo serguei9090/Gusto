@@ -1,4 +1,4 @@
-package com.gusto.app
+package com.gusto.desktop
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

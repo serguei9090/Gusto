@@ -156,6 +156,7 @@
   },
   "ingredients": {
     "title": "Ingredients",
+    "empty": "No ingredients found.",
     "addIngredient": "Add Ingredient",
     "editIngredient": "Edit Ingredient",
     "deleteIngredient": "Delete Ingredient",

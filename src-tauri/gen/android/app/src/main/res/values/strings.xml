@@ -1,2 +1,4 @@
 <resources>
+    <string name="app_name">Gusto</string>
+    <string name="main_activity_title">Gusto</string>
 </resources>

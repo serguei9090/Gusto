@@ -15,21 +15,22 @@ val tauriProperties = Properties().apply {
 
 android {
     compileSdk = 36
-    namespace = "com.gusto.app"
+    namespace = "com.gusto.desktop"
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
-        applicationId = "com.gusto.app"
+        applicationId = "com.gusto.desktop"
         minSdk = 24
         targetSdk = 36
         versionCode = tauriProperties.getProperty("tauri.android.versionCode", "1").toInt()
         versionName = tauriProperties.getProperty("tauri.android.versionName", "1.0")
-        
+
         // Dynamic App Name Resources
         val mode = System.getenv("VITE_APP_MODE") ?: "core"
         val appNameRes = if (mode.contains("pro")) "Gusto Pro" else "Gusto"
         resValue("string", "app_name", appNameRes)
         resValue("string", "main_activity_title", appNameRes)
     }
+
     signingConfigs {
         create("release") {
             keyAlias = "gusto"
