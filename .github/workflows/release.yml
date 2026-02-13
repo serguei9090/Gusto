@@ -125,6 +125,12 @@ jobs:
       - name: install frontend dependencies
         run: bun install
 
+      - name: Ensure Tauri Linux CLI binding
+        shell: bash
+        run: |
+          TAURI_CLI_VERSION="$(node -p "require('./node_modules/@tauri-apps/cli/package.json').version")"
+          npm install --no-save "@tauri-apps/cli-linux-x64-gnu@${TAURI_CLI_VERSION}"
+
       - name: Build Android APK
         run: bun run release:mobile
         env:
