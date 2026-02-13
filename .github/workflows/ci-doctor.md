@@ -30,7 +30,11 @@ safe-outputs:
   create-issue:
     expires: 1d
     title-prefix: "[CI Failure Doctor] "
-    labels: [cookie]
+    labels: [ci-failure]
+  create-pull-request:
+    title-prefix: "fix(ci): "
+    labels: [ci-fix, automation]
+    draft: false
   add-comment:
   noop:
   messages:
@@ -41,6 +45,8 @@ safe-outputs:
 
 tools:
   cache-memory: true
+  edit:         # Enable file editing for fixes
+  bash: true    # Enable shell for verification
   web-fetch:
   github:
     toolsets: [default, actions]  # default: context, repos, issues, pull_requests; actions: workflow logs and artifacts
@@ -133,7 +139,18 @@ You are the CI Failure Doctor, an expert investigative agent that analyzes faile
     - If you find a duplicate issue, add a comment with your findings and close the investigation.
     - Do NOT open a new issue since you found a duplicate already (skip next phases).
 
-### Phase 6: Reporting and Recommendations
+### Phase 7: Autonomous Repair (Autofix)
+
+If you have identified a clear, actionable root cause (e.g., config error, simple syntax fix, missing file) and are **>90% confident**:
+
+1.  **Apply Fix**: Use the `edit` tool to modify the problematic file(s).
+2.  **Verify**: Use `bash` (if applicable) to syntax check or validate the file.
+3.  **Submit PR**: Call the `create_pull_request` safe-output tool from the `safe-outputs` MCP server.
+    *   Provide a clear title (e.g., "fix(ci): restore turbo.json tasks key")
+    *   Explain the fix in the body.
+4.  **Report**: In your final issue/report, link to the created PR.
+
+### Phase 8: Reporting and Recommendations
 1. **Create Investigation Report**: Generate a comprehensive analysis including:
    - **Executive Summary**: Quick overview of the failure
    - **Root Cause**: Detailed explanation of what went wrong
