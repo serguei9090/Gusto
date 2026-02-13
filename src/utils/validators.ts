@@ -9,10 +9,10 @@ export const unitOfMeasureSchema = z.string().min(1, "Unit is required");
 // Create Ingredient Schema
 export const createIngredientSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name too long"),
-  category: ingredientCategorySchema,
+  category: ingredientCategorySchema.optional(),
   unitOfMeasure: unitOfMeasureSchema,
-  currentPrice: z.number().positive("Price must be positive"),
-  pricePerUnit: z.number().positive("Price per unit must be positive"),
+  currentPrice: z.number().nonnegative().default(0),
+  pricePerUnit: z.number().nonnegative().default(0),
   currency: z.string().length(3).default("USD"),
   supplierId: z.number().int().positive().nullable().optional(),
   minStockLevel: z.number().nonnegative().nullable().optional(),
@@ -83,6 +83,7 @@ export const createRecipeSchema = z.object({
     z.number().positive().optional(),
   ),
   yieldUnit: z.string().max(50).nullable().optional(),
+  isBaseRecipe: z.boolean().optional().default(false),
 });
 
 export const recipeIngredientFormSchema = z.object({

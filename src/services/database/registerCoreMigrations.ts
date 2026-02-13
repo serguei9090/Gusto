@@ -480,4 +480,27 @@ export function registerCoreMigrations() {
       );
     },
   });
+
+  migrationRegistry.register({
+    id: "20260213_add_base_recipe_type",
+    up: async (db) => {
+      const ignoreDuplicate = (e: unknown) => {
+        if (String(e).includes("duplicate column name")) return;
+        throw e;
+      };
+
+      // Add is_base_recipe flag to recipes table
+      await db
+        .execute(
+          "ALTER TABLE recipes ADD COLUMN is_base_recipe INTEGER DEFAULT 0",
+        )
+        .catch(ignoreDuplicate);
+
+      // Add index for efficient filtering
+      await db.execute(`
+        CREATE INDEX IF NOT EXISTS idx_recipes_is_base 
+        ON recipes(is_base_recipe)
+      `);
+    },
+  });
 }

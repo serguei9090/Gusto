@@ -42,6 +42,7 @@ export interface RecipesTable {
   allergens: string | null;
   dietary_restrictions: string | null;
   calories: number | null;
+  is_base_recipe: number; // 1 or 0
   created_at: Generated<string>;
   updated_at: Generated<string>;
 }

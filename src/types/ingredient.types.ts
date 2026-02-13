@@ -91,6 +91,7 @@ export interface Recipe {
   allergens?: string[];
   dietaryRestrictions?: string[];
   calories?: number | null;
+  isBaseRecipe?: boolean;
 }
 
 export interface CreateRecipeInput {
@@ -108,6 +109,7 @@ export interface CreateRecipeInput {
   allergens?: string[];
   dietaryRestrictions?: string[];
   calories?: number | null;
+  isBaseRecipe?: boolean;
 }
 
 export interface UpdateRecipeInput {
@@ -132,6 +134,7 @@ export interface UpdateRecipeInput {
   allergens?: string[];
   dietaryRestrictions?: string[];
   calories?: number | null;
+  isBaseRecipe?: boolean;
 }
 
 export interface RecipeWithIngredients extends Recipe {

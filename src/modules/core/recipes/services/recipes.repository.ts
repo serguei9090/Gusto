@@ -44,6 +44,26 @@ export class RecipesRepository {
     return rows.map(this.mapRowToRecipe);
   }
 
+  async getBaseRecipes(): Promise<Recipe[]> {
+    const rows = await db
+      .selectFrom("recipes")
+      .selectAll()
+      .where("is_base_recipe", "=", 1)
+      .orderBy("name")
+      .execute();
+    return rows.map(this.mapRowToRecipe);
+  }
+
+  async getProductionRecipes(): Promise<Recipe[]> {
+    const rows = await db
+      .selectFrom("recipes")
+      .selectAll()
+      .where("is_base_recipe", "=", 0)
+      .orderBy("name")
+      .execute();
+    return rows.map(this.mapRowToRecipe);
+  }
+
   async getById(id: number): Promise<RecipeWithIngredients | null> {
     const recipeRow = await db
       .selectFrom("recipes")
@@ -112,6 +132,7 @@ export class RecipesRepository {
         target_cost_percentage: data.targetCostPercentage || null,
         waste_buffer_percentage: data.wasteBufferPercentage || null,
         is_experiment: 0,
+        is_base_recipe: data.isBaseRecipe ? 1 : 0,
         allergens: data.allergens ? JSON.stringify(data.allergens) : null,
         dietary_restrictions: data.dietaryRestrictions
           ? JSON.stringify(data.dietaryRestrictions)
@@ -170,6 +191,12 @@ export class RecipesRepository {
         selling_price: data.sellingPrice,
         target_cost_percentage: data.targetCostPercentage,
         waste_buffer_percentage: data.wasteBufferPercentage,
+        is_base_recipe:
+          data.isBaseRecipe !== undefined
+            ? data.isBaseRecipe
+              ? 1
+              : 0
+            : undefined,
         allergens: data.allergens ? JSON.stringify(data.allergens) : undefined,
         dietary_restrictions: data.dietaryRestrictions
           ? JSON.stringify(data.dietaryRestrictions)
@@ -183,6 +210,13 @@ export class RecipesRepository {
     if (data.ingredients) {
       // --- Circular Reference Detection ---
       await this.validateNoCircularReferences(id, data.ingredients);
+
+      // --- Base Recipe Hierarchy Validation ---
+      for (const ing of data.ingredients) {
+        if (ing.subRecipeId) {
+          await this.validateBaseRecipeHierarchy(id, ing.subRecipeId);
+        }
+      }
 
       // Replace all ingredients
       await db
@@ -232,6 +266,7 @@ export class RecipesRepository {
   ): Promise<void> {
     if (subRecipeId) {
       await this.validateNoCircularReferences(recipeId, [{ subRecipeId }]);
+      await this.validateBaseRecipeHierarchy(recipeId, subRecipeId);
     }
     await db
       .insertInto("recipe_ingredients")
@@ -348,6 +383,7 @@ export class RecipesRepository {
         total_cost: parentRecipe.totalCost,
         profit_margin: parentRecipe.profitMargin,
         is_experiment: 1,
+        is_base_recipe: parentRecipe.isBaseRecipe ? 1 : 0,
         parent_recipe_id: parentRecipeId,
         experiment_name: experimentName,
         allergens: parentRecipe.allergens
@@ -518,7 +554,39 @@ export class RecipesRepository {
         ? JSON.parse(row.dietary_restrictions)
         : [],
       calories: row.calories,
+      isBaseRecipe: row.is_base_recipe === 1,
     };
+  }
+
+  /**
+   * Validate that base recipes can only import other base recipes
+   */
+  private async validateBaseRecipeHierarchy(
+    parentRecipeId: number,
+    subRecipeId: number,
+  ): Promise<void> {
+    const parentRecipe = await db
+      .selectFrom("recipes")
+      .select(["name", "is_base_recipe"])
+      .where("id", "=", parentRecipeId)
+      .executeTakeFirst();
+
+    const subRecipe = await db
+      .selectFrom("recipes")
+      .select(["name", "is_base_recipe"])
+      .where("id", "=", subRecipeId)
+      .executeTakeFirst();
+
+    if (!parentRecipe || !subRecipe) {
+      throw new Error("Recipe not found");
+    }
+
+    // Base recipes can only import other base recipes
+    if (parentRecipe.is_base_recipe === 1 && subRecipe.is_base_recipe === 0) {
+      throw new Error(
+        `Base recipe "${parentRecipe.name}" cannot import production recipe "${subRecipe.name}". Base recipes can only import other base recipes.`,
+      );
+    }
   }
 }
 

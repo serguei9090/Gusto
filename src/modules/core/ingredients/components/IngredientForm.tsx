@@ -2,6 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { FieldHelp } from "@/components/ui/field-help";
 import {
@@ -127,6 +133,7 @@ export const IngredientForm = ({
   return (
     <Form {...form}>
       <form onSubmit={submitHandler} className="space-y-4 pb-0">
+        {/* Name - Mandatory */}
         <FormField
           control={form.control}
           name="name"
@@ -150,65 +157,29 @@ export const IngredientForm = ({
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  {t("common.labels.category")}{" "}
-                  <span className="text-destructive">*</span>
-                  <FieldHelp helpText={t("ingredients.help.category")} />
-                </FormLabel>
-                <Select
+        {/* Unit of Measure - Mandatory */}
+        <FormField
+          control={form.control}
+          name="unitOfMeasure"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                {t("ingredients.fields.unitOfMeasure")}{" "}
+                <span className="text-destructive">*</span>
+                <FieldHelp helpText={t("ingredients.help.unitOfMeasure")} />
+              </FormLabel>
+              <FormControl>
+                <UnitSelect
+                  value={field.value}
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("common.labels.category")} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {t(`common.categories.${category}`) ===
-                        `common.categories.${category}`
-                          ? category.charAt(0).toUpperCase() + category.slice(1)
-                          : t(`common.categories.${category}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="unitOfMeasure"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  {t("ingredients.fields.unitOfMeasure")}{" "}
-                  <span className="text-destructive">*</span>
-                  <FieldHelp helpText={t("ingredients.help.unitOfMeasure")} />
-                </FormLabel>
-                <FormControl>
-                  <UnitSelect
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    placeholder={t("ingredients.fields.unitOfMeasure")}
-                    className="h-12"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                  placeholder={t("ingredients.fields.unitOfMeasure")}
+                  className="h-12"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Pricing Section */}
         <div className="space-y-4 border-t pt-4">
@@ -345,7 +316,6 @@ export const IngredientForm = ({
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
                       {t("ingredients.fields.pricePerUnit")}{" "}
-                      <span className="text-destructive">*</span>
                       <FieldHelp
                         helpText={t("ingredients.help.pricePerUnit")}
                       />
@@ -376,89 +346,7 @@ export const IngredientForm = ({
           )}
         </div>
 
-        <FormField
-          control={form.control}
-          name="currency"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="flex items-center gap-2">
-                {t("common.labels.currency")}
-                <FieldHelp helpText={t("ingredients.help.currency")} />
-              </FormLabel>
-              <FormControl>
-                <CurrencySelector
-                  value={field.value ?? "USD"}
-                  onChange={field.onChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="currentStock"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  {t("ingredients.fields.currentStock")}
-                  <FieldHelp helpText={t("ingredients.help.currentStock")} />
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    {...field}
-                    disabled={isEdit}
-                    value={field.value === 0 ? "" : field.value}
-                    onFocus={(e) => e.target.select()}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === ""
-                          ? 0
-                          : Number.parseFloat(e.target.value),
-                      )
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="minStockLevel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  {t("ingredients.fields.minStockLevel")}
-                  <FieldHelp helpText={t("ingredients.help.minStockLevel")} />
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    {...field}
-                    value={field.value === 0 ? "" : (field.value ?? "")}
-                    onFocus={(e) => e.target.select()}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === ""
-                          ? 0
-                          : Number.parseFloat(e.target.value),
-                      )
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
+        {/* Supplier */}
         <div className="space-y-2">
           <Label htmlFor="supplierId" className="flex items-center gap-2">
             {t("ingredients.fields.supplier")}
@@ -479,6 +367,145 @@ export const IngredientForm = ({
             ))}
           </select>
         </div>
+
+        {/* SECONDARY SECTION - Collapsible Additional Information */}
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="additional-info" className="border-b-0">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <span className="text-base font-semibold">
+                Additional Information
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-2 pb-6">
+              {/* Category */}
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      {t("common.labels.category")}
+                      <FieldHelp helpText={t("ingredients.help.category")} />
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={t("common.labels.category")}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {t(`common.categories.${category}`) ===
+                            `common.categories.${category}`
+                              ? category.charAt(0).toUpperCase() +
+                                category.slice(1)
+                              : t(`common.categories.${category}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Currency */}
+              <FormField
+                control={form.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      {t("common.labels.currency")}
+                      <FieldHelp helpText={t("ingredients.help.currency")} />
+                    </FormLabel>
+                    <FormControl>
+                      <CurrencySelector
+                        value={field.value ?? "USD"}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Stock Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="currentStock"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        {t("ingredients.fields.currentStock")}
+                        <FieldHelp
+                          helpText={t("ingredients.help.currentStock")}
+                        />
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          {...field}
+                          disabled={isEdit}
+                          value={field.value === 0 ? "" : field.value}
+                          onFocus={(e) => e.target.select()}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? 0
+                                : Number.parseFloat(e.target.value),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="minStockLevel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        {t("ingredients.fields.minStockLevel")}
+                        <FieldHelp
+                          helpText={t("ingredients.help.minStockLevel")}
+                        />
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          {...field}
+                          value={field.value === 0 ? "" : (field.value ?? "")}
+                          onFocus={(e) => e.target.select()}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? 0
+                                : Number.parseFloat(e.target.value),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         <MobileFormFooter>
           {onCancel && (

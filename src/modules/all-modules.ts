@@ -24,6 +24,7 @@ export function registerModules() {
   registerCoreMigrations();
 
   // Register Core Modules (Always)
+
   registry.register(dashboardModule);
   registry.register(ingredientsModule);
   registry.register(recipesModule);
