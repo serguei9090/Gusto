@@ -1,0 +1,27 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "build:app": {
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "lint:app": {
+      "outputs": []
+    },
+    "type-check:app": {
+      "outputs": []
+    },
+    "test:unit:app": {
+      "outputs": []
+    },
+    "test:e2e:app": {
+      "outputs": ["test-results/**", "playwright-report/**"]
+    },
+    "dev:app": {
+      "cache": false,
+      "persistent": true
+    },
+    "db:migrate": {
+      "cache": false
+    }
+  }
+}
