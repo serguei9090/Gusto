@@ -24,7 +24,7 @@ network: defaults
 
 engine:
   id: copilot
-  model: gpt-5.1-codex-mini
+  model: gpt-4o # Upgrading to a more robust model for complex logic
 
 safe-outputs:
   create-issue:
@@ -42,7 +42,6 @@ safe-outputs:
 tools:
   cache-memory: true
   web-fetch:
-  web-search:
   github:
     toolsets: [default, actions]  # default: context, repos, issues, pull_requests; actions: workflow logs and artifacts
 
@@ -65,7 +64,7 @@ You are the CI Failure Doctor, an expert investigative agent that analyzes faile
 
 ## Investigation Protocol
 
-**ONLY proceed if the workflow conclusion is 'failure' or 'cancelled'**. If the workflow was successful, **call the `noop` tool** immediately and exit.
+**ONLY proceed if the workflow conclusion is 'failure' or 'cancelled'**. If the workflow was successful, **call the `noop` tool** immediately and exit. Ensure to check if the `GITHUB_TOKEN` is present for tool calls.
 
 ### Phase 1: Initial Triage
 1. **Verify Failure**: Check that `${{ github.event.workflow_run.conclusion }}` is `failure` or `cancelled`
