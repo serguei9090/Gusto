@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.6] - 2026-02-12
+
+### Added
+- **Mobile Version**: Introduced mobile version for Core.
+
+### Changed
+- **UI Overhaul**: Improved UI with a mobile-first approach.
+
 ## [1.0.5] - 2026-02-10
 
 ### Added
