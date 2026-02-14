@@ -36,6 +36,8 @@ export const Sidebar = ({
     .filter((id) => {
       const normalizedId = id.toLowerCase();
       if (normalizedId === "settings") return false;
+      // Hide Ingredients as it is now integrated into Inventory
+      if (normalizedId === "ingredients") return false;
 
       const module = reg.get(normalizedId);
       if (!module) return false;

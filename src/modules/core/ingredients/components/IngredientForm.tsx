@@ -174,6 +174,7 @@ export const IngredientForm = ({
                   onValueChange={field.onChange}
                   placeholder={t("ingredients.fields.unitOfMeasure")}
                   className="h-12"
+                  filterType="ingredient"
                 />
               </FormControl>
               <FormMessage />

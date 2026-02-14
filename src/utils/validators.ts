@@ -26,7 +26,7 @@ export const createIngredientSchema = z.object({
 export const updateIngredientSchema = createIngredientSchema.partial();
 
 // Recipe Category
-export const recipeCategorySchema = z.string().min(1, "Category is required");
+export const recipeCategorySchema = z.string().optional();
 
 // Transaction Type Enum
 export const transactionTypeSchema = z.enum([
@@ -56,8 +56,14 @@ export const createRecipeSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   description: z.string().max(1000).nullable().optional(),
   category: recipeCategorySchema,
-  servings: z.number().int().positive("Servings must be positive"),
-  prepTimeMinutes: z.number().int().nonnegative(),
+  servings: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? undefined : v),
+    z.number().int().positive("Servings must be positive").optional(),
+  ),
+  prepTimeMinutes: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? undefined : v),
+    z.number().int().nonnegative().optional(),
+  ),
   cookingInstructions: z.string().nullable().optional(),
   sellingPrice: z.preprocess(
     (v) => (v === "" || v === null || Number.isNaN(v) ? undefined : v),
@@ -98,18 +104,59 @@ export const recipeIngredientFormSchema = z.object({
   isSubRecipe: z.boolean().optional().default(false),
 });
 
-export const recipeFormSchema = createRecipeSchema.extend({
-  ingredients: z.array(recipeIngredientFormSchema).default([]),
+export const recipeFormSchema = createRecipeSchema
+  .extend({
+    ingredients: z.array(recipeIngredientFormSchema).default([]),
+  })
+  .refine((data) => data.ingredients.length > 0, {
+    message: "At least one ingredient is required",
+    path: ["ingredients"],
+  });
+
+// Asset Type Enum
+export const assetTypeSchema = z.enum([
+  "operational",
+  "equipment",
+  "disposable",
+]);
+
+// Create Asset Schema
+export const createAssetSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100, "Name too long"),
+  category: z.string().optional(),
+  unitOfMeasure: unitOfMeasureSchema,
+  currentPrice: z.number().nonnegative().default(0),
+  pricePerUnit: z.number().nonnegative().default(0),
+  currency: z.string().length(3).default("USD"),
+  supplierId: z.number().int().positive().nullable().optional(),
+  minStockLevel: z.number().nonnegative().nullable().optional(),
+  currentStock: z.number().nonnegative().default(0),
+  notes: z.string().max(500).nullable().optional(),
+  purchaseUnit: z.string().max(50).nullable().optional(),
+  conversionRatio: z.number().positive().nullable().optional(),
+  assetType: assetTypeSchema.default("operational"),
 });
 
-// Create Inventory Transaction Schema
-export const createTransactionSchema = z.object({
-  ingredientId: z.number().int().positive(),
-  transactionType: transactionTypeSchema,
-  quantity: z.number(),
-  costPerUnit: z.number().positive().nullable().optional(),
-  totalCost: z.number().nullable().optional(),
-  currency: z.string().length(3).optional(),
-  reference: z.string().max(100).nullable().optional(),
-  notes: z.string().max(500).nullable().optional(),
-});
+// Update Asset Schema (all fields optional)
+export const updateAssetSchema = createAssetSchema.partial();
+
+// Create Inventory Transaction Schema (supports both ingredients and assets)
+export const createTransactionSchema = z
+  .object({
+    ingredientId: z.number().int().positive().optional(),
+    assetId: z.number().int().positive().optional(),
+    itemType: z.enum(["ingredient", "asset"]).default("ingredient"),
+    transactionType: transactionTypeSchema,
+    quantity: z.number(),
+    costPerUnit: z.number().positive().nullable().optional(),
+    totalCost: z.number().nullable().optional(),
+    currency: z.string().length(3).optional(),
+    reference: z.string().max(100).nullable().optional(),
+    notes: z.string().max(500).nullable().optional(),
+  })
+  .refine((data) => data.ingredientId || data.assetId, {
+    message: "Either ingredientId or assetId is required",
+    path: ["ingredientId"],
+  });
+
+export type InventoryTransactionInput = z.infer<typeof createTransactionSchema>;

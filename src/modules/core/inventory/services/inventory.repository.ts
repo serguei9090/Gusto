@@ -2,20 +2,22 @@ import type { Selectable } from "kysely";
 import { sql } from "kysely";
 import { db } from "@/lib/db";
 import type {
-  CreateTransactionInput,
   Ingredient,
   InventoryTransaction,
 } from "@/modules/core/inventory/types";
 import type { InventoryTransactionsTable } from "@/types/db.types";
+import type { InventoryTransactionInput } from "@/utils/validators";
 
 export type TransactionRow = Selectable<InventoryTransactionsTable>;
 
 class InventoryRepository {
   async logTransaction(
-    data: CreateTransactionInput,
+    data: InventoryTransactionInput,
   ): Promise<InventoryTransaction> {
     const {
       ingredientId,
+      assetId,
+      itemType = "ingredient",
       transactionType,
       quantity,
       costPerUnit,
@@ -32,13 +34,15 @@ class InventoryRepository {
     } else if (transactionType === "purchase") {
       delta = Math.abs(quantity);
     }
-    // "adjustment" uses the raw quantity value as a delta (can be positive or negative)
+    // "adjustment" uses the raw quantity value to SET absolute stock
 
     // 1. Insert Transaction
     const result = await db
       .insertInto("inventory_transactions")
       .values({
-        ingredient_id: ingredientId,
+        ingredient_id: ingredientId || null,
+        asset_id: assetId || null,
+        item_type: itemType,
         transaction_type: transactionType,
         quantity: quantity,
         cost_per_unit: costPerUnit,
@@ -49,21 +53,27 @@ class InventoryRepository {
       .returningAll()
       .executeTakeFirstOrThrow();
 
-    // 2. Update Ingredient Stock & Price
+    // 2. Update Stock & Price (WAC for both ingredients and assets)
+    const tableName = itemType === "ingredient" ? "ingredients" : "assets";
+    const itemId = itemType === "ingredient" ? ingredientId : assetId;
+
+    if (!itemId) {
+      throw new Error(`${itemType} ID is required for transaction`);
+    }
+
     if (transactionType === "purchase" && currency && costPerUnit) {
       // Fetch current state to calculate Weighted Average Cost (WAC)
-      const ingredient = await db
-        .selectFrom("ingredients")
+      const item = await db
+        .selectFrom(tableName)
         .select(["current_stock", "price_per_unit"])
-        .where("id", "=", ingredientId)
+        .where("id", "=", itemId)
         .executeTakeFirstOrThrow();
 
-      const oldStock = ingredient.current_stock || 0;
-      const oldPrice = ingredient.price_per_unit || 0;
+      const oldStock = item.current_stock || 0;
+      const oldPrice = item.price_per_unit || 0;
       const newStock = oldStock + delta;
 
       // WAC Formula: ((Old Stock * Old Price) + (New Quantity * New Price)) / New Total Stock
-      // If newStock is 0 or less (shouldn't happen on purchase but safety first), use the new costPerUnit
       const calculatedWac =
         newStock > 0
           ? (oldStock * oldPrice + quantity * costPerUnit) / newStock
@@ -71,39 +81,42 @@ class InventoryRepository {
       const newWacPrice = Number(calculatedWac.toFixed(2));
 
       await db
-        .updateTable("ingredients")
+        .updateTable(tableName)
         .set({
           current_stock: newStock,
           price_per_unit: newWacPrice,
           currency: currency,
           last_updated: sql`CURRENT_TIMESTAMP`,
         })
-        .where("id", "=", ingredientId)
+        .where("id", "=", itemId)
         .execute();
     } else if (transactionType === "adjustment") {
       // Adjustment overwrites the current stock with the counted value
       await db
-        .updateTable("ingredients")
+        .updateTable(tableName)
         .set({
           current_stock: quantity,
           last_updated: sql`CURRENT_TIMESTAMP`,
         })
-        .where("id", "=", ingredientId)
+        .where("id", "=", itemId)
         .execute();
     } else {
+      // Usage/Waste: simple delta update
       await db
-        .updateTable("ingredients")
+        .updateTable(tableName)
         .set((eb) => ({
           current_stock: eb("current_stock", "+", delta),
           last_updated: sql`CURRENT_TIMESTAMP`,
         }))
-        .where("id", "=", ingredientId)
+        .where("id", "=", itemId)
         .execute();
     }
 
     return {
       id: result.id,
-      ingredientId: result.ingredient_id,
+      ingredientId: result.ingredient_id || undefined,
+      assetId: result.asset_id || undefined,
+      itemType: result.item_type as "ingredient" | "asset",
       transactionType: result.transaction_type,
       quantity: result.quantity,
       costPerUnit: result.cost_per_unit,

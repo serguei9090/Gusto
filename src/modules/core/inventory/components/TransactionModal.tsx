@@ -29,20 +29,25 @@ import type {
   TransactionType,
 } from "@/modules/core/inventory/types";
 import { CurrencySelector } from "@/modules/core/settings/components/CurrencySelector";
+import type { Asset } from "@/types/asset.types";
 import type { Currency } from "@/utils/currency";
-import { createTransactionSchema } from "@/utils/validators";
+import {
+  createTransactionSchema,
+  type InventoryTransactionInput,
+} from "@/utils/validators";
 
 interface TransactionModalProps {
-  ingredient: Ingredient;
+  item: Ingredient | Asset;
+  itemType: "ingredient" | "asset";
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  // biome-ignore lint/suspicious/noExplicitAny: Form data type
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: InventoryTransactionInput) => Promise<void>;
   isLoading?: boolean;
 }
 
 export function TransactionModal({
-  ingredient,
+  item,
+  itemType,
   open,
   onOpenChange,
   onSubmit,
@@ -59,14 +64,14 @@ export function TransactionModal({
   } = useForm({
     resolver: zodResolver(createTransactionSchema),
     defaultValues: {
-      ingredientId: ingredient.id,
+      ingredientId: itemType === "ingredient" ? item.id : undefined,
+      assetId: itemType === "asset" ? item.id : undefined,
+      itemType: itemType,
       transactionType: "purchase" as TransactionType,
       quantity: 0,
-      costPerUnit: ingredient.pricePerUnit
-        ? Number(ingredient.pricePerUnit.toFixed(2))
-        : 0,
+      costPerUnit: item.pricePerUnit ? Number(item.pricePerUnit.toFixed(2)) : 0,
       totalCost: 0,
-      currency: ingredient.currency || "USD",
+      currency: item.currency || "USD",
       reference: "",
       notes: "",
     },
@@ -79,29 +84,31 @@ export function TransactionModal({
     if (open) {
       setIsUsingPurchaseUnit(false);
       reset({
-        ingredientId: ingredient.id,
+        ingredientId: itemType === "ingredient" ? item.id : undefined,
+        assetId: itemType === "asset" ? item.id : undefined,
+        itemType: itemType,
         transactionType: "purchase" as TransactionType,
         quantity: 0,
-        costPerUnit: ingredient.pricePerUnit
-          ? Number(ingredient.pricePerUnit.toFixed(2))
+        costPerUnit: item.pricePerUnit
+          ? Number(item.pricePerUnit.toFixed(2))
           : 0,
         totalCost: 0,
-        currency: ingredient.currency || "USD",
+        currency: item.currency || "USD",
         reference: "",
         notes: "",
       });
     }
-  }, [open, ingredient, reset]);
+  }, [open, item, itemType, reset]);
 
   const handleTransact = handleSubmit(async (data) => {
     let finalQuantity = data.quantity || 0;
     let finalCostPerUnit = data.costPerUnit || 0;
     let finalNotes = data.notes;
 
-    if (isUsingPurchaseUnit && ingredient.conversionRatio) {
-      finalQuantity = (data.quantity || 0) * ingredient.conversionRatio;
-      finalCostPerUnit = (data.costPerUnit || 0) / ingredient.conversionRatio;
-      const notePrefix = `Bulk Purchase: ${data.quantity} x ${ingredient.purchaseUnit}`;
+    if (isUsingPurchaseUnit && item.conversionRatio) {
+      finalQuantity = (data.quantity || 0) * item.conversionRatio;
+      finalCostPerUnit = (data.costPerUnit || 0) / item.conversionRatio;
+      const notePrefix = `Bulk Purchase: ${data.quantity} x ${item.purchaseUnit}`;
       finalNotes = finalNotes ? `${notePrefix} | ${finalNotes}` : notePrefix;
     }
 
@@ -121,7 +128,7 @@ export function TransactionModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-[425px] sm:translate-x-[-50%] sm:translate-y-[-50%] rounded-none sm:rounded-lg border-x-0 sm:border p-4 pt-6 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Update Stock: {ingredient.name}</DialogTitle>
+          <DialogTitle>Update Stock: {item.name}</DialogTitle>
           <DialogDescription>Record a stock transaction.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleTransact} className="space-y-4 pb-20 sm:pb-0">
@@ -192,45 +199,42 @@ export function TransactionModal({
             </div>
 
             {/* Unit Selection (Base vs Purchase) */}
-            {ingredient.purchaseUnit &&
-              (ingredient.conversionRatio || 0) > 1 && (
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    Unit for this Transaction
-                  </Label>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant={isUsingPurchaseUnit ? "outline" : "default"}
-                      className="flex-1 h-10"
-                      onClick={() => setIsUsingPurchaseUnit(false)}
-                    >
-                      {ingredient.unitOfMeasure} (Base)
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={isUsingPurchaseUnit ? "default" : "outline"}
-                      className="flex-1 h-10"
-                      onClick={() => setIsUsingPurchaseUnit(true)}
-                    >
-                      {ingredient.purchaseUnit} (Case/Pack)
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    1 {ingredient.purchaseUnit} = {ingredient.conversionRatio}{" "}
-                    {ingredient.unitOfMeasure}
-                  </p>
+            {item.purchaseUnit && (item.conversionRatio || 0) > 1 && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  Unit for this Transaction
+                </Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={isUsingPurchaseUnit ? "outline" : "default"}
+                    className="flex-1 h-10"
+                    onClick={() => setIsUsingPurchaseUnit(false)}
+                  >
+                    {item.unitOfMeasure} (Base)
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={isUsingPurchaseUnit ? "default" : "outline"}
+                    className="flex-1 h-10"
+                    onClick={() => setIsUsingPurchaseUnit(true)}
+                  >
+                    {item.purchaseUnit} (Case/Pack)
+                  </Button>
                 </div>
-              )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  1 {item.purchaseUnit} = {item.conversionRatio}{" "}
+                  {item.unitOfMeasure}
+                </p>
+              </div>
+            )}
 
             {/* Quantity */}
             <div className="space-y-2">
               <Label htmlFor="quantity" className="flex items-center gap-2">
                 Quantity (
-                {isUsingPurchaseUnit
-                  ? ingredient.purchaseUnit
-                  : ingredient.unitOfMeasure}
-                ) <span className="text-destructive">*</span>
+                {isUsingPurchaseUnit ? item.purchaseUnit : item.unitOfMeasure}){" "}
+                <span className="text-destructive">*</span>
                 <FieldHelp helpText={t("inventory.help.quantity")} />
               </Label>
               <Input
@@ -255,8 +259,8 @@ export function TransactionModal({
               >
                 Price per{" "}
                 {isUsingPurchaseUnit
-                  ? ingredient.purchaseUnit
-                  : ingredient.unitOfMeasure || "Unit"}{" "}
+                  ? item.purchaseUnit
+                  : item.unitOfMeasure || "Unit"}{" "}
                 ($)
                 <FieldHelp helpText={t("inventory.help.costPerUnit")} />
               </Label>
@@ -268,11 +272,11 @@ export function TransactionModal({
                 className="h-12 sm:h-10"
                 onFocus={(e) => e.target.select()}
               />
-              {isUsingPurchaseUnit && ingredient.conversionRatio && (
+              {isUsingPurchaseUnit && item.conversionRatio && (
                 <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
                   Calculates to: $
-                  {(watchedPrice / ingredient.conversionRatio).toFixed(2)} /{" "}
-                  {ingredient.unitOfMeasure}
+                  {(watchedPrice / item.conversionRatio).toFixed(2)} /{" "}
+                  {item.unitOfMeasure}
                 </div>
               )}
             </div>
@@ -304,13 +308,11 @@ export function TransactionModal({
                 </Label>
                 <div className="text-lg font-mono font-bold">
                   {watch("transactionType") === "adjustment" ? "" : "+"}
-                  {isUsingPurchaseUnit && ingredient.conversionRatio
-                    ? Number(
-                        (watchedQty * ingredient.conversionRatio).toFixed(2),
-                      )
+                  {isUsingPurchaseUnit && item.conversionRatio
+                    ? Number((watchedQty * item.conversionRatio).toFixed(2))
                     : Number(watchedQty.toFixed(2))}
                   <span className="text-xs font-normal text-muted-foreground ml-1">
-                    {ingredient.unitOfMeasure}
+                    {item.unitOfMeasure}
                   </span>
                 </div>
               </div>

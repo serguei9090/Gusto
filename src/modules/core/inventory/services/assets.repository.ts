@@ -1,21 +1,21 @@
-import type { ExpressionBuilder, Selectable } from "kysely";
-import { db } from "@/lib/db";
-import type { Database, IngredientsTable } from "@/types/db.types";
+import type { Selectable } from "kysely";
 
-export type IngredientRow = Selectable<IngredientsTable>;
-
-import { logger } from "@/utils/logger";
+import { getDb } from "@/lib/db";
 import type {
-  CreateIngredientInput,
-  Ingredient,
-  UpdateIngredientInput,
-} from "../types";
+  Asset,
+  AssetType,
+  CreateAssetInput,
+  UpdateAssetInput,
+} from "@/types/asset.types";
+import type { AssetsTable } from "@/types/db.types";
+import { logger } from "@/utils/logger";
 
-export class IngredientsRepository {
-  async create(data: CreateIngredientInput): Promise<Ingredient> {
-    logger.debug("IngredientsRepository.create: Starting insert", data);
+export type AssetRow = Selectable<AssetsTable>;
 
-    // Ensure numeric values are valid
+export class AssetsRepository {
+  async create(data: CreateAssetInput): Promise<Asset> {
+    logger.debug("AssetsRepository.create: Starting insert", data);
+
     const payload = {
       name: data.name,
       category: data.category,
@@ -34,80 +34,71 @@ export class IngredientsRepository {
       purchase_unit: data.purchaseUnit || null,
       conversion_ratio: data.conversionRatio || 1,
       is_active: data.isActive === false ? 0 : 1,
+      asset_type: data.assetType || "operational",
     };
 
     try {
-      // Modern SQLite approach: Use RETURNING clause
-      // This works on Tauri because our custom dialect routes "RETURNING" queries to db.select()
-      // yielding the actual row immediately.
-      const result = await db
-        .insertInto("ingredients")
+      const result = await getDb()
+        .insertInto("assets")
         .values(payload)
         .returning("id")
         .executeTakeFirst();
 
       if (!result?.id) {
-        logger.error("IngredientsRepository.create: Failed to retrieve ID.", {
+        logger.error("AssetsRepository.create: Failed to retrieve ID.", {
           payload,
           result,
         });
-        throw new Error("Failed to insert ingredient: could not retrieve ID.");
+        throw new Error("Failed to insert asset: could not retrieve ID.");
       }
 
-      logger.debug("IngredientsRepository.create: Insert successful", result);
+      logger.debug("AssetsRepository.create: Insert successful", result);
 
-      // 1. Record initial stock transaction if stock > 0
+      // Record initial stock transaction if stock > 0
       if (data.currentStock && data.currentStock > 0) {
-        await db
+        await getDb()
           .insertInto("inventory_transactions")
           .values({
-            ingredient_id: result.id,
-            transaction_type: "purchase", // Use purchase for initial stock to establish cost basis
+            asset_id: result.id,
+            item_type: "asset",
+            transaction_type: "purchase",
             quantity: data.currentStock,
             cost_per_unit: data.pricePerUnit || 0,
             total_cost: (data.currentStock || 0) * (data.pricePerUnit || 0),
             notes: "Initial stock on creation",
-            item_type: "ingredient",
           })
           .execute();
       }
 
-      // 2. Fetch full object
-      return this.getById(result.id) as Promise<Ingredient>;
+      return this.getById(result.id) as Promise<Asset>;
     } catch (error) {
-      logger.error("IngredientsRepository.create: DB Error", error);
+      logger.error("AssetsRepository.create: DB Error", error);
       throw error;
     }
   }
 
-  async getById(id: number): Promise<Ingredient | null> {
-    const row = await db
-      .selectFrom("ingredients")
+  async getById(id: number): Promise<Asset | null> {
+    const row = await getDb()
+      .selectFrom("assets")
       .selectAll()
       .where("id", "=", id)
       .executeTakeFirst();
 
-    return row ? this.mapRowToIngredient(row) : null;
+    return row ? this.mapRowToAsset(row) : null;
   }
 
-  async getAll(): Promise<Ingredient[]> {
-    const rows = await db
-      .selectFrom("ingredients")
+  async getAll(): Promise<Asset[]> {
+    const rows = await getDb()
+      .selectFrom("assets")
       .selectAll()
       .where("is_active", "=", 1)
       .orderBy("name", "asc")
       .execute();
 
-    return rows.map(this.mapRowToIngredient);
+    return rows.map(this.mapRowToAsset);
   }
 
-  /**
-   * Builds update data object from partial ingredient input
-   * @private
-   */
-  private buildUpdateData(
-    data: UpdateIngredientInput,
-  ): Record<string, unknown> {
+  private buildUpdateData(data: UpdateAssetInput): Record<string, unknown> {
     const updateData: Record<string, unknown> = {
       last_updated: new Date().toISOString(),
     };
@@ -133,18 +124,16 @@ export class IngredientsRepository {
       updateData.conversion_ratio = data.conversionRatio;
     if (data.isActive !== undefined)
       updateData.is_active = data.isActive ? 1 : 0;
+    if (data.assetType !== undefined) updateData.asset_type = data.assetType;
 
     return updateData;
   }
 
-  async update(
-    id: number,
-    data: UpdateIngredientInput,
-  ): Promise<Ingredient | null> {
+  async update(id: number, data: UpdateAssetInput): Promise<Asset | null> {
     const updateData = this.buildUpdateData(data);
 
-    const result = await db
-      .updateTable("ingredients")
+    const result = await getDb()
+      .updateTable("assets")
       .set(updateData)
       .where("id", "=", id)
       .returning("id")
@@ -156,8 +145,8 @@ export class IngredientsRepository {
   }
 
   async delete(id: number): Promise<boolean> {
-    const result = await db
-      .deleteFrom("ingredients")
+    const result = await getDb()
+      .deleteFrom("assets")
       .where("id", "=", id)
       .executeTakeFirst();
 
@@ -165,8 +154,8 @@ export class IngredientsRepository {
   }
 
   async archive(id: number): Promise<boolean> {
-    const result = await db
-      .updateTable("ingredients")
+    const result = await getDb()
+      .updateTable("assets")
       .set({ is_active: 0 })
       .where("id", "=", id)
       .executeTakeFirst();
@@ -174,23 +163,23 @@ export class IngredientsRepository {
     return Number(result.numUpdatedRows) > 0;
   }
 
-  async search(query: string): Promise<Ingredient[]> {
-    const rows = await db
-      .selectFrom("ingredients")
+  async search(query: string): Promise<Asset[]> {
+    const rows = await getDb()
+      .selectFrom("assets")
       .selectAll()
       .where("name", "like", `%${query}%`)
       .where("is_active", "=", 1)
       .orderBy("name", "asc")
       .execute();
 
-    return rows.map(this.mapRowToIngredient);
+    return rows.map(this.mapRowToAsset);
   }
 
-  async getLowStock(): Promise<Ingredient[]> {
-    const rows = await db
-      .selectFrom("ingredients")
+  async getLowStock(): Promise<Asset[]> {
+    const rows = await getDb()
+      .selectFrom("assets")
       .selectAll()
-      .where((eb: ExpressionBuilder<Database, "ingredients">) =>
+      .where((eb) =>
         eb.and([
           eb("min_stock_level", "is not", null),
           eb("current_stock", "<", eb.ref("min_stock_level")),
@@ -199,18 +188,18 @@ export class IngredientsRepository {
       )
       .execute();
 
-    return rows.map(this.mapRowToIngredient);
+    return rows.map(this.mapRowToAsset);
   }
 
-  private mapRowToIngredient(row: IngredientRow): Ingredient {
+  private mapRowToAsset(row: AssetRow): Asset {
     return {
       id: row.id,
       name: row.name,
       category: row.category,
       unitOfMeasure: row.unit_of_measure,
       currentPrice: row.current_price,
-      pricePerUnit: row.price_per_unit || 0, // Fallback if null in DB
-      currency: row.currency || "USD",
+      pricePerUnit: row.price_per_unit || 0,
+      currency: row.currency as Asset["currency"],
       supplierId: row.supplier_id,
       minStockLevel: row.min_stock_level,
       currentStock: row.current_stock,
@@ -219,8 +208,9 @@ export class IngredientsRepository {
       purchaseUnit: row.purchase_unit,
       conversionRatio: row.conversion_ratio,
       isActive: Boolean(row.is_active),
+      assetType: (row.asset_type as AssetType) || "operational",
     };
   }
 }
 
-export const ingredientsRepository = new IngredientsRepository();
+export const assetsRepository = new AssetsRepository();

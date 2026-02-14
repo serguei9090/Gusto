@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "@/hooks/useTranslation";
 import { cn } from "@/lib/utils";
 import { useConfigStore } from "../store/config.store";
@@ -72,6 +73,9 @@ export const UnitConfigModal = ({ isOpen, onClose }: UnitConfigModalProps) => {
   const { t } = useTranslation();
   const { items, addItem, removeItem } = useConfigStore();
   const [filterText, setFilterText] = useState("");
+  const [activeTab, setActiveTab] = useState<"ingredients" | "assets">(
+    "ingredients",
+  );
 
   // Get active units map: UnitName -> ID
   const activeUnitsMap = useMemo(() => {
@@ -131,8 +135,15 @@ export const UnitConfigModal = ({ isOpen, onClose }: UnitConfigModalProps) => {
 
     // Process groups
     categoryMap.forEach((units, category) => {
+      // Filter based on active tab
+      if (activeTab === "ingredients") {
+        if (!["mass", "volume", "misc", "other"].includes(category)) return;
+      } else {
+        // Assets
+        if (!["length", "misc", "other"].includes(category)) return;
+      }
+
       // Filter units based on search or show all if translated category matches
-      // We need to check against translated name for search
       const translatedCategory = t(`common.unit_categories.${category}`, {
         defaultValue: category,
       });
@@ -165,7 +176,47 @@ export const UnitConfigModal = ({ isOpen, onClose }: UnitConfigModalProps) => {
     });
 
     return groups;
-  }, [items, filterText, t]);
+  }, [items, filterText, t, activeTab]);
+
+  const renderUnitList = () => (
+    <div className="space-y-6 pb-4 md:pb-6">
+      {groupedUnits.map(({ category, units }) => (
+        <div key={category} className="space-y-3">
+          <h3 className="text-sm font-semibold text-muted-foreground border-b pb-1">
+            {t(`common.unit_categories.${category}`, {
+              defaultValue: category,
+            })}
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+            {units.map((unit) => {
+              const isActive = activeUnitsMap.has(unit.name.toLowerCase());
+              return (
+                <button
+                  key={unit.id}
+                  type="button"
+                  onClick={() => handleToggle(category, unit.name, isActive)}
+                  className={cn(
+                    "flex items-center justify-between px-3 py-2 rounded-md border text-sm transition-all duration-200 w-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                    isActive
+                      ? "bg-primary/10 border-primary text-primary ring-1 ring-primary/20 shadow-sm font-medium"
+                      : "bg-card hover:bg-muted/60 hover:border-foreground/20 text-muted-foreground",
+                  )}
+                >
+                  <span>{unit.name}</span>
+                  {isActive && <Check className="h-3.5 w-3.5" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+      {groupedUnits.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground text-sm">
+          {t("common.messages.noData")}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -177,68 +228,44 @@ export const UnitConfigModal = ({ isOpen, onClose }: UnitConfigModalProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col flex-1 min-h-0 space-y-4 p-4 md:p-6 overflow-hidden">
-          <div className="relative shrink-0">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={t("common.actions.search")}
-              value={filterText}
-              onChange={(e) => setFilterText(e.target.value)}
-              className="pl-8 h-12"
-            />
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as "ingredients" | "assets")}
+          className="flex-1 flex flex-col min-h-0"
+        >
+          <div className="px-6 py-2 border-b bg-muted/20">
+            <TabsList className="w-full">
+              <TabsTrigger value="ingredients" className="flex-1">
+                Ingredients
+              </TabsTrigger>
+              <TabsTrigger value="assets" className="flex-1">
+                Assets
+              </TabsTrigger>
+            </TabsList>
           </div>
 
-          <ScrollArea className="flex-1 -mr-4 pr-4 h-full">
-            <div className="space-y-6 pb-4 md:pb-6">
-              {groupedUnits.map(({ category, units }) => (
-                <div key={category} className="space-y-3">
-                  <h3 className="text-sm font-semibold text-muted-foreground border-b pb-1">
-                    {t(`common.unit_categories.${category}`, {
-                      defaultValue: category,
-                    })}
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                    {units.map((unit) => {
-                      const isActive = activeUnitsMap.has(
-                        unit.name.toLowerCase(),
-                      );
-                      // Use mapped ID for toggle if active, otherwise uses name to add
-                      // If there are duplicates, activeUnitsMap might have a different ID than unit.id
-                      // But since we want to toggle THIS specific button, we should likely check if THIS unit is active.
-                      // However, logic relies on isActive.
-                      // If I have 2 'cup's, and both are in items.
-                      // If activeUnitsMap has 'cup', it means AT LEAST one is active.
-                      // If I use unit.id as key, React is happy.
-                      return (
-                        <button
-                          key={unit.id}
-                          type="button"
-                          onClick={() =>
-                            handleToggle(category, unit.name, isActive)
-                          }
-                          className={cn(
-                            "flex items-center justify-between px-3 py-2 rounded-md border text-sm transition-all duration-200 w-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                            isActive
-                              ? "bg-primary/10 border-primary text-primary ring-1 ring-primary/20 shadow-sm font-medium"
-                              : "bg-card hover:bg-muted/60 hover:border-foreground/20 text-muted-foreground",
-                          )}
-                        >
-                          <span>{unit.name}</span>
-                          {isActive && <Check className="h-3.5 w-3.5" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-              {groupedUnits.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground text-sm">
-                  {t("common.messages.noData")}
-                </div>
-              )}
+          <div className="flex flex-col flex-1 min-h-0 space-y-4 p-4 md:p-6 overflow-hidden">
+            <div className="relative shrink-0">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t("common.actions.search")}
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                className="pl-8 h-12"
+              />
             </div>
-          </ScrollArea>
-        </div>
+
+            <ScrollArea className="flex-1 -mr-4 pr-4 h-full">
+              <TabsContent value="ingredients" className="m-0 border-0 p-0">
+                {renderUnitList()}
+              </TabsContent>
+              <TabsContent value="assets" className="m-0 border-0 p-0">
+                {renderUnitList()}
+              </TabsContent>
+            </ScrollArea>
+          </div>
+        </Tabs>
+
         <DialogFooter className="sticky bottom-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t bg-background sm:static sm:border-0 sm:pt-4 sm:pb-4 sm:justify-end">
           <Button
             className="w-full sm:w-auto h-12 sm:h-9 text-lg sm:text-sm"

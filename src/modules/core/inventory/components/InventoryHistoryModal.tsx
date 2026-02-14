@@ -49,6 +49,15 @@ const getTransactionColor = (type: TransactionType) => {
   }
 };
 
+const getTransactionDisplayName = (type: TransactionType) => {
+  switch (type) {
+    case "adjustment":
+      return "Stock Count";
+    default:
+      return type.charAt(0).toUpperCase() + type.slice(1);
+  }
+};
+
 export function InventoryHistoryModal({
   ingredient,
   open,
@@ -122,7 +131,7 @@ export function InventoryHistoryModal({
                             variant="outline"
                             className={getTransactionColor(tx.transactionType)}
                           >
-                            {tx.transactionType}
+                            {getTransactionDisplayName(tx.transactionType)}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right font-medium">
@@ -161,7 +170,7 @@ export function InventoryHistoryModal({
                             variant="outline"
                             className={getTransactionColor(tx.transactionType)}
                           >
-                            {tx.transactionType}
+                            {getTransactionDisplayName(tx.transactionType)}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
                             {format(new Date(tx.createdAt), "MMM d, HH:mm")}

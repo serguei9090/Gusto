@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Search, Trash2 } from "lucide-react";
+import * as AccordionPrimitive from "@radix-ui/react-accordion";
+import { ChevronDown, Search, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -352,8 +353,18 @@ export const RecipeForm = ({
                     className="w-full"
                   >
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="production">Recipe</TabsTrigger>
-                      <TabsTrigger value="base">Base Recipe</TabsTrigger>
+                      <TabsTrigger
+                        value="production"
+                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                      >
+                        Recipe
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="base"
+                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                      >
+                        Base Recipe
+                      </TabsTrigger>
                     </TabsList>
                   </Tabs>
                 )}
@@ -388,8 +399,7 @@ export const RecipeForm = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="category" className="flex items-center gap-2">
-                  {t("common.labels.category")}{" "}
-                  <span className="text-destructive">*</span>
+                  {t("common.labels.category")}
                   <FieldHelp helpText={t("recipes.help.category")} />
                 </Label>
                 <select
@@ -410,8 +420,7 @@ export const RecipeForm = ({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="servings" className="flex items-center gap-2">
-                  {t("recipes.fields.servings")}{" "}
-                  <span className="text-destructive">*</span>
+                  {t("recipes.fields.servings")}
                   <FieldHelp helpText={t("recipes.help.servings")} />
                 </Label>
                 <Input
@@ -584,218 +593,59 @@ export const RecipeForm = ({
         </Card>
 
         {/* Description & Instructions Card */}
+        {/* Description & Instructions - Collapsible Section */}
         <Card>
-          <CardHeader>
-            <CardTitle>Description & Instructions</CardTitle>
-            <CardDescription>
-              Main overview and step-by-step preparation guide
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="description" className="flex items-center gap-2">
-                {t("common.labels.description")}
-                <FieldHelp helpText={t("recipes.help.description")} />
-              </Label>
-              <Textarea
-                id="description"
-                {...register("description")}
-                placeholder={t("recipes.placeholders.briefOverview")}
-                className="min-h-[80px]"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label
-                htmlFor="cookingInstructions"
-                className="flex items-center gap-2"
-              >
-                Cooking Instructions
-                <FieldHelp helpText="Step by step preparation guide..." />
-              </Label>
-              <Textarea
-                id="cookingInstructions"
-                {...register("cookingInstructions")}
-                placeholder="Step by step preparation guide..."
-                className="min-h-[150px]"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Financials Card */}
-        <Card className="flex flex-col">
-          <CardHeader>
-            <CardTitle>{t("recipes.financials")}</CardTitle>
-            <CardDescription>{t("recipes.financialsDesc")}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 flex-1">
-            <div className="space-y-2">
-              <Label htmlFor="sellingPrice" className="flex items-center gap-2">
-                {t("recipes.fields.sellingPrice")}
-                <span className="ml-2 text-[10px] text-muted-foreground uppercase opacity-70">
-                  (Optional)
-                </span>
-                <FieldHelp helpText={t("recipes.help.sellingPrice")} />
-              </Label>
-              <Input
-                type="number"
-                step="0.01"
-                id="sellingPrice"
-                {...register("sellingPrice", { valueAsNumber: true })}
-                placeholder={
-                  suggestedPrice > 0
-                    ? suggestedPrice.toFixed(2)
-                    : t("recipes.placeholders.sellingPrice")
-                }
-                className="h-12"
-                onFocus={(e) => e.target.select()}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="currency">{t("common.labels.currency")}</Label>
-              <CurrencySelector
-                value={watch("currency") ?? "USD"}
-                onChange={(value) => setValue("currency", value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="targetCost" className="flex items-center gap-2">
-                  {t("recipes.fields.targetCostPercentage")}
-                  <FieldHelp
-                    helpText={t("recipes.help.targetCostPercentage")}
-                  />
-                </Label>
-                <span className="text-[10px] font-mono text-muted-foreground">
-                  {t("recipes.default")}: 25%
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                  id="targetCost"
-                  {...register("targetCostPercentage", { valueAsNumber: true })}
-                  placeholder="25"
-                  className="h-12"
-                  onFocus={(e) => e.target.select()}
-                />
-                <div className="flex gap-1">
-                  {[20, 25, 30].map((val) => (
-                    <Button
-                      key={val}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="px-2"
-                      onClick={() => setValue("targetCostPercentage", val)}
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem
+              value="description-instructions"
+              className="border-0"
+            >
+              <CardHeader className="pb-0">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex flex-col items-start text-left gap-1">
+                    <CardTitle>Description & Instructions</CardTitle>
+                    <CardDescription>
+                      Main overview and step-by-step preparation guide
+                    </CardDescription>
+                  </div>
+                </AccordionTrigger>
+              </CardHeader>
+              <AccordionContent>
+                <CardContent className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="description"
+                      className="flex items-center gap-2"
                     >
-                      {val}%
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label
-                  htmlFor="wasteBuffer"
-                  className="flex items-center gap-2"
-                >
-                  {t("recipes.fields.wasteBuffer")}
-                  <FieldHelp helpText={t("recipes.help.wasteBuffer")} />
-                </Label>
-                <span className="text-[10px] font-mono text-muted-foreground">
-                  {t("recipes.placeholders.yield")}%
-                </span>
-              </div>
-              <Input
-                type="number"
-                id="wasteBuffer"
-                {...register("wasteBufferPercentage", { valueAsNumber: true })}
-                placeholder="0"
-                className="h-12"
-                onFocus={(e) => e.target.select()}
-              />
-            </div>
-
-            <div className="mt-6 p-4 bg-muted/30 border border-border/50 rounded-lg space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">
-                  {t("recipes.subtotal")}:
-                </span>
-                <span className="font-medium">
-                  {getCurrencySymbol(watch("currency") || "USD")}
-                  {subtotal.toFixed(2)}
-                </span>
-              </div>
-
-              {watchedWasteBuffer > 0 && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">
-                    {t("recipes.fields.wasteBuffer").replace("%", "").trim()} (
-                    {watchedWasteBuffer}%):
-                  </span>
-                  <span className="font-medium text-orange-600">
-                    +{getCurrencySymbol(watch("currency") || "USD")}
-                    {wasteCost.toFixed(2)}
-                  </span>
-                </div>
-              )}
-
-              <div className="h-px bg-border/50 my-2" />
-
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground font-bold">
-                  {t("recipes.trueCost")}:
-                </span>
-                <span className="font-bold text-lg">
-                  {getCurrencySymbol(watch("currency") || "USD")}
-                  {totalCost.toFixed(2)}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">
-                  {t("recipes.suggestedPrice")} ({watchedTargetCost}%{" "}
-                  {t("recipes.cost")}):
-                </span>
-                <span className="font-semibold text-primary">
-                  {getCurrencySymbol(watch("currency") || "USD")}
-                  {Number.isFinite(suggestedPrice)
-                    ? suggestedPrice.toFixed(2)
-                    : "0.00"}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground text-xs italic">
-                  {watchedSellingPrice
-                    ? t("recipes.actualCost")
-                    : t("recipes.targetCost")}
-                  :
-                </span>
-                <span
-                  className={`font-medium ${getMarginColor(100 - currentFoodCost)}`}
-                >
-                  {currentFoodCost.toFixed(1)}%
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground font-medium">
-                  {watchedSellingPrice
-                    ? t("recipes.netMargin")
-                    : t("recipes.targetMargin")}
-                  :
-                </span>
-                <span className={`font-bold ${getMarginColor(currentMargin)}`}>
-                  {currentMargin.toFixed(1)}%
-                </span>
-              </div>
-            </div>
-          </CardContent>
+                      {t("common.labels.description")}
+                      <FieldHelp helpText={t("recipes.help.description")} />
+                    </Label>
+                    <Textarea
+                      id="description"
+                      {...register("description")}
+                      placeholder={t("recipes.placeholders.briefOverview")}
+                      className="min-h-[80px]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="cookingInstructions"
+                      className="flex items-center gap-2"
+                    >
+                      Cooking Instructions
+                      <FieldHelp helpText="Step by step preparation guide..." />
+                    </Label>
+                    <Textarea
+                      id="cookingInstructions"
+                      {...register("cookingInstructions")}
+                      placeholder="Step by step preparation guide..."
+                      className="min-h-[150px]"
+                    />
+                  </div>
+                </CardContent>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </Card>
 
         {/* Additional Information - Collapsible Section */}
@@ -987,6 +837,325 @@ export const RecipeForm = ({
                             );
                           })}
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </Card>
+
+        {/* Financials - Collapsible Section */}
+        <Card>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="financials" className="border-0">
+              <AccordionPrimitive.Header className="flex">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between w-full border-b hover:bg-muted/30 transition-colors group">
+                  <AccordionPrimitive.Trigger
+                    className="flex flex-1 items-center justify-between py-6 pl-6 text-left focus:outline-none"
+                    asChild
+                  >
+                    <button type="button" className="flex-1 text-left">
+                      <div className="flex flex-col gap-1 min-w-[200px]">
+                        <CardTitle>{t("recipes.financials")}</CardTitle>
+                        <CardDescription>
+                          {t("recipes.financialsDesc")}
+                        </CardDescription>
+                      </div>
+                      <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180 ml-4 lg:hidden" />
+                    </button>
+                  </AccordionPrimitive.Trigger>
+
+                  <div className="flex flex-wrap items-center gap-6 px-6 pb-6 lg:pb-0">
+                    {/* Target Cost Fast Select */}
+                    <fieldset
+                      className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border/50"
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.stopPropagation();
+                        }
+                      }}
+                      aria-label="Fast select target cost"
+                    >
+                      <legend className="sr-only">
+                        Fast select target cost
+                      </legend>
+                      <span className="text-[10px] uppercase font-bold text-muted-foreground px-2">
+                        Target
+                      </span>
+                      {[20, 25, 30].map((val) => (
+                        <Button
+                          key={val}
+                          type="button"
+                          variant={
+                            watchedTargetCost === val ? "default" : "ghost"
+                          }
+                          size="sm"
+                          className={`h-8 px-3 text-xs font-bold ${
+                            watchedTargetCost === val
+                              ? "shadow-sm"
+                              : "hover:bg-background"
+                          }`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setValue("targetCostPercentage", val);
+                          }}
+                        >
+                          {val}%
+                        </Button>
+                      ))}
+                    </fieldset>
+
+                    {/* Summary Metrics Display */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-x-8 gap-y-2 border-l pl-6 border-border/50">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-0.5">
+                          Subtotal
+                        </span>
+                        <span className="text-sm font-semibold whitespace-nowrap">
+                          {getCurrencySymbol(watch("currency") || "USD")}
+                          {subtotal.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-0.5 whitespace-nowrap">
+                          True Cost
+                        </span>
+                        <span className="text-sm font-bold whitespace-nowrap">
+                          {getCurrencySymbol(watch("currency") || "USD")}
+                          {totalCost.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-0.5 whitespace-nowrap">
+                          Suggested ({watchedTargetCost}%)
+                        </span>
+                        <span className="text-sm font-bold text-primary whitespace-nowrap">
+                          {getCurrencySymbol(watch("currency") || "USD")}
+                          {Number.isFinite(suggestedPrice)
+                            ? suggestedPrice.toFixed(2)
+                            : "0.00"}
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-0.5 whitespace-nowrap">
+                          Target Food Cost
+                        </span>
+                        <span
+                          className={`text-sm font-bold whitespace-nowrap ${getMarginColor(
+                            100 - currentFoodCost,
+                          )}`}
+                        >
+                          {currentFoodCost.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-0.5 whitespace-nowrap">
+                          Target Margin
+                        </span>
+                        <span
+                          className={`text-sm font-bold whitespace-nowrap ${getMarginColor(
+                            currentMargin,
+                          )}`}
+                        >
+                          {currentMargin.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <AccordionPrimitive.Trigger asChild>
+                      <button
+                        type="button"
+                        className="hidden lg:flex p-2 hover:bg-muted rounded-full transition-colors order-last focus:outline-none"
+                      >
+                        <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </button>
+                    </AccordionPrimitive.Trigger>
+                  </div>
+                </div>
+              </AccordionPrimitive.Header>
+              <AccordionContent>
+                <CardContent className="space-y-6 pt-6 border-t border-border/30 mx-6 bg-muted/5 rounded-b-xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="sellingPrice"
+                          className="flex items-center gap-2"
+                        >
+                          {t("recipes.fields.sellingPrice")}
+                          <span className="ml-2 text-[10px] text-muted-foreground uppercase opacity-70">
+                            (Optional)
+                          </span>
+                          <FieldHelp
+                            helpText={t("recipes.help.sellingPrice")}
+                          />
+                        </Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          id="sellingPrice"
+                          {...register("sellingPrice", { valueAsNumber: true })}
+                          placeholder={
+                            suggestedPrice > 0
+                              ? suggestedPrice.toFixed(2)
+                              : t("recipes.placeholders.sellingPrice")
+                          }
+                          className="h-12 text-lg font-semibold"
+                          onFocus={(e) => e.target.select()}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="currency">
+                          {t("common.labels.currency")}
+                        </Label>
+                        <CurrencySelector
+                          value={watch("currency") ?? "USD"}
+                          onChange={(value) => setValue("currency", value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <Label
+                            htmlFor="targetCost"
+                            className="flex items-center gap-2"
+                          >
+                            {t("recipes.fields.targetCostPercentage")}
+                            <FieldHelp
+                              helpText={t("recipes.help.targetCostPercentage")}
+                            />
+                          </Label>
+                          <span className="text-[10px] font-mono text-muted-foreground">
+                            {t("recipes.default")}: 25%
+                          </span>
+                        </div>
+                        <Input
+                          type="number"
+                          id="targetCost"
+                          {...register("targetCostPercentage", {
+                            valueAsNumber: true,
+                          })}
+                          placeholder="25"
+                          className="h-12"
+                          onFocus={(e) => e.target.select()}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <Label
+                            htmlFor="wasteBuffer"
+                            className="flex items-center gap-2"
+                          >
+                            {t("recipes.fields.wasteBuffer")}
+                            <FieldHelp
+                              helpText={t("recipes.help.wasteBuffer")}
+                            />
+                          </Label>
+                          <span className="text-[10px] font-mono text-muted-foreground">
+                            {t("recipes.placeholders.yield")}%
+                          </span>
+                        </div>
+                        <Input
+                          type="number"
+                          id="wasteBuffer"
+                          {...register("wasteBufferPercentage", {
+                            valueAsNumber: true,
+                          })}
+                          placeholder="0"
+                          className="h-12"
+                          onFocus={(e) => e.target.select()}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 p-6 bg-background border border-border/50 rounded-xl space-y-4 shadow-sm">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground font-medium">
+                        {t("recipes.subtotal")}:
+                      </span>
+                      <span className="font-semibold">
+                        {getCurrencySymbol(watch("currency") || "USD")}
+                        {subtotal.toFixed(2)}
+                      </span>
+                    </div>
+
+                    {watchedWasteBuffer > 0 && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground font-medium">
+                          {t("recipes.fields.wasteBuffer")
+                            .replace("%", "")
+                            .trim()}{" "}
+                          ({watchedWasteBuffer}%):
+                        </span>
+                        <span className="font-semibold text-orange-600">
+                          +{getCurrencySymbol(watch("currency") || "USD")}
+                          {wasteCost.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="h-px bg-border/50 my-2" />
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground font-bold">
+                        {t("recipes.trueCost")}:
+                      </span>
+                      <span className="font-bold text-2xl">
+                        {getCurrencySymbol(watch("currency") || "USD")}
+                        {totalCost.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground font-semibold">
+                        {t("recipes.suggestedPrice")} ({watchedTargetCost}%{" "}
+                        {t("recipes.cost")}):
+                      </span>
+                      <span className="font-bold text-xl text-primary">
+                        {getCurrencySymbol(watch("currency") || "USD")}
+                        {Number.isFinite(suggestedPrice)
+                          ? suggestedPrice.toFixed(2)
+                          : "0.00"}
+                      </span>
+                    </div>
+
+                    <div className="pt-2 grid grid-cols-2 gap-4">
+                      <div className="p-3 rounded-lg bg-muted/30 border border-border/20">
+                        <span className="block text-[10px] uppercase font-bold text-muted-foreground mb-1">
+                          {watchedSellingPrice
+                            ? t("recipes.actualCost")
+                            : t("recipes.targetCost")}
+                        </span>
+                        <span
+                          className={`text-lg font-bold ${getMarginColor(
+                            100 - currentFoodCost,
+                          )}`}
+                        >
+                          {currentFoodCost.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="p-3 rounded-lg bg-muted/30 border border-border/20">
+                        <span className="block text-[10px] uppercase font-bold text-muted-foreground mb-1">
+                          {watchedSellingPrice
+                            ? t("recipes.netMargin")
+                            : t("recipes.targetMargin")}
+                        </span>
+                        <span
+                          className={`text-lg font-bold ${getMarginColor(
+                            currentMargin,
+                          )}`}
+                        >
+                          {currentMargin.toFixed(1)}%
+                        </span>
                       </div>
                     </div>
                   </div>

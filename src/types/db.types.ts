@@ -18,6 +18,25 @@ export interface IngredientsTable {
   is_active: number; // 1 or 0
 }
 
+export interface AssetsTable {
+  id: Generated<number>;
+  name: string;
+  category: string;
+  unit_of_measure: string;
+  current_price: number;
+  price_per_unit: number;
+  currency: string;
+  supplier_id: number | null;
+  min_stock_level: number | null;
+  current_stock: number;
+  last_updated: Generated<string>;
+  notes: string | null;
+  purchase_unit: string | null;
+  conversion_ratio: number | null;
+  is_active: number; // 1 or 0
+  asset_type: string; // 'operational', 'equipment', 'disposable'
+}
+
 export interface RecipesTable {
   id: Generated<number>;
   name: string;
@@ -60,7 +79,9 @@ export interface RecipeIngredientsTable {
 
 export interface InventoryTransactionsTable {
   id: Generated<number>;
-  ingredient_id: number;
+  ingredient_id: number | null;
+  asset_id: number | null;
+  item_type: string; // 'ingredient' or 'asset'
   transaction_type: string;
   quantity: number;
   cost_per_unit: number | null;
@@ -162,6 +183,7 @@ export interface ConfigurationItemsTable {
 
 export interface Database {
   ingredients: IngredientsTable;
+  assets: AssetsTable;
   recipes: RecipesTable;
   recipe_ingredients: RecipeIngredientsTable;
   inventory_transactions: InventoryTransactionsTable;

@@ -1,8 +1,10 @@
 import { createModuleStore } from "@/lib/store";
 import { useIngredientsStore } from "@/modules/core/ingredients/store/ingredients.store";
 import type { Ingredient } from "@/types/ingredient.types";
+import type { InventoryTransactionInput } from "@/utils/validators";
 import { inventoryRepository } from "../services/inventory.repository";
-import type { CreateTransactionInput, InventoryTransaction } from "../types";
+import type { InventoryTransaction } from "../types";
+import { useAssetsStore } from "./assets.store";
 
 interface InventoryStore {
   transactions: InventoryTransaction[];
@@ -12,7 +14,7 @@ interface InventoryStore {
 
   fetchTransactions: (limit?: number) => Promise<void>;
   fetchLowStockItems: () => Promise<void>;
-  logTransaction: (data: CreateTransactionInput) => Promise<void>;
+  logTransaction: (data: InventoryTransactionInput) => Promise<void>;
 }
 
 export const useInventoryStore = createModuleStore<InventoryStore>(
@@ -59,7 +61,7 @@ export const useInventoryStore = createModuleStore<InventoryStore>(
       }
     },
 
-    logTransaction: async (data: CreateTransactionInput) => {
+    logTransaction: async (data) => {
       set({ isLoading: true, error: null });
       try {
         await inventoryRepository.logTransaction(data);
@@ -67,8 +69,12 @@ export const useInventoryStore = createModuleStore<InventoryStore>(
         // Re-fetch transactions
         await get().fetchTransactions();
 
-        // Refresh ingredients in the main store to reflect stock changes
-        await useIngredientsStore.getState().fetchIngredients();
+        // Refresh the appropriate store based on item type
+        if (data.itemType === "asset" || data.assetId) {
+          await useAssetsStore.getState().fetchAssets();
+        } else {
+          await useIngredientsStore.getState().fetchIngredients();
+        }
 
         // Refresh low stock items
         await get().fetchLowStockItems();

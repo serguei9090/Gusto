@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { useTranslation } from "@/hooks/useTranslation";
 import { useConfigStore } from "@/modules/core/settings/store/config.store";
 
@@ -17,6 +16,7 @@ export interface UnitSelectProps {
   placeholder?: string;
   className?: string;
   id?: string;
+  filterType?: "ingredient" | "asset";
 }
 
 export function UnitSelect({
@@ -24,13 +24,20 @@ export function UnitSelect({
   onValueChange,
   placeholder = "Select unit",
   className,
+  filterType,
 }: UnitSelectProps) {
   const { getUnits } = useConfigStore();
   const dynamicUnits = getUnits();
   const { t } = useTranslation();
 
-  // Define category order
-  const CATEGORY_ORDER = ["mass", "volume", "length", "misc", "other"];
+  // Define category order based on filterType
+  let CATEGORY_ORDER = ["mass", "volume", "length", "misc", "other"];
+
+  if (filterType === "ingredient") {
+    CATEGORY_ORDER = ["mass", "volume", "misc", "other"];
+  } else if (filterType === "asset") {
+    CATEGORY_ORDER = ["length", "misc", "other"];
+  }
 
   // Group units by category
   const groups = CATEGORY_ORDER.map((categoryKey) => {
@@ -65,7 +72,9 @@ export function UnitSelect({
         {groups.map((group) =>
           group.units.length > 0 ? (
             <SelectGroup key={group.label}>
-              <SelectLabel>{group.label}</SelectLabel>
+              <SelectLabel className="font-semibold text-muted-foreground pl-2 py-1 text-xs uppercase tracking-wider">
+                {group.label}
+              </SelectLabel>
               {group.units.map((unit) => (
                 <SelectItem key={unit.name} value={unit.name}>
                   {unit.name}

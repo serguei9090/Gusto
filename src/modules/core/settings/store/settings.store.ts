@@ -31,7 +31,7 @@ export const useSettingsStore = create<SettingsState>()(
       exchangeRates: DEFAULT_RATES,
       modules: {
         dashboard: true,
-        ingredients: true,
+        ingredients: false, // Disabled by default, moved to Inventory
         recipes: true,
         inventory: true,
         suppliers: true,
@@ -40,7 +40,7 @@ export const useSettingsStore = create<SettingsState>()(
       },
       moduleOrder: [
         "dashboard",
-        "ingredients",
+        // "ingredients", // Removed from default order
         "recipes",
         "inventory",
         "suppliers",
