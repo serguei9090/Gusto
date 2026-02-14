@@ -4,7 +4,6 @@ import type { ModuleDefinition } from "@/types/module";
 import { logger } from "@/utils/logger";
 import { calculatorsModule } from "./core/calculators";
 import { dashboardModule } from "./core/dashboard";
-import { ingredientsModule } from "./core/ingredients";
 import { inventoryModule } from "./core/inventory";
 import { prepSheetsModule } from "./core/prep-sheets";
 import { recipesModule } from "./core/recipes";
@@ -26,7 +25,6 @@ export function registerModules() {
   // Register Core Modules (Always)
 
   registry.register(dashboardModule);
-  registry.register(ingredientsModule);
   registry.register(recipesModule);
   registry.register(inventoryModule);
   registry.register(suppliersModule);

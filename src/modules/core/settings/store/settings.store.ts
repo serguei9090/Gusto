@@ -31,7 +31,6 @@ export const useSettingsStore = create<SettingsState>()(
       exchangeRates: DEFAULT_RATES,
       modules: {
         dashboard: true,
-        ingredients: false, // Disabled by default, moved to Inventory
         recipes: true,
         inventory: true,
         suppliers: true,
@@ -40,7 +39,6 @@ export const useSettingsStore = create<SettingsState>()(
       },
       moduleOrder: [
         "dashboard",
-        // "ingredients", // Removed from default order
         "recipes",
         "inventory",
         "suppliers",
@@ -72,7 +70,6 @@ export const useSettingsStore = create<SettingsState>()(
           exchangeRates: DEFAULT_RATES,
           modules: {
             dashboard: true,
-            ingredients: true,
             recipes: true,
             inventory: true,
             suppliers: true,
@@ -81,7 +78,6 @@ export const useSettingsStore = create<SettingsState>()(
           },
           moduleOrder: [
             "dashboard",
-            "ingredients",
             "recipes",
             "inventory",
             "suppliers",
@@ -92,16 +88,28 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "restaurant-settings-storage",
-      version: 1,
+      version: 2,
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as SettingsState;
-        if (version === 0) {
+        if (version < 1) {
           // Add calculators if missing from old versions
           if (state.modules && !state.modules.calculators) {
             state.modules.calculators = true;
           }
           if (state.moduleOrder && !state.moduleOrder.includes("calculators")) {
             state.moduleOrder.push("calculators");
+          }
+        }
+
+        if (version < 2) {
+          // Properly remove ingredients module from order and visibility
+          if (state.modules) {
+            delete state.modules.ingredients;
+          }
+          if (state.moduleOrder) {
+            state.moduleOrder = state.moduleOrder.filter(
+              (id) => id.toLowerCase() !== "ingredients",
+            );
           }
         }
         return state;

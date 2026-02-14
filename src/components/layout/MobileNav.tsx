@@ -1,10 +1,4 @@
-import {
-  History,
-  Home,
-  Package,
-  Settings,
-  UtensilsCrossed,
-} from "lucide-react";
+import { History, Home, Settings, UtensilsCrossed } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface MobileNavProps {
@@ -17,7 +11,6 @@ export const MobileNav = ({ currentView, onChangeView }: MobileNavProps) => {
 
   const navItems = [
     { id: "dashboard", label: t("navigation.dashboard"), icon: Home },
-    { id: "ingredients", label: t("navigation.ingredients"), icon: Package },
     { id: "recipes", label: t("navigation.recipes"), icon: UtensilsCrossed },
     { id: "inventory", label: t("navigation.inventory"), icon: History },
     { id: "settings", label: t("navigation.settings"), icon: Settings },

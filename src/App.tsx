@@ -60,9 +60,9 @@ function App() {
       return <module.component />;
     }
 
-    // Default fallback
-    const ingredients = reg.get("ingredients");
-    return ingredients ? <ingredients.component /> : null;
+    // Default fallback - show dashboard if module not found
+    const dashboard = reg.get("dashboard");
+    return dashboard ? <dashboard.component /> : null;
   };
 
   const getTitle = () => {
