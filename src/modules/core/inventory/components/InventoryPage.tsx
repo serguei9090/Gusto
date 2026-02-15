@@ -27,10 +27,15 @@ import { IngredientForm } from "@/modules/core/ingredients/components/Ingredient
 import { useIngredientsStore } from "@/modules/core/ingredients/store/ingredients.store";
 import { useAssetsStore } from "@/modules/core/inventory/store/assets.store";
 import { useInventoryStore } from "@/modules/core/inventory/store/inventory.store";
-import type { Asset, CreateAssetInput } from "@/types/asset.types";
+import type {
+  Asset,
+  CreateAssetInput,
+  UpdateAssetInput,
+} from "@/types/asset.types";
 import type {
   CreateIngredientInput,
   Ingredient,
+  UpdateIngredientInput,
 } from "@/types/ingredient.types";
 import type { InventoryTransactionInput } from "@/utils/validators";
 import { AssetForm } from "./AssetForm";
@@ -45,12 +50,14 @@ export const InventoryPage = () => {
     ingredients,
     fetchIngredients,
     createIngredient,
+    updateIngredient,
     isLoading: loadingIng,
   } = useIngredientsStore();
   const {
     assets,
     fetchAssets,
     createAsset,
+    updateAsset,
     isLoading: loadingAsset,
   } = useAssetsStore();
   const {
@@ -66,15 +73,23 @@ export const InventoryPage = () => {
     "consumables",
   );
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Transaction Modal State
   const [selectedIngredient, setSelectedIngredient] =
     useState<Ingredient | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Add/Edit Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addModalTab, setAddModalTab] = useState<"consumables" | "assets">(
     "consumables",
   );
+  const [editingItem, setEditingItem] = useState<Ingredient | Asset | null>(
+    null,
+  );
 
+  // History Modal State
   const [historyIngredient, setHistoryIngredient] = useState<Ingredient | null>(
     null,
   );
@@ -106,30 +121,48 @@ export const InventoryPage = () => {
     }
   };
 
-  const handleCreateIngredient = async (data: CreateIngredientInput) => {
+  const handleCreateOrUpdateIngredient = async (
+    data: CreateIngredientInput,
+  ) => {
     try {
-      await createIngredient(data);
+      if (editingItem) {
+        await updateIngredient(editingItem.id, data as UpdateIngredientInput);
+      } else {
+        await createIngredient(data);
+      }
       setIsAddModalOpen(false);
+      setEditingItem(null);
     } catch (err) {
-      console.error("Failed to create ingredient:", err);
+      console.error("Failed to save ingredient:", err);
     }
   };
 
-  const handleCreateAsset = async (data: CreateAssetInput) => {
+  const handleCreateOrUpdateAsset = async (data: CreateAssetInput) => {
     try {
-      await createAsset(data);
+      if (editingItem) {
+        await updateAsset(editingItem.id, data as UpdateAssetInput);
+      } else {
+        await createAsset(data);
+      }
       setIsAddModalOpen(false);
+      setEditingItem(null);
     } catch (err) {
-      console.error("Failed to create asset:", err);
+      console.error("Failed to save asset:", err);
     }
   };
 
-  const openTransactionModal = (item: Ingredient | Asset) => {
-    if (activeTab === "consumables") {
-      setSelectedIngredient(item as Ingredient);
-    } else {
-      setSelectedAsset(item as Asset);
-    }
+  const handleEditItem = (
+    item: Ingredient | Asset,
+    type: "consumables" | "assets",
+  ) => {
+    setEditingItem(item);
+    setAddModalTab(type);
+    setIsAddModalOpen(true);
+  };
+
+  const openGlobalTransactionModal = () => {
+    setSelectedIngredient(null);
+    setSelectedAsset(null);
     setIsModalOpen(true);
   };
 
@@ -230,6 +263,7 @@ export const InventoryPage = () => {
         </div>
         <Button
           onClick={() => {
+            setEditingItem(null);
             setAddModalTab(activeTab);
             setIsAddModalOpen(true);
           }}
@@ -240,7 +274,7 @@ export const InventoryPage = () => {
           <span className="hidden sm:inline">Add Item</span>
         </Button>
         <Button
-          onClick={() => setIsModalOpen(true)}
+          onClick={openGlobalTransactionModal}
           className="flex items-center gap-2"
         >
           <ArrowLeftRight className="h-4 w-4" />
@@ -292,9 +326,10 @@ export const InventoryPage = () => {
                     className={
                       isLow ? "border-destructive/50 bg-destructive/5" : ""
                     }
+                    onEdit={() => handleEditItem(ingredient, "consumables")}
                     actions={
                       <Button
-                        variant="secondary"
+                        variant="ghost"
                         size="icon"
                         className="h-8 w-8"
                         onClick={(e) => {
@@ -355,7 +390,7 @@ export const InventoryPage = () => {
           <div className="hidden md:block flex-1 overflow-auto bg-card rounded-md border text-sm">
             <InventoryTable
               ingredients={filteredIngredients}
-              onRecordTransaction={openTransactionModal}
+              onEdit={(ing) => handleEditItem(ing, "consumables")}
               onViewHistory={openHistoryModal}
             />
           </div>
@@ -381,6 +416,8 @@ export const InventoryPage = () => {
                     className={
                       isLow ? "border-destructive/50 bg-destructive/5" : ""
                     }
+                    onEdit={() => handleEditItem(asset, "assets")}
+                    actions={null}
                     details={[
                       {
                         label: "Stock",
@@ -442,25 +479,30 @@ export const InventoryPage = () => {
           <div className="hidden md:block flex-1 overflow-auto bg-card rounded-md border text-sm">
             <AssetTable
               assets={filteredAssets}
-              onRecordTransaction={openTransactionModal}
+              onEdit={(asset) => handleEditItem(asset, "assets")}
               onViewHistory={() => {}} // Placeholder for now
             />
           </div>
         </TabsContent>
       </Tabs>
 
-      {/* Add Item Modal */}
+      {/* Add/Edit Item Modal */}
       <Dialog
         open={isAddModalOpen}
         onOpenChange={(v) => {
           setIsAddModalOpen(v);
-          // Optional: Reset to current active tab when opening
-          if (v) setAddModalTab(activeTab);
+          if (v) {
+            setAddModalTab(activeTab); // Reset to active tab when opening new, but handleEditItem overrides this if editing
+          } else {
+            setEditingItem(null); // Clear editing item on close
+          }
         }}
       >
         <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] max-w-none translate-x-0 translate-y-0 rounded-none border-0 bg-background sm:fixed sm:left-[50%] sm:top-[50%] sm:z-[200] sm:w-full sm:max-w-2xl sm:h-auto sm:max-h-[90vh] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:p-0 flex flex-col gap-0 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95 sm:data-[state=closed]:slide-out-to-left-1/2 sm:data-[state=closed]:slide-out-to-top-[48%] sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%] overflow-hidden">
           <DialogHeader className="p-4 sm:p-6 border-b shrink-0">
-            <DialogTitle>Add New Item</DialogTitle>
+            <DialogTitle>
+              {editingItem ? "Edit Item" : "Add New Item"}
+            </DialogTitle>
           </DialogHeader>
 
           <Tabs
@@ -468,16 +510,18 @@ export const InventoryPage = () => {
             onValueChange={(v) => setAddModalTab(v as "consumables" | "assets")}
             className="flex-1 flex flex-col min-h-0"
           >
-            <div className="px-4 sm:px-6 py-2 border-b bg-muted/20">
-              <TabsList className="w-full">
-                <TabsTrigger value="consumables" className="flex-1">
-                  Consumable (Ingredient)
-                </TabsTrigger>
-                <TabsTrigger value="assets" className="flex-1">
-                  Asset (Equipment/Other)
-                </TabsTrigger>
-              </TabsList>
-            </div>
+            {!editingItem && (
+              <div className="px-4 sm:px-6 py-2 border-b bg-muted/20">
+                <TabsList className="w-full">
+                  <TabsTrigger value="consumables" className="flex-1">
+                    Consumable (Ingredient)
+                  </TabsTrigger>
+                  <TabsTrigger value="assets" className="flex-1">
+                    Asset (Equipment/Other)
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+            )}
 
             <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               <TabsContent
@@ -485,7 +529,9 @@ export const InventoryPage = () => {
                 className="mt-0 h-full flex flex-col"
               >
                 <IngredientForm
-                  onSubmit={handleCreateIngredient}
+                  defaultValues={editingItem as Partial<CreateIngredientInput>}
+                  isEdit={!!editingItem}
+                  onSubmit={handleCreateOrUpdateIngredient}
                   onCancel={() => setIsAddModalOpen(false)}
                   isLoading={loadingIng}
                 />
@@ -493,7 +539,9 @@ export const InventoryPage = () => {
 
               <TabsContent value="assets" className="mt-0 h-full flex flex-col">
                 <AssetForm
-                  onSubmit={handleCreateAsset}
+                  defaultValues={editingItem as Partial<CreateAssetInput>}
+                  isEdit={!!editingItem}
+                  onSubmit={handleCreateOrUpdateAsset}
                   onCancel={() => setIsAddModalOpen(false)}
                   isLoading={loadingAsset}
                 />
@@ -503,22 +551,27 @@ export const InventoryPage = () => {
         </DialogContent>
       </Dialog>
 
-      {(selectedIngredient || selectedAsset) && (
-        <TransactionModal
-          item={(selectedIngredient || selectedAsset) as Ingredient | Asset}
-          itemType={selectedIngredient ? "ingredient" : "asset"}
-          open={isModalOpen}
-          onOpenChange={(val) => {
-            setIsModalOpen(val);
-            if (!val) {
-              setSelectedIngredient(null);
-              setSelectedAsset(null);
-            }
-          }}
-          onSubmit={handleTransaction}
-          isLoading={loadingInv}
-        />
-      )}
+      {/* Transaction Modal - Always render if open, logic inside handles item selection */}
+      <TransactionModal
+        item={selectedIngredient || selectedAsset}
+        itemType={
+          selectedIngredient
+            ? "ingredient"
+            : selectedAsset
+              ? "asset"
+              : undefined
+        }
+        open={isModalOpen}
+        onOpenChange={(val) => {
+          setIsModalOpen(val);
+          if (!val) {
+            setSelectedIngredient(null);
+            setSelectedAsset(null);
+          }
+        }}
+        onSubmit={handleTransaction}
+        isLoading={loadingInv}
+      />
 
       {historyIngredient && (
         <InventoryHistoryModal

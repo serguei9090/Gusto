@@ -14,13 +14,13 @@ import { formatCurrencyAmount } from "@/utils/currencyConverter";
 
 interface InventoryTableProps {
   readonly ingredients: Ingredient[];
-  readonly onRecordTransaction: (ingredient: Ingredient) => void;
+  readonly onEdit: (ingredient: Ingredient) => void;
   readonly onViewHistory: (ingredient: Ingredient) => void;
 }
 
 export function InventoryTable({
   ingredients,
-  onRecordTransaction,
+  onEdit,
   onViewHistory,
 }: InventoryTableProps) {
   return (
@@ -105,16 +105,18 @@ export function InventoryTable({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onRecordTransaction(ingredient)}
+                      onClick={() => onEdit(ingredient)}
+                      title="Edit Details"
                       className="h-8 w-8 p-0"
                     >
                       <Edit3 className="h-4 w-4" />
-                      <span className="sr-only">Update</span>
+                      <span className="sr-only">Edit Details</span>
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onViewHistory(ingredient)}
+                      title="History"
                       className="h-8 w-8 p-0"
                     >
                       <History className="h-4 w-4" />

@@ -14,15 +14,11 @@ import { formatCurrencyAmount } from "@/utils/currencyConverter";
 
 interface AssetTableProps {
   readonly assets: Asset[];
-  readonly onRecordTransaction: (asset: Asset) => void;
+  readonly onEdit: (asset: Asset) => void;
   readonly onViewHistory: (asset: Asset) => void;
 }
 
-export function AssetTable({
-  assets,
-  onRecordTransaction,
-  onViewHistory,
-}: AssetTableProps) {
+export function AssetTable({ assets, onEdit, onViewHistory }: AssetTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
@@ -107,18 +103,18 @@ export function AssetTable({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onRecordTransaction(asset)}
+                      onClick={() => onEdit(asset)}
+                      title="Edit Details"
                       className="h-8 w-8 p-0"
                     >
                       <Edit3 className="h-4 w-4" />
-                      <span className="sr-only">Update</span>
+                      <span className="sr-only">Edit Details</span>
                     </Button>
-                    {/* Placeholder for future history functionality specific to assets if different */}
-                    {/* Reusing existing onViewHistory for now, assuming it handles assets or will be updated */}
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onViewHistory(asset)}
+                      title="History"
                       className="h-8 w-8 p-0"
                     >
                       <History className="h-4 w-4" />
