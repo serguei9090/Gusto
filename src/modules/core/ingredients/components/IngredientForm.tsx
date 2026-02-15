@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "@/hooks/useTranslation";
 import { CurrencySelector } from "@/modules/core/settings/components/CurrencySelector";
 import { useConfigStore } from "@/modules/core/settings/store/config.store";
@@ -188,26 +189,16 @@ export const IngredientForm = ({
             <Label className="text-base font-semibold">
               Pricing Configuration
             </Label>
-            <div className="grid grid-cols-2 gap-1 bg-muted p-1 rounded-md w-full md:w-auto">
-              <Button
-                type="button"
-                variant={pricingMode === "unit" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setPricingMode("unit")}
-                className="text-xs px-3 h-8"
-              >
-                Per Unit
-              </Button>
-              <Button
-                type="button"
-                variant={pricingMode === "package" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setPricingMode("package")}
-                className="text-xs px-3 h-8"
-              >
-                By Package
-              </Button>
-            </div>
+            <Tabs
+              value={pricingMode}
+              onValueChange={(v) => setPricingMode(v as "unit" | "package")}
+              className="w-full md:w-auto"
+            >
+              <TabsList className="grid w-full grid-cols-2 md:w-[200px]">
+                <TabsTrigger value="unit">Per Unit</TabsTrigger>
+                <TabsTrigger value="package">By Package</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
           {pricingMode === "package" && (
@@ -249,15 +240,14 @@ export const IngredientForm = ({
                         type="number"
                         step="0.001"
                         {...field}
-                        value={field.value === 0 ? "" : (field.value ?? "")}
-                        onFocus={(e) => e.target.select()}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value === ""
-                              ? 0
-                              : Number.parseFloat(e.target.value),
-                          )
+                        value={
+                          field.value === null ||
+                          field.value === undefined ||
+                          Number.isNaN(field.value)
+                            ? ""
+                            : field.value
                         }
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -278,17 +268,17 @@ export const IngredientForm = ({
                     <FormControl>
                       <Input
                         type="number"
-                        step="0.01"
+                        step="0.001"
+                        placeholder="1"
                         {...field}
-                        value={field.value === 0 ? "" : field.value}
-                        onFocus={(e) => e.target.select()}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value === ""
-                              ? 0
-                              : Number.parseFloat(e.target.value),
-                          )
+                        value={
+                          field.value === null ||
+                          field.value === undefined ||
+                          Number.isNaN(field.value)
+                            ? ""
+                            : field.value
                         }
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -326,16 +316,17 @@ export const IngredientForm = ({
                         type="number"
                         step="0.01"
                         {...field}
-                        value={field.value === 0 ? "" : field.value}
-                        onFocus={(e) => e.target.select()}
+                        value={
+                          field.value === null ||
+                          field.value === undefined ||
+                          Number.isNaN(field.value)
+                            ? ""
+                            : field.value
+                        }
                         onChange={(e) => {
-                          field.onChange(
-                            e.target.value === ""
-                              ? 0
-                              : Number.parseFloat(e.target.value),
-                          );
+                          field.onChange(e.target.valueAsNumber);
                           // In unit mode, currentPrice is same as pricePerUnit
-                          form.setValue("currentPrice", Number(e.target.value));
+                          form.setValue("currentPrice", e.target.valueAsNumber);
                         }}
                       />
                     </FormControl>

@@ -1,6 +1,5 @@
 import { MobileHeader } from "@/components/layout/MobileHeader";
 import { Sidebar } from "@/components/Sidebar";
-import styles from "./MainLayout.module.css";
 
 export interface MainLayoutProps {
   currentView: string;
@@ -16,9 +15,7 @@ export const MainLayout = ({
   children,
 }: MainLayoutProps) => {
   return (
-    <div
-      className={`${styles.container} flex-col md:flex-row h-[100dvh] w-screen overflow-hidden bg-background`}
-    >
+    <div className="flex flex-col md:flex-row h-[100dvh] w-screen overflow-hidden bg-background">
       {/* Mobile Top Header (with Sidebar Trigger) */}
       <div className="md:hidden">
         <MobileHeader
@@ -37,9 +34,7 @@ export const MainLayout = ({
       <main className="flex-1 flex flex-col overflow-hidden relative w-full pt-16 md:pt-0">
         {/* Header - Desktop Only (Title) */}
         {title && (
-          <header
-            className={`${styles.header} hidden md:flex items-center px-8 text-2xl font-bold`}
-          >
+          <header className="hidden md:flex items-center h-16 bg-card border-b px-8 font-semibold text-lg text-foreground shrink-0">
             {title}
           </header>
         )}

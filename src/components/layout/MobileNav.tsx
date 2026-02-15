@@ -33,7 +33,7 @@ export const MobileNav = ({ currentView, onChangeView }: MobileNavProps) => {
             }`}
           >
             <Icon size={20} />
-            <span className="text-[10px] font-medium">{item.label}</span>
+            <span className="text-xs font-medium">{item.label}</span>
           </button>
         );
       })}
