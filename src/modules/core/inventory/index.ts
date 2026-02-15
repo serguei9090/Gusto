@@ -1,8 +1,8 @@
 import { Package } from "lucide-react";
+import { InventoryPage } from "@/components/pages/InventoryPage/InventoryPage";
 import type { ModuleDefinition } from "@/types/module";
-import { InventoryPage } from "./components/InventoryPage";
 
-export * from "./components/InventoryPage";
+export { InventoryPage };
 
 export const inventoryModule: ModuleDefinition = {
   id: "inventory",

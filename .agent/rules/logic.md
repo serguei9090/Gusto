@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: When implementing business logic, calculations, or pricing formulas.
+---
+
 # Business Logic Rules
 
 ---

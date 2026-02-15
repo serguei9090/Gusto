@@ -1,3 +1,8 @@
+---
+trigger: glob
+globs: ["**/*.test.ts", "**/*.spec.ts", "**/tests/**", "src/test/**"]
+---
+
 # Testing Requirements
 
 ---

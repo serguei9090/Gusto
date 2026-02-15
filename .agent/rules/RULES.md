@@ -1,12 +1,12 @@
-# Gusto Project Standards & Rules
-
-This document outlines the mandatory architectural, coding, and styling standards for the Gusto project. All developers (AI and human) MUST follow these rules to ensure consistency, maintainability, and high performance.
-
+---
+trigger: always_on
 ---
 
-## 🏗️ 1. Project Architecture
+# Architecture & Naming Rules
 
-### 1.1 Atomic Design (Pragmatic Model)
+## 📂 Architecture Rules
+
+### 1. Atomic Design (Pragmatic Model)
 We follow a modified Atomic Design structure optimized for Shadcn/UI and Tailwind CSS.
 
 | Level | Location | Purpose | Examples |

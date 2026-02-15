@@ -1,3 +1,4 @@
+import { AboutDialog } from "@/components/organisms/AboutDialog";
 import {
   Card,
   CardContent,
@@ -5,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AboutDialog } from "../components/AboutDialog";
 
 export const AboutSection = () => {
   return (

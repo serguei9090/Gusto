@@ -1,8 +1,8 @@
 import { ClipboardList } from "lucide-react";
+import { PrepSheetsPage } from "@/components/pages/PrepSheetsPage/PrepSheetsPage";
 import type { ModuleDefinition } from "@/types/module";
-import { PrepSheetsPage } from "./components/PrepSheetsPage";
 
-export * from "./components/PrepSheetsPage";
+export * from "@/components/pages/PrepSheetsPage/PrepSheetsPage";
 
 export const prepSheetsModule: ModuleDefinition = {
   id: "prepsheets",

@@ -1,6 +1,6 @@
 import { ChefHat, Percent } from "lucide-react";
+import { StatCard } from "@/components/atoms/StatCard";
 import { useTranslation } from "@/hooks/useTranslation";
-import { StatCard } from "@/modules/core/dashboard/components/StatCard";
 import { useDashboardStore } from "@/modules/core/dashboard/store/dashboard.store";
 
 export const AvgMarginWidget = () => {

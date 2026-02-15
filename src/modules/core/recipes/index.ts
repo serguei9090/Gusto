@@ -3,10 +3,12 @@ import React from "react";
 import type { ModuleDefinition } from "@/types/module";
 
 const RecipesPage = React.lazy(() =>
-  import("./components/RecipesPage").then((m) => ({ default: m.RecipesPage })),
+  import("@/components/pages/RecipesPage/RecipesPage").then((m) => ({
+    default: m.RecipesPage,
+  })),
 );
 
-export { RecipesPage } from "./components/RecipesPage";
+export { RecipesPage } from "@/components/pages/RecipesPage/RecipesPage";
 export { recipesRepository } from "./services/recipes.repository";
 export { useRecipeStore } from "./store/recipes.store";
 

@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: When adding new dependencies or modifying package.json.
+---
+
 # Dependency Management Rules
 
 ---

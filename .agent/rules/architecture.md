@@ -1,44 +1,40 @@
-# Architecture & Naming Rules
-
 ---
+trigger: always_on
+---
+
+# Architecture & Naming Rules
 
 ## 📂 Architecture Rules
 
-### 1. Atomic Design MUST Be Followed
+### 1. Atomic Design (Pragmatic Model)
+We follow a modified Atomic Design structure optimized for **Shadcn/UI** and **Tailwind CSS**.
 
-All UI components MUST follow this hierarchy:
-
-```
-src/components/
-├── atoms/        ← Basic elements (Button, Input, Label, Icon)
-├── molecules/    ← Simple combinations (FormField, SearchBar)
-├── organisms/    ← Complex sections (RecipeForm, InventoryTable)
-├── templates/    ← Page layouts (MainLayout, DashboardLayout)
-└── pages/        ← Complete pages (Dashboard, Recipes, Inventory)
-```
-
-**Rules:**
-- Atoms CANNOT import other atoms
-- Molecules CAN import atoms
-- Organisms CAN import atoms and molecules
-- Templates CAN import organisms, molecules, and atoms
-- Pages CAN import templates and organisms
+| Level | Location | Purpose | Examples |
+| :--- | :--- | :--- | :--- |
+| **Primitives** | `src/components/ui` | **Shadcn/UI components**. Standard, unstyled primitives. Do not modify directly. | `Button`, `Input`, `Dialog` |
+| **Atoms** | `src/components/atoms` | Smallest functional units with **domain logic**. Often wrap Primitives. | `StatusBadge`, `PriceDisplay`, `UserAvatar` |
+| **Molecules** | `src/components/molecules` | Simple combinations of atoms. Handles local interaction logic. | `SearchBar`, `QuantityCounter`, `IngredientRow` |
+| **Organisms** | `src/components/organisms` | Complex, data-aware UI sections. Often interact with Stores/Services. | `RecipeEditor`, `InventoryTable`, `SupplierList` |
+| **Templates** | `src/components/templates` | Page-level layout structures (no real data). | `DashboardLayout`, `AuthLayout` |
+| **Pages** | `src/components/pages` | Composed organisms with real data and module-specific logic. | `IngredientsPage`, `SettingsPage` |
 
 ### 2. Component Structure
 
-Each component MUST have:
+Each component MUST follow this structure (using `index.ts` for clean exports):
+
 ```
 ComponentName/
-├── ComponentName.tsx
-├── ComponentName.module.css
-└── index.ts
+├── ComponentName.tsx  ← Main component file
+└── index.ts           ← Exports
 ```
 
 **index.ts pattern:**
 ```typescript
 export { ComponentName } from "./ComponentName";
-export type { ComponentNameProps } from "./ComponentName";
+export type { ComponentNameProps } from "./ComponentName"; // If separate type export needed
 ```
+
+**Note:** We do NOT use `.module.css` files. All styling must be done via Tailwind utility classes.
 
 ### 3. Naming Conventions
 
@@ -51,4 +47,4 @@ export type { ComponentNameProps } from "./ComponentName";
 
 ---
 
-**Last Updated:** 2026-02-04
+**Last Updated:** 2026-02-15

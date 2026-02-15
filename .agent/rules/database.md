@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: When working with database schema, SQL queries, or data access services.
+---
+
 # Database & Data Layer Rules
 
 ## Tech Stack

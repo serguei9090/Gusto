@@ -1,10 +1,10 @@
 import { Suspense, useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { GlobalErrorBarrier } from "@/components/error/GlobalErrorBarrier";
+import { CurrencySettingsPage } from "@/components/pages/CurrencySettingsPage/CurrencySettingsPage";
 import { useTranslation } from "@/hooks/useTranslation";
 import { initDb } from "@/lib/db";
 import { useRegistry } from "@/lib/modules/registry";
-import { CurrencySettingsPage } from "@/modules/core/settings/pages/CurrencySettingsPage";
 import { WelcomeScreen } from "./components/onboarding/WelcomeScreen";
 import { MainLayout } from "./components/templates/MainLayout/MainLayout";
 

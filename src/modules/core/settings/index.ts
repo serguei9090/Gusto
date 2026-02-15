@@ -5,12 +5,14 @@ import { useConfigStore } from "./store/config.store";
 import { useCurrencyStore } from "./store/currency.store";
 
 const SettingsPage = React.lazy(() =>
-  import("./SettingsPage").then((m) => ({ default: m.SettingsPage })),
+  import("@/components/pages/SettingsPage/SettingsPage").then((m) => ({
+    default: m.SettingsPage,
+  })),
 );
 
+export { SettingsPage } from "@/components/pages/SettingsPage/SettingsPage";
 export type { SettingsSection } from "./registry";
 export { settingsRegistry } from "./registry";
-export * from "./SettingsPage";
 
 export const settingsModule: ModuleDefinition = {
   id: "settings",

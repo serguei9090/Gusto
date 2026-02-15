@@ -1,8 +1,8 @@
 # Gusto - Project Wiki
 
-**Version:** 1.0.4  
+**Version:** 1.0.5  
 **Tech Stack:** Tauri v2 + React 19 + TypeScript + Kysely + SQLite  
-**Last Updated:** 2026-02-09
+**Last Updated:** 2026-02-15
 
 ---
 
@@ -26,21 +26,21 @@
 ```
 Gusto/
 ├── src/
-│   ├── components/          # Shared UI components (Atomic Design)
+│   ├── components/          # Shared Global UI components (Atomic Design)
 │   │   ├── ui/             # Shadcn primitives (Base Layer)
-│   │   ├── atoms/          # Domain-specific smallest units
-│   │   ├── molecules/      # Composed units (Search, Row)
-│   │   ├── organisms/      # Complex sections (Tables, Forms)
-│   │   └── templates/      # Layout structures
-│   ├── modules/            # Feature-based business logic
-│   │   ├── core/           # Open-source features
-│   │   └── pro/            # Private extensions
-│   ├── lib/                # Core utilities & database config
-│   │   ├── db.ts           # Kysely client
-│   │   └── utils.ts        # cn() helper and others
-│   ├── services/           # Shared business logic services
-│   ├── hooks/              # Shared React hooks
-│   └── types/              # Global TypeScript definitions
+│   │   ├── atoms/          # Domain-specific smallest units (Inputs, Badges)
+│   │   ├── molecules/      # Composed units (Selectors, Cards)
+│   │   ├── organisms/      # Complex data-aware sections (Forms, Tables)
+│   │   ├── templates/      # Main page layout structures
+│   │   └── pages/          # Full page compositions (DashboardPage, etc)
+│   ├── modules/            # Feature-level business logic
+│   │   ├── core/           # Open-source feature logic (States, Services)
+│   │   └── pro/            # Private extension modules
+│   ├── lib/                # Framework configurations & DB setup
+│   ├── services/           # Global business logic services
+│   ├── hooks/              # Global React hooks
+│   ├── types/              # Domain-wide TypeScript definitions
+│   └── utils/              # Pure utility functions and validators
 ├── e2e/                    # End-to-end tests
 ├── src-tauri/              # Tauri native layer
 └── docs/                   # Project documentation
@@ -306,13 +306,17 @@ bun run tauri:dev
 
 ### Adding New Features
 
-1. **Create feature module:** `src/features/[feature-name]/`
-2. **Define types:** `types.ts`
-3. **Create repository:** `services/[feature].repository.ts`
-4. **Setup state:** `store/[feature].store.ts`
-5. **Build components:** `components/`
-6. **Add routes:** Update navigation in `App.tsx`
-7. **Write tests:** Unit tests in `__tests__/`, E2E in `e2e/`
+1. **Define domain model:** Add to `src/types/`
+2. **Setup state:** `src/modules/core/[feature]/store/[feature].store.ts`
+3. **Create repository:** `src/modules/core/[feature]/services/[feature].repository.ts`
+4. **Build UI elements:**
+   - Primitives: `src/components/ui/`
+   - Unit elements: `src/components/atoms/`
+   - Composed UI: `src/components/molecules/`
+   - Data-aware UI: `src/components/organisms/`
+5. **Assemble full page:** `src/components/pages/[FeaturePage]/[FeaturePage].tsx`
+6. **Register Module:** Update `src/modules/core/[feature]/index.ts` and `src/modules/all-modules.ts`
+7. **Write tests:** Unit tests in `src/modules/core/[feature]/__tests__/`, E2E in `e2e/`
 
 ---
 

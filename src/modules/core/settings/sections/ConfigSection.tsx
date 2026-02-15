@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { CategoryConfigModal } from "@/components/organisms/CategoryConfigModal";
+import { UnitConfigModal } from "@/components/organisms/UnitConfigModal";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,8 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useTranslation } from "@/hooks/useTranslation";
-import { CategoryConfigModal } from "../components/CategoryConfigModal";
-import { UnitConfigModal } from "../components/UnitConfigModal";
 
 export const ConfigSection = () => {
   const { t } = useTranslation();

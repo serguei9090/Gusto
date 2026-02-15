@@ -1,3 +1,7 @@
+---
+trigger: manual
+---
+
 # Development Setup & Commands
 
 ---

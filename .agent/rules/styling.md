@@ -1,53 +1,54 @@
-# Styling & Design System Rules
-
 ---
+trigger: always_on
+---
+
+# Styling & Design System Rules
 
 ## 🎨 Design System Rules
 
-### CSS Architecture
+### 1. Tailwind CSS (Single Source of Truth)
 
-**Global Styles Location:**
-```
-src/styles/
-├── index.css         ← Design tokens, variables, resets
-├── reset.css         ← CSS reset (optional)
-└── utilities.css     ← Utility classes (optional)
-```
+**Standard:** All styling MUST be done using **Tailwind CSS Utility Classes**.
 
-**Design Tokens (CSS Variables - MUST USE):**
-```css
-:root {
-  --color-primary-500: #22c55e;
-  --space-md: 1rem;
-  --radius-md: 0.5rem;
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+- **No CSS Modules:** Do not use `.module.css` files.
+- **No Inline Styles:** Avoid logic in `style={{ ... }}` unless dynamic values (like coordinates) require it.
+
+### 2. Class Merging
+
+**Standard:** Use the `cn()` utility (clsx + tailwind-merge) for all dynamic classes.
+
+```typescript
+import { cn } from "@/lib/utils";
+
+export function Button({ className, variant, ...props }: ButtonProps) {
+  return (
+    <button 
+      className={cn(
+        "rounded-md px-4 py-2 font-medium transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2",
+        variant === "destructive" && "bg-destructive text-destructive-foreground",
+        className
+      )}
+      {...props}
+    />
+  );
 }
 ```
 
-**Component Styles:**
-- Use CSS Modules (`.module.css`)
-- Reference design tokens for colors, spacing, borders
-- NO hardcoded values (use variables)
-- Mobile-first responsive design
+### 3. Design Tokens (Tailwind Theme)
 
-**Example:**
-```css
-/* ✅ GOOD */
-.button {
-  padding: var(--space-sm) var(--space-md);
-  background: var(--color-primary-500);
-  border-radius: var(--radius-md);
-}
+Reference theme variables in `src/index.css` via `@theme` or Tailwind config.
 
-/* ❌ BAD */
-.button {
-  padding: 8px 16px;
-  background: #22c55e;
-  border-radius: 8px;
-}
-```
+**Usage:**
+- Use `text-primary` instead of `text-[#...]`
+- Use `bg-background` instead of `bg-white`
+- Use `rounded-md` instead of `rounded-[8px]`
+
+### 4. Animations
+
+- **Micro-interactions:** Use Tailwind `transition-*` classes.
+- **Complex Animations:** Use `framer-motion` for shared layout animations and gestures.
 
 ---
 
-**Last Updated:** 2026-02-04
+**Last Updated:** 2026-02-15

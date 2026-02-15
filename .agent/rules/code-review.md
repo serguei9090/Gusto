@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: When performing a code review or checking code quality.
+---
+
 # Code Review Checklist
 
 ---

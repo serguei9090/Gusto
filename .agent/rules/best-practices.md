@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Best Practices & Anti-Patterns
 
 ---

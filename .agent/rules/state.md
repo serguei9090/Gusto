@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: When managing global state, Zustand stores, or complex React state.
+---
+
 # State Management Rules
 
 ---

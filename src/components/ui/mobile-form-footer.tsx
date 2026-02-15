@@ -23,8 +23,8 @@ export function MobileFormFooter({
       className={cn(
         // Mobile styles
         "sticky -bottom-4 -mx-4 px-4 pb-safe pt-4 border-t bg-background",
-        // Desktop styles (resetting mobile)
-        "sm:static sm:mx-0 sm:px-0 sm:pb-0 sm:pt-0 sm:border-t-0",
+        // Desktop styles (Premium padded footer)
+        "sm:static sm:mx-0 sm:px-6 sm:pb-8 sm:pt-6",
         // Flex layout
         "flex flex-row sm:justify-end gap-2",
         className,

@@ -1,3 +1,7 @@
+---
+trigger: manual
+---
+
 # Development Workflow Rules
 
 ---

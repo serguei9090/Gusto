@@ -1,8 +1,8 @@
 import { Calculator } from "lucide-react";
+import { CalculatorsPage } from "@/components/pages/CalculatorsPage/CalculatorsPage";
 import type { ModuleDefinition } from "@/types/module";
-import { CalculatorsPage } from "./CalculatorsPage";
 
-export * from "./CalculatorsPage";
+export * from "@/components/pages/CalculatorsPage/CalculatorsPage";
 
 export const calculatorsModule: ModuleDefinition = {
   id: "calculators",

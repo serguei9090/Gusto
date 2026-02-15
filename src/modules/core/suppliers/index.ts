@@ -1,8 +1,8 @@
 import { Users } from "lucide-react";
+import { SuppliersPage } from "@/components/pages/SuppliersPage/SuppliersPage";
 import type { ModuleDefinition } from "@/types/module";
-import { SuppliersPage } from "./components/SuppliersPage";
 
-export * from "./components/SuppliersPage";
+export * from "@/components/pages/SuppliersPage/SuppliersPage";
 
 export const suppliersModule: ModuleDefinition = {
   id: "suppliers",

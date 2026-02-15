@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: When working on mobile layouts, responsive design, or mobile-specific features.
+---
+
 # Mobile Design Rules
 
 ---

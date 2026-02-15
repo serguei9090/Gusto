@@ -10,7 +10,7 @@ import { TopRecipesWidget, UrgentReordersWidget } from "./widgets/MainWidgets";
 import { ActiveRecipesWidget, AvgMarginWidget } from "./widgets/RecipeWidgets";
 
 const DashboardPage = React.lazy(() =>
-  import("./components/DashboardPage").then((m) => ({
+  import("@/components/pages/DashboardPage/DashboardPage").then((m) => ({
     default: m.DashboardPage,
   })),
 );
