@@ -47,6 +47,13 @@ export function convertUnit(
     );
   }
 
+  // Strict check: If unit is unknown (and not identical handled above), we cannot convert safely.
+  if (fromType === "unknown" || toType === "unknown") {
+    throw new Error(
+      `Cannot convert unknown unit types: ${fromUnit} -> ${toUnit}. conversion is ambiguous.`,
+    );
+  }
+
   if (fromType === "mass") {
     const grams = value * MASS_TO_GRAMS[fromUnit];
     return grams / MASS_TO_GRAMS[toUnit];

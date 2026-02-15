@@ -172,8 +172,10 @@ export const RecipeForm = ({
       return matchesSearch && isNotSelf && r.isBaseRecipe === true;
     }
 
-    // Regular recipes can import any base recipe
-    return matchesSearch && isNotSelf;
+    // Regular recipes can import any base recipe ONLY
+    // "Base recipes can only import other base recipes" remains true above.
+    // "Regular recipes can import any base recipe" means they CANNOT import regular recipes.
+    return matchesSearch && isNotSelf && r.isBaseRecipe === true;
   });
 
   const [costSummary, setCostSummary] = useState({
@@ -221,6 +223,8 @@ export const RecipeForm = ({
 
   // Calculate Total Cost Asynchronously
   useEffect(() => {
+    let isCancelled = false;
+
     const updateCosts = async () => {
       const items = watchedIngredients.map((field) => {
         if (field.isSubRecipe) {
@@ -234,12 +238,19 @@ export const RecipeForm = ({
         watchedWasteBuffer,
         watchedCurrency,
       );
-      setCostSummary(result);
+
+      if (!isCancelled) {
+        setCostSummary(result);
+      }
     };
 
     if (allIngredients.length > 0 || allRecipes.length > 0) {
       updateCosts();
     }
+
+    return () => {
+      isCancelled = true;
+    };
   }, [
     watchedIngredients,
     watchedWasteBuffer,

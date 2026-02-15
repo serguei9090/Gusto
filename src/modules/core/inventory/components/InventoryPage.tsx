@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DataCard, DataCardList } from "@/components/ui/data-card";
 import {
   Dialog,
@@ -95,6 +95,8 @@ export const InventoryPage = () => {
   );
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isLowStockOpen, setIsLowStockOpen] = useState(false);
+  const [showTotalDetails, setShowTotalDetails] = useState(false);
+  const [showValueDetails, setShowValueDetails] = useState(false);
 
   useEffect(() => {
     fetchIngredients();
@@ -187,62 +189,70 @@ export const InventoryPage = () => {
   return (
     <div className="h-full flex flex-col space-y-4 md:space-y-6 p-4 md:p-8 pt-6 md:pt-8">
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+      {/* Compact Stats Row */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        {/* 1. Total Items Card */}
+        <Card
+          className="cursor-pointer hover:bg-muted/50 transition-colors active:scale-95 duration-100"
+          onClick={() => setShowTotalDetails(true)}
+        >
+          <CardContent className="p-3 sm:p-6 flex flex-col items-center justify-center text-center space-y-1 sm:space-y-2">
+            <Package className="h-4 w-4 text-muted-foreground mb-1" />
+            <div className="text-xl sm:text-2xl font-bold">{totalItems}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground leading-tight">
               {t("inventory.totalItems")}
-            </CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalItems}</div>
-            <p className="text-xs text-muted-foreground">
-              {ingredients.length} consumables, {assets.length} assets
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {t("inventory.lowStock")}
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setIsLowStockOpen(true)}
+
+        {/* 2. Low Stock Card */}
+        <Card
+          className={`cursor-pointer hover:bg-muted/50 transition-colors active:scale-95 duration-100 ${
+            lowStockItems.length > 0
+              ? "border-destructive/50 bg-destructive/5"
+              : ""
+          }`}
+          onClick={() => setIsLowStockOpen(true)}
+        >
+          <CardContent className="p-3 sm:p-6 flex flex-col items-center justify-center text-center space-y-1 sm:space-y-2">
+            <Eye
+              className={`h-4 w-4 mb-1 ${
+                lowStockItems.length > 0
+                  ? "text-destructive"
+                  : "text-muted-foreground"
+              }`}
+            />
+            <div
+              className={`text-xl sm:text-2xl font-bold ${
+                lowStockItems.length > 0 ? "text-destructive" : ""
+              }`}
             >
-              <Eye className="h-4 w-4 text-amber-600" />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">
               {lowStockItems.length}
             </div>
-            <p className="text-xs text-muted-foreground">
-              {t("inventory.itemsNeedingAttention")}
+            <p className="text-[10px] sm:text-xs text-muted-foreground leading-tight">
+              {t("inventory.lowStock")}
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Inventory Value
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              $
-              {totalValue.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+
+        {/* 3. Inventory Value Card */}
+        <Card
+          className="cursor-pointer hover:bg-muted/50 transition-colors active:scale-95 duration-100"
+          onClick={() => setShowValueDetails(true)}
+        >
+          <CardContent className="p-3 sm:p-6 flex flex-col items-center justify-center text-center space-y-1 sm:space-y-2">
+            <DollarSign className="h-4 w-4 text-muted-foreground mb-1" />
+            <div className="text-xl sm:text-2xl font-bold">
+              {/* Use compact notation for mobile to prevent overflow (e.g. $12k) */}
+              {new Intl.NumberFormat(undefined, {
+                style: "currency",
+                currency: "USD",
+                notation: "compact",
+                maximumFractionDigits: 1,
+              }).format(totalValue)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              ${ingredientsValue.toFixed(0)} consumables, $
-              {assetsValue.toFixed(0)} assets
+            <p className="text-[10px] sm:text-xs text-muted-foreground leading-tight">
+              Value
             </p>
           </CardContent>
         </Card>
@@ -588,6 +598,76 @@ export const InventoryPage = () => {
         onOpenChange={setIsLowStockOpen}
         items={lowStockItems}
       />
+
+      {/* Detail Modals */}
+      <Dialog open={showTotalDetails} onOpenChange={setShowTotalDetails}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Inventory Breakdown</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-full">
+                  <Package className="h-4 w-4 text-blue-600" />
+                </div>
+                <span className="font-medium">Ingredients</span>
+              </div>
+              <span className="text-xl font-bold">{ingredients.length}</span>
+            </div>
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-full">
+                  <Package className="h-4 w-4 text-purple-600" />
+                </div>
+                <span className="font-medium">Assets</span>
+              </div>
+              <span className="text-xl font-bold">{assets.length}</span>
+            </div>
+            <div className="pt-4 border-t flex justify-between items-center">
+              <span className="text-muted-foreground">Total Items</span>
+              <span className="text-2xl font-bold">{totalItems}</span>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showValueDetails} onOpenChange={setShowValueDetails}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Value Breakdown</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <span className="font-medium">Consumables</span>
+              <span className="font-bold">
+                $
+                {ingredientsValue.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <span className="font-medium">Assets/Equipment</span>
+              <span className="font-bold">
+                $
+                {assetsValue.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+            <div className="pt-4 border-t flex justify-between items-center text-lg">
+              <span className="font-semibold">Total Valuation</span>
+              <span className="font-bold text-primary">
+                $
+                {totalValue.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

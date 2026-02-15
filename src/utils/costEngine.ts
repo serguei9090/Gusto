@@ -101,27 +101,47 @@ export async function calculateRecipeTotal(
   let subtotal = 0;
   const errors: string[] = [];
 
-  for (const item of items) {
-    const result = calculateIngredientCost(
-      item.quantity,
-      item.unit,
-      item.currentPricePerUnit,
-      item.ingredientUnit,
-    );
+  /*
+   * PARALLEL EXECUTION:
+   * We map over items to initiate all async conversions simultaneously.
+   * Then we wait for all to complete using Promise.all.
+   */
+  const results = await Promise.all(
+    items.map(async (item) => {
+      const result = calculateIngredientCost(
+        item.quantity,
+        item.unit,
+        item.currentPricePerUnit,
+        item.ingredientUnit,
+      );
 
-    if (result.error) {
-      errors.push(`${item.name}: ${result.error}`);
-    } else {
+      if (result.error) {
+        return { cost: 0, error: `${item.name}: ${result.error}` };
+      }
+
       // Convert ingredient cost to recipe currency
       const conversion = await convertCurrency(
         result.cost,
         item.currency || "USD",
         recipeCurrency,
       );
-      subtotal += conversion.converted;
+
       if (conversion.error) {
-        errors.push(`${item.name}: ${conversion.error}`);
+        return {
+          cost: conversion.converted,
+          error: `${item.name}: ${conversion.error}`,
+        };
       }
+
+      return { cost: conversion.converted };
+    }),
+  );
+
+  // Aggregate results
+  for (const res of results) {
+    subtotal += res.cost;
+    if (res.error) {
+      errors.push(res.error);
     }
   }
 
