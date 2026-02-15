@@ -247,7 +247,7 @@ export const IngredientForm = ({
                             ? ""
                             : field.value
                         }
-                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -278,7 +278,7 @@ export const IngredientForm = ({
                             ? ""
                             : field.value
                         }
-                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -324,9 +324,12 @@ export const IngredientForm = ({
                             : field.value
                         }
                         onChange={(e) => {
-                          field.onChange(e.target.valueAsNumber);
-                          // In unit mode, currentPrice is same as pricePerUnit
-                          form.setValue("currentPrice", e.target.valueAsNumber);
+                          field.onChange(e); // Pass synthetic event, let RHF handle it
+                          // Update currentPrice specifically
+                          form.setValue(
+                            "currentPrice",
+                            parseFloat(e.target.value) || 0,
+                          );
                         }}
                       />
                     </FormControl>

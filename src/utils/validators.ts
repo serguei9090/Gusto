@@ -11,15 +11,39 @@ export const createIngredientSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name too long"),
   category: ingredientCategorySchema.optional(),
   unitOfMeasure: unitOfMeasureSchema,
-  currentPrice: z.number().nonnegative().default(0),
-  pricePerUnit: z.number().nonnegative().default(0),
+  currentPrice: z
+    .preprocess(
+      (v) => (v === "" || v === null || Number.isNaN(v) ? 0 : v),
+      z.coerce.number().nonnegative(),
+    )
+    .default(0),
+  pricePerUnit: z
+    .preprocess(
+      (v) => (v === "" || v === null || Number.isNaN(v) ? 0 : v),
+      z.coerce.number().nonnegative(),
+    )
+    .default(0),
   currency: z.string().length(3).default("USD"),
-  supplierId: z.number().int().positive().nullable().optional(),
-  minStockLevel: z.number().nonnegative().nullable().optional(),
-  currentStock: z.number().nonnegative().default(0),
+  supplierId: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? null : v),
+    z.coerce.number().int().positive().nullable().optional(),
+  ),
+  minStockLevel: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? null : v),
+    z.coerce.number().nonnegative().nullable().optional(),
+  ),
+  currentStock: z
+    .preprocess(
+      (v) => (v === "" || v === null || Number.isNaN(v) ? 0 : v),
+      z.coerce.number().nonnegative(),
+    )
+    .default(0),
   notes: z.string().max(500).nullable().optional(),
   purchaseUnit: z.string().max(50).nullable().optional(),
-  conversionRatio: z.number().positive().nullable().optional(),
+  conversionRatio: z.preprocess(
+    (v) => (v === "" || v === null || Number.isNaN(v) ? null : v),
+    z.coerce.number().positive().nullable().optional(),
+  ),
 });
 
 // Update Ingredient Schema (all fields optional)
