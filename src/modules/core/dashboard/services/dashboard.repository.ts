@@ -9,37 +9,51 @@ import { calculateTotalWithConversions } from "@/utils/currencyConverter";
 
 class DashboardRepository {
   async getSummary(): Promise<DashboardSummary> {
-    // 1. Fetch all ingredients with their stock, price, and currency
-    const ingredients = await getDb()
-      .selectFrom("ingredients")
-      .select(["current_stock", "price_per_unit", "currency"])
-      .where("is_active", "=", 1)
-      .execute();
+    // 1. Fetch all ingredients and assets with their stock, price, and currency
+    const [ingredients, assets] = await Promise.all([
+      getDb()
+        .selectFrom("ingredients")
+        .select(["current_stock", "price_per_unit", "currency"])
+        .where("is_active", "=", 1)
+        .execute(),
+      getDb()
+        .selectFrom("assets")
+        .select(["current_stock", "price_per_unit", "currency"])
+        .where("is_active", "=", 1)
+        .execute(),
+    ]);
 
     // Calculate total inventory value with conversions
-    const { total } = await calculateTotalWithConversions(
-      ingredients.map((ing) => ({
+    const { total } = await calculateTotalWithConversions([
+      ...ingredients.map((ing) => ({
         amount: ing.current_stock * (ing.price_per_unit || 0),
         currency: ing.currency || "USD",
       })),
-    );
+      ...assets.map((ast) => ({
+        amount: ast.current_stock * (ast.price_per_unit || 0),
+        currency: ast.currency || "USD",
+      })),
+    ]);
 
-    // 2. Low Stock Count
-    const lowStockResult = await getDb()
-      .selectFrom("ingredients")
-      .select(sql<number>`COUNT(*)`.as("count"))
-      .where("min_stock_level", "is not", null)
-      .whereRef("current_stock", "<=", "min_stock_level")
-      .where("is_active", "=", 1)
-      .executeTakeFirst();
+    // 2. Low Stock Count (both ingredients and assets)
+    const [lowStockIngredients, lowStockAssets] = await Promise.all([
+      getDb()
+        .selectFrom("ingredients")
+        .select(sql<number>`COUNT(*)`.as("count"))
+        .where("min_stock_level", "is not", null)
+        .whereRef("current_stock", "<=", "min_stock_level")
+        .where("is_active", "=", 1)
+        .executeTakeFirst(),
+      getDb()
+        .selectFrom("assets")
+        .select(sql<number>`COUNT(*)`.as("count"))
+        .where("min_stock_level", "is not", null)
+        .whereRef("current_stock", "<=", "min_stock_level")
+        .where("is_active", "=", 1)
+        .executeTakeFirst(),
+    ]);
 
     // 3. Recipe Count & Avg Margin
-    // Note: Assuming recipes table has 'profit_margin' or we calculate it.
-    // If 'profit_margin' is calculated on fly, this query needs adjustment.
-    // Based on previous recipe migration, we likely store it or calc it.
-    // Let's assume we need to calculate it if it's not stored, but for efficiency,
-    // let's check if we can just average the stored ones or if we need to join.
-    // For now, let's assume simple selection from recipes table if it has these fields.
     const recipeStatsResult = await getDb()
       .selectFrom("recipes")
       .select([
@@ -48,42 +62,72 @@ class DashboardRepository {
       ])
       .executeTakeFirst();
 
-    // To be precise, let's look at the recipe schema from previous steps or assume standard calculation.
-    // Actually, let's use a simpler query for now and refine if schema differs.
-
     return {
       totalInventoryValue: total || 0,
-      lowStockCount: Number(lowStockResult?.count || 0),
+      lowStockCount:
+        Number(lowStockIngredients?.count || 0) +
+        Number(lowStockAssets?.count || 0),
       avgProfitMargin: recipeStatsResult?.avgMargin || 0,
       recipeCount: Number(recipeStatsResult?.count || 0),
     };
   }
 
   async getUrgentReorders(limit = 5): Promise<UrgentReorderItem[]> {
-    const rows = await getDb()
-      .selectFrom("ingredients")
-      .select([
-        "id",
-        "name",
-        "current_stock",
-        "min_stock_level",
-        "unit_of_measure",
-      ])
-      .where("min_stock_level", "is not", null)
-      .whereRef("current_stock", "<=", "min_stock_level")
-      .where("is_active", "=", 1)
-      .orderBy("current_stock", "asc") // prioritize lowest absolute stock? or biggest deficit?
-      .limit(limit)
-      .execute();
+    const [ingredientRows, assetRows] = await Promise.all([
+      getDb()
+        .selectFrom("ingredients")
+        .select([
+          "id",
+          "name",
+          "current_stock",
+          "min_stock_level",
+          "unit_of_measure",
+        ])
+        .where("min_stock_level", "is not", null)
+        .whereRef("current_stock", "<=", "min_stock_level")
+        .where("is_active", "=", 1)
+        .orderBy("current_stock", "asc")
+        .limit(limit)
+        .execute(),
+      getDb()
+        .selectFrom("assets")
+        .select([
+          "id",
+          "name",
+          "current_stock",
+          "min_stock_level",
+          "unit_of_measure",
+        ])
+        .where("min_stock_level", "is not", null)
+        .whereRef("current_stock", "<=", "min_stock_level")
+        .where("is_active", "=", 1)
+        .orderBy("current_stock", "asc")
+        .limit(limit)
+        .execute(),
+    ]);
 
-    return rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      currentStock: row.current_stock,
-      minStockLevel: row.min_stock_level ?? 0,
-      deficit: (row.min_stock_level ?? 0) - row.current_stock,
-      unit: row.unit_of_measure,
-    }));
+    const combined = [
+      ...ingredientRows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        currentStock: row.current_stock,
+        minStockLevel: row.min_stock_level ?? 0,
+        deficit: (row.min_stock_level ?? 0) - row.current_stock,
+        unit: row.unit_of_measure,
+      })),
+      ...assetRows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        currentStock: row.current_stock,
+        minStockLevel: row.min_stock_level ?? 0,
+        deficit: (row.min_stock_level ?? 0) - row.current_stock,
+        unit: row.unit_of_measure,
+      })),
+    ];
+
+    return combined
+      .sort((a, b) => b.deficit - a.deficit) // Sort by biggest deficit
+      .slice(0, limit);
   }
 
   async getTopRecipes(limit = 5): Promise<TopRecipeItem[]> {

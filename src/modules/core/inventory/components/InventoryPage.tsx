@@ -37,6 +37,7 @@ import type {
   Ingredient,
   UpdateIngredientInput,
 } from "@/types/ingredient.types";
+import { calculateTotalWithConversions } from "@/utils/currencyConverter";
 import type { InventoryTransactionInput } from "@/utils/validators";
 import { AssetForm } from "./AssetForm";
 import { AssetTable } from "./AssetTable";
@@ -90,7 +91,7 @@ export const InventoryPage = () => {
   );
 
   // History Modal State
-  const [historyIngredient, setHistoryIngredient] = useState<Ingredient | null>(
+  const [historyItem, setHistoryItem] = useState<Ingredient | Asset | null>(
     null,
   );
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -168,22 +169,38 @@ export const InventoryPage = () => {
     setIsModalOpen(true);
   };
 
-  const openHistoryModal = (ingredient: Ingredient) => {
-    setHistoryIngredient(ingredient);
+  const openHistoryModal = (item: Ingredient | Asset) => {
+    setHistoryItem(item);
     setIsHistoryOpen(true);
   };
 
-  const ingredientsValue = ingredients.reduce(
-    (acc, curr) => acc + curr.currentStock * curr.pricePerUnit,
-    0,
-  );
+  const [ingredientsValue, setIngredientsValue] = useState(0);
+  const [assetsValue, setAssetsValue] = useState(0);
+  const [totalValue, setTotalValue] = useState(0);
 
-  const assetsValue = assets.reduce(
-    (acc, curr) => acc + curr.currentStock * curr.pricePerUnit,
-    0,
-  );
+  useEffect(() => {
+    const calculateValues = async () => {
+      const { total: ingTotal } = await calculateTotalWithConversions(
+        ingredients.map((i) => ({
+          amount: i.currentStock * i.pricePerUnit,
+          currency: i.currency || "USD",
+        })),
+      );
+      const { total: astTotal } = await calculateTotalWithConversions(
+        assets.map((a) => ({
+          amount: a.currentStock * a.pricePerUnit,
+          currency: a.currency || "USD",
+        })),
+      );
 
-  const totalValue = ingredientsValue + assetsValue;
+      setIngredientsValue(ingTotal);
+      setAssetsValue(astTotal);
+      setTotalValue(ingTotal + astTotal);
+    };
+
+    calculateValues();
+  }, [ingredients, assets]);
+
   const totalItems = ingredients.length + assets.length;
 
   return (
@@ -427,7 +444,19 @@ export const InventoryPage = () => {
                       isLow ? "border-destructive/50 bg-destructive/5" : ""
                     }
                     onEdit={() => handleEditItem(asset, "assets")}
-                    actions={null}
+                    actions={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openHistoryModal(asset);
+                        }}
+                      >
+                        <History className="h-4 w-4" />
+                      </Button>
+                    }
                     details={[
                       {
                         label: "Stock",
@@ -490,7 +519,7 @@ export const InventoryPage = () => {
             <AssetTable
               assets={filteredAssets}
               onEdit={(asset) => handleEditItem(asset, "assets")}
-              onViewHistory={() => {}} // Placeholder for now
+              onViewHistory={openHistoryModal}
             />
           </div>
         </TabsContent>
@@ -583,13 +612,13 @@ export const InventoryPage = () => {
         isLoading={loadingInv}
       />
 
-      {historyIngredient && (
+      {historyItem && (
         <InventoryHistoryModal
-          ingredient={historyIngredient}
+          item={historyItem}
           open={isHistoryOpen}
           onOpenChange={(val) => {
             setIsHistoryOpen(val);
-            if (!val) setHistoryIngredient(null);
+            if (!val) setHistoryItem(null);
           }}
         />
       )}

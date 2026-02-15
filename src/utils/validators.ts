@@ -169,10 +169,16 @@ export const createTransactionSchema = z
   .object({
     ingredientId: z.number().int().positive().optional(),
     assetId: z.number().int().positive().optional(),
-    itemType: z.enum(["ingredient", "asset"]).default("ingredient"),
+    itemType: z.enum(["ingredient", "asset"]).optional(),
     transactionType: transactionTypeSchema,
     quantity: z.number(),
-    costPerUnit: z.number().positive().nullable().optional(),
+    costPerUnit: z
+      .preprocess(
+        (v) => (v === "" || v === null || Number.isNaN(v) ? 0 : v),
+        z.coerce.number().nonnegative(),
+      )
+      .nullable()
+      .optional(),
     totalCost: z.number().nullable().optional(),
     currency: z.string().length(3).optional(),
     reference: z.string().max(100).nullable().optional(),

@@ -180,7 +180,9 @@ export interface CreateTransactionResult {
 
 export interface InventoryTransaction {
   id: number;
-  ingredientId: number;
+  ingredientId?: number | null;
+  assetId?: number | null;
+  itemType?: "ingredient" | "asset";
   transactionType: TransactionType;
   quantity: number;
   costPerUnit: number | null;

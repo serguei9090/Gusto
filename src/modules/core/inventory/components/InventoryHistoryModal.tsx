@@ -28,10 +28,11 @@ import type {
   InventoryTransaction,
   TransactionType,
 } from "@/modules/core/inventory/types";
+import type { Asset } from "@/types/asset.types";
 import { formatCurrencyAmount } from "@/utils/currencyConverter";
 
 interface InventoryHistoryModalProps {
-  ingredient: Ingredient;
+  item: Ingredient | Asset;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -61,7 +62,7 @@ const getTransactionDisplayName = (type: TransactionType) => {
 };
 
 export function InventoryHistoryModal({
-  ingredient,
+  item,
   open,
   onOpenChange,
 }: Readonly<InventoryHistoryModalProps>) {
@@ -69,14 +70,17 @@ export function InventoryHistoryModal({
   const [transactions, setTransactions] = useState<InventoryTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Helper to determine if item is an asset
+  const isAsset = "assetType" in item;
+
   useEffect(() => {
-    if (open && ingredient) {
+    if (open && item) {
       const fetchHistory = async () => {
         setIsLoading(true);
         try {
-          const data = await inventoryRepository.getTransactionsByIngredient(
-            ingredient.id,
-          );
+          const data = isAsset
+            ? await inventoryRepository.getTransactionsByAsset(item.id)
+            : await inventoryRepository.getTransactionsByIngredient(item.id);
           setTransactions(data);
         } catch (error) {
           console.error("Failed to fetch history:", error);
@@ -86,7 +90,7 @@ export function InventoryHistoryModal({
       };
       fetchHistory();
     }
-  }, [open, ingredient]);
+  }, [open, item, isAsset]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -96,11 +100,13 @@ export function InventoryHistoryModal({
       >
         <DialogHeader className="p-4 sm:p-6 border-b shrink-0 flex flex-row items-center justify-between">
           <div className="space-y-1">
-            <DialogTitle>Stock History: {ingredient.name}</DialogTitle>
+            <DialogTitle>Stock History: {item.name}</DialogTitle>
             <DialogDescription>
-              View past transactions for this ingredient.
+              View past transactions for this {isAsset ? "asset" : "ingredient"}
+              .
             </DialogDescription>
           </div>
+
           <DialogClose asChild>
             <Button
               variant="ghost"
@@ -153,7 +159,7 @@ export function InventoryHistoryModal({
                         </TableCell>
                         <TableCell className="text-right font-medium">
                           {tx.quantity > 0 ? "+" : ""}
-                          {tx.quantity} {ingredient.unitOfMeasure}
+                          {tx.quantity} {item.unitOfMeasure}
                         </TableCell>
                         <TableCell className="text-right">
                           {formatCurrencyAmount(
@@ -197,7 +203,7 @@ export function InventoryHistoryModal({
                       <div className="text-right">
                         <div className="font-bold">
                           {tx.quantity > 0 ? "+" : ""}
-                          {tx.quantity} {ingredient.unitOfMeasure}
+                          {tx.quantity} {item.unitOfMeasure}
                         </div>
                       </div>
                     </div>

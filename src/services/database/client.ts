@@ -160,7 +160,9 @@ async function initSchema(db: Database) {
     await db.execute(`
       CREATE TABLE IF NOT EXISTS inventory_transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        ingredient_id INTEGER NOT NULL,
+        ingredient_id INTEGER,
+        asset_id INTEGER,
+        item_type TEXT DEFAULT 'ingredient',
         transaction_type TEXT NOT NULL,
         quantity REAL NOT NULL,
         cost_per_unit REAL,
@@ -168,7 +170,8 @@ async function initSchema(db: Database) {
         reference TEXT,
         notes TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (ingredient_id) REFERENCES ingredients(id)
+        FOREIGN KEY (ingredient_id) REFERENCES ingredients(id),
+        FOREIGN KEY (asset_id) REFERENCES assets(id)
       )
     `);
 

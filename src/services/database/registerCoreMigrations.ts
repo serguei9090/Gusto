@@ -557,4 +557,55 @@ export function registerCoreMigrations() {
       console.log("✅ Migration 20260213_create_assets_table completed");
     },
   });
+
+  migrationRegistry.register({
+    id: "20260215_fix_transaction_schema",
+    up: async (db) => {
+      console.log(
+        "🔧 Fixing inventory_transactions schema (nullable ingredient_id)...",
+      );
+
+      // 1. Create new table with nullable ingredient_id
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS inventory_transactions_new (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          ingredient_id INTEGER,
+          asset_id INTEGER,
+          item_type TEXT DEFAULT 'ingredient',
+          transaction_type TEXT NOT NULL,
+          quantity REAL NOT NULL,
+          cost_per_unit REAL,
+          total_cost REAL,
+          reference TEXT,
+          notes TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (ingredient_id) REFERENCES ingredients(id),
+          FOREIGN KEY (asset_id) REFERENCES assets(id)
+        )
+      `);
+
+      // 2. Copy existing data
+      // We select specific columns to ensure compatibility.
+      // If asset_id/item_type don't exist in source (unlikely if previous migration ran), this might fail.
+      // But 20260213 should have run before this.
+      await db.execute(`
+        INSERT INTO inventory_transactions_new (
+          id, ingredient_id, asset_id, item_type, transaction_type, quantity, cost_per_unit, total_cost, reference, notes, created_at
+        )
+        SELECT 
+          id, ingredient_id, asset_id, item_type, transaction_type, quantity, cost_per_unit, total_cost, reference, notes, created_at
+        FROM inventory_transactions
+      `);
+
+      // 3. Drop old table
+      await db.execute("DROP TABLE inventory_transactions");
+
+      // 4. Rename new table
+      await db.execute(
+        "ALTER TABLE inventory_transactions_new RENAME TO inventory_transactions",
+      );
+
+      console.log("✅ Migration 20260215_fix_transaction_schema completed");
+    },
+  });
 }

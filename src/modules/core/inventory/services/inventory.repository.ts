@@ -51,14 +51,20 @@ class InventoryRepository {
         notes: notes,
       })
       .returningAll()
-      .executeTakeFirstOrThrow();
+      .executeTakeFirst();
+
+    if (!result) {
+      throw new Error(
+        `Failed to insert transaction into database. [Item: ${itemType}, Type: ${transactionType}]`,
+      );
+    }
 
     // 2. Update Stock & Price (WAC for both ingredients and assets)
     const tableName = itemType === "ingredient" ? "ingredients" : "assets";
     const itemId = itemType === "ingredient" ? ingredientId : assetId;
 
     if (!itemId) {
-      throw new Error(`${itemType} ID is required for transaction`);
+      throw new Error(`${itemType} ID is missing for transaction update`);
     }
 
     if (transactionType === "purchase" && currency && costPerUnit) {
@@ -140,6 +146,33 @@ class InventoryRepository {
     return rows.map((row) => ({
       id: row.id,
       ingredientId: row.ingredient_id,
+      assetId: row.asset_id,
+      itemType: row.item_type as "ingredient" | "asset",
+      transactionType: row.transaction_type,
+      quantity: row.quantity,
+      costPerUnit: row.cost_per_unit,
+      totalCost: row.total_cost,
+      reference: row.reference,
+      notes: row.notes,
+      createdAt: row.created_at,
+    })) as InventoryTransaction[];
+  }
+
+  async getTransactionsByAsset(
+    assetId: number,
+  ): Promise<InventoryTransaction[]> {
+    const rows = await db
+      .selectFrom("inventory_transactions")
+      .selectAll()
+      .where("asset_id", "=", assetId)
+      .orderBy("created_at", "desc")
+      .execute();
+
+    return rows.map((row) => ({
+      id: row.id,
+      ingredientId: row.ingredient_id,
+      assetId: row.asset_id,
+      itemType: row.item_type as "ingredient" | "asset",
       transactionType: row.transaction_type,
       quantity: row.quantity,
       costPerUnit: row.cost_per_unit,
@@ -161,6 +194,8 @@ class InventoryRepository {
     return rows.map((row) => ({
       id: row.id,
       ingredientId: row.ingredient_id,
+      assetId: row.asset_id,
+      itemType: row.item_type as "ingredient" | "asset",
       transactionType: row.transaction_type,
       quantity: row.quantity,
       costPerUnit: row.cost_per_unit,

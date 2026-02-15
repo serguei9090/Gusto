@@ -8,7 +8,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { type Resolver, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -94,13 +94,15 @@ export function TransactionModal({
     setValue,
     reset,
     formState: { errors },
-  } = useForm({
-    resolver: zodResolver(createTransactionSchema),
+  } = useForm<InventoryTransactionInput>({
+    resolver: zodResolver(
+      createTransactionSchema,
+    ) as unknown as Resolver<InventoryTransactionInput>,
     defaultValues: {
       ingredientId:
         activeItemType === "ingredient" ? activeItem?.id : undefined,
       assetId: activeItemType === "asset" ? activeItem?.id : undefined,
-      itemType: activeItemType,
+      itemType: activeItemType || "ingredient",
       transactionType: "purchase" as TransactionType,
       quantity: 0,
       costPerUnit: activeItem?.pricePerUnit
@@ -123,7 +125,7 @@ export function TransactionModal({
         ingredientId:
           activeItemType === "ingredient" ? activeItem.id : undefined,
         assetId: activeItemType === "asset" ? activeItem.id : undefined,
-        itemType: activeItemType,
+        itemType: activeItemType || "ingredient",
         transactionType: "purchase" as TransactionType,
         quantity: 0,
         costPerUnit: activeItem.pricePerUnit
@@ -140,31 +142,35 @@ export function TransactionModal({
   const handleTransact = handleSubmit(async (data) => {
     if (!activeItem) return;
 
-    let finalQuantity = data.quantity || 0;
-    let finalCostPerUnit = data.costPerUnit || 0;
-    let finalNotes = data.notes;
+    const baseData = data as InventoryTransactionInput;
+    let finalQuantity = baseData.quantity || 0;
+    let finalCostPerUnit = baseData.costPerUnit || 0;
+    let finalNotes = baseData.notes;
 
     if (isUsingPurchaseUnit && activeItem.conversionRatio) {
-      finalQuantity = (data.quantity || 0) * activeItem.conversionRatio;
-      finalCostPerUnit = (data.costPerUnit || 0) / activeItem.conversionRatio;
-      const notePrefix = `Bulk Purchase: ${data.quantity} x ${activeItem.purchaseUnit}`;
+      finalQuantity =
+        (baseData.quantity || 0) * (activeItem.conversionRatio as number);
+      finalCostPerUnit =
+        (baseData.costPerUnit || 0) / (activeItem.conversionRatio as number);
+      const notePrefix = `Bulk Purchase: ${baseData.quantity} x ${activeItem.purchaseUnit}`;
       finalNotes = finalNotes ? `${notePrefix} | ${finalNotes}` : notePrefix;
     }
 
     await onSubmit({
-      ...data,
+      ...baseData,
       quantity: finalQuantity,
       costPerUnit: finalCostPerUnit,
-      notes: finalNotes,
-      // Ensure we pass the correct ID if it wasn't caught by defaultValues (safety)
+      notes: finalNotes || null,
       ingredientId: activeItemType === "ingredient" ? activeItem.id : undefined,
       assetId: activeItemType === "asset" ? activeItem.id : undefined,
-      itemType: activeItemType!,
+      itemType: (activeItemType as "ingredient" | "asset") || "ingredient",
     });
   });
 
-  const watchedQty = watch("quantity") || 0;
-  const watchedPrice = watch("costPerUnit") || 0;
+  const watchedQtyValue = watch("quantity");
+  const watchedPriceValue = watch("costPerUnit");
+  const watchedQty = Number(watchedQtyValue) || 0;
+  const watchedPrice = Number(watchedPriceValue) || 0;
   const totalCost = watchedQty * watchedPrice;
 
   // Handle item selection from ItemSelector
@@ -396,8 +402,10 @@ export function TransactionModal({
                   {isUsingPurchaseUnit && activeItem.conversionRatio && (
                     <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
                       Calculates to: $
-                      {(watchedPrice / activeItem.conversionRatio).toFixed(2)} /{" "}
-                      {activeItem.unitOfMeasure}
+                      {(
+                        watchedPrice / (activeItem.conversionRatio as number)
+                      ).toFixed(2)}{" "}
+                      / {activeItem.unitOfMeasure}
                     </div>
                   )}
                 </div>
