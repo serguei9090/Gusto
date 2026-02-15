@@ -5,12 +5,14 @@ import {
   ArrowUpRight,
   RefreshCw,
   Trash2,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -181,16 +183,31 @@ export function TransactionModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-w-[425px] sm:translate-x-[-50%] sm:translate-y-[-50%] rounded-none sm:rounded-lg border-x-0 sm:border p-4 pt-6 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        hideClose
+        className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-w-[425px] sm:translate-x-[-50%] sm:translate-y-[-50%] rounded-none sm:rounded-lg border-x-0 sm:border p-0 max-h-[100dvh] sm:max-h-[85vh] overflow-hidden flex flex-col"
+      >
         {!activeItem ? (
           <div className="h-full flex flex-col">
-            <DialogHeader>
-              <DialogTitle>Select Item</DialogTitle>
-              <DialogDescription>
-                Which item are you recording a transaction for?
-              </DialogDescription>
+            <DialogHeader className="p-4 sm:p-6 border-b shrink-0 flex flex-row items-center justify-between">
+              <div className="space-y-1">
+                <DialogTitle>Select Item</DialogTitle>
+                <DialogDescription>
+                  Which item are you recording a transaction for?
+                </DialogDescription>
+              </div>
+              <DialogClose asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 -mr-2 rounded-full opacity-70 hover:opacity-100 transition-opacity"
+                >
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">Close</span>
+                </Button>
+              </DialogClose>
             </DialogHeader>
-            <div className="flex-1 mt-4">
+            <div className="flex-1 mt-0 p-4 sm:p-6 overflow-y-auto">
               <ItemSelector
                 onSelect={handleItemSelect}
                 onCancel={() => onOpenChange(false)}
@@ -199,24 +216,41 @@ export function TransactionModal({
           </div>
         ) : (
           <>
-            <DialogHeader>
-              <div className="flex items-center gap-2">
-                {!propItem && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 -ml-2"
-                    onClick={handleBackToSelect}
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                  </Button>
-                )}
-                <DialogTitle>Update Stock: {activeItem.name}</DialogTitle>
+            <DialogHeader className="p-4 sm:p-6 border-b shrink-0 flex flex-row items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  {!propItem && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 -ml-1"
+                      onClick={handleBackToSelect}
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <DialogTitle>Update Stock</DialogTitle>
+                </div>
+                <DialogDescription className="line-clamp-1">
+                  {activeItem.name}
+                </DialogDescription>
               </div>
-              <DialogDescription>Record a stock transaction.</DialogDescription>
+              <DialogClose asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 -mr-2 rounded-full opacity-70 hover:opacity-100 transition-opacity"
+                >
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">Close</span>
+                </Button>
+              </DialogClose>
             </DialogHeader>
-            <form onSubmit={handleTransact} className="space-y-4 pb-20 sm:pb-0">
-              <div className="grid gap-4 py-2">
+            <form
+              onSubmit={handleTransact}
+              className="flex-1 flex flex-col min-h-0"
+            >
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
                 {/* Transaction Type */}
                 <div className="space-y-2">
                   <Label
@@ -440,7 +474,7 @@ export function TransactionModal({
                 </div>
               </div>
 
-              <MobileFormFooter>
+              <MobileFormFooter className="shrink-0">
                 <Button
                   type="button"
                   variant="outline"

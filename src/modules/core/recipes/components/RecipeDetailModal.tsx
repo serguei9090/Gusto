@@ -1,8 +1,9 @@
-import { Beaker, ChefHat, GitPullRequest, Printer } from "lucide-react";
+import { Beaker, ChefHat, GitPullRequest, Printer, X } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -124,8 +125,11 @@ export const RecipeDetailModal = ({
 
   return (
     <Dialog open={!!recipeId} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-4xl sm:translate-x-[-50%] sm:translate-y-[-50%] rounded-none sm:rounded-lg border-x-0 sm:border p-0 sm:max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="p-6 border-b flex flex-row items-center justify-between print:hidden sticky top-0 bg-background z-10 shrink-0">
+      <DialogContent
+        hideClose
+        className="fixed left-0 top-[calc(64px+env(safe-area-inset-top))] z-[200] w-full h-[calc(100dvh-(64px+env(safe-area-inset-top)))] translate-x-0 translate-y-0 sm:h-auto sm:max-w-4xl sm:translate-x-[-50%] sm:translate-y-[-50%] rounded-none sm:rounded-lg border-x-0 sm:border p-0 sm:max-h-[85vh] overflow-hidden flex flex-col"
+      >
+        <DialogHeader className="p-4 sm:p-6 border-b flex flex-row items-center justify-between print:hidden sticky top-0 bg-background z-10 shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-full hidden sm:block">
               <ChefHat className="h-6 w-6 text-primary" />
@@ -153,7 +157,7 @@ export const RecipeDetailModal = ({
                 variant="outline"
                 onClick={handleCreateExperiment}
                 size="sm"
-                className="hidden sm:flex"
+                className="hidden sm:flex h-9"
               >
                 <Beaker className="mr-2 h-4 w-4" />
                 New Experiment
@@ -163,7 +167,7 @@ export const RecipeDetailModal = ({
                 variant="default"
                 onClick={handleApplyToOriginal}
                 size="sm"
-                className="bg-amber-600 hover:bg-amber-700 hidden sm:flex"
+                className="bg-amber-600 hover:bg-amber-700 hidden sm:flex h-9"
               >
                 <GitPullRequest className="mr-2 h-4 w-4" />
                 Apply to Original
@@ -173,11 +177,22 @@ export const RecipeDetailModal = ({
               variant="secondary"
               onClick={handlePrint}
               size="sm"
-              className="hidden sm:flex"
+              className="hidden sm:flex h-9"
             >
               <Printer className="mr-2 h-4 w-4" />
               Print
             </Button>
+
+            <DialogClose asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 -mr-2 rounded-full opacity-70 hover:opacity-100 transition-opacity"
+              >
+                <X className="h-5 w-5" />
+                <span className="sr-only">Close</span>
+              </Button>
+            </DialogClose>
           </div>
         </DialogHeader>
 
