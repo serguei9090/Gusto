@@ -188,7 +188,7 @@ export function LowStockModal({
 
         <MobileFormFooter>
           <Button
-            className="w-full sm:w-auto h-12 sm:h-9 text-lg sm:text-sm font-bold"
+            className="w-full sm:w-auto h-12 sm:h-9 text-lg sm:text-sm max-sm:font-bold"
             variant="outline"
             onClick={() => onOpenChange(false)}
           >

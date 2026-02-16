@@ -21,11 +21,9 @@ export function MobileFormFooter({
   return (
     <DialogFooter
       className={cn(
-        // Mobile styles
-        "sticky -bottom-4 -mx-4 px-4 pb-safe pt-4 border-t bg-background",
-        // Desktop styles (Premium padded footer)
-        "sm:static sm:mx-0 sm:px-6 sm:pb-8 sm:pt-6",
-        // Flex layout
+        // Refined Styles (Tested in Dev)
+        "sticky px-2 pb-1 pt-2 border-t bg-background",
+        "sm:static sm:mx-0 sm:px-2 sm:pb-2 sm:pt-2",
         "flex flex-row sm:justify-end gap-2",
         className,
       )}

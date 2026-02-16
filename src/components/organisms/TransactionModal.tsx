@@ -489,14 +489,14 @@ export function TransactionModal({
                   type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
-                  className="flex-1 h-12 text-lg font-bold sm:flex-none sm:h-9 sm:text-sm"
+                  className="w-full sm:w-auto h-12 sm:h-9 text-lg sm:text-sm max-sm:font-bold"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 h-12 text-lg font-bold sm:flex-none sm:h-9 sm:text-sm"
+                  className="w-full sm:w-auto h-12 sm:h-9 text-lg sm:text-sm max-sm:font-bold"
                 >
                   {isLoading ? "Saving..." : "Save Transaction"}
                 </Button>

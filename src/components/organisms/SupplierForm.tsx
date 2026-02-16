@@ -247,14 +247,14 @@ export function SupplierForm({
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1 h-12 text-lg font-bold sm:flex-none sm:h-9 sm:text-sm"
+              className="flex-1 h-12 text-lg sm:flex-none sm:h-9 sm:text-sm max-sm:font-bold"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
-              className="flex-1 h-12 text-lg font-bold sm:flex-none sm:h-9 sm:text-sm"
+              className="flex-1 h-12 text-lg sm:flex-none sm:h-9 sm:text-sm max-sm:font-bold"
             >
               {isLoading
                 ? "Saving..."

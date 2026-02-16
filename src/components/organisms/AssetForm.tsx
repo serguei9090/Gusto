@@ -362,7 +362,7 @@ export const AssetForm = ({
               type="button"
               variant="outline"
               onClick={onCancel}
-              className="flex-1 sm:flex-none h-12 sm:h-9"
+              className="flex-1 sm:flex-none h-12 sm:h-9 text-lg sm:text-sm max-sm:font-bold"
             >
               {t("common.actions.cancel")}
             </Button>
@@ -370,7 +370,7 @@ export const AssetForm = ({
           <Button
             type="submit"
             disabled={isLoading}
-            className="flex-1 sm:flex-none h-12 sm:h-9"
+            className="flex-1 sm:flex-none h-12 sm:h-9 text-lg sm:text-sm max-sm:font-bold"
           >
             {isLoading ? t("common.messages.saving") : t("common.actions.save")}
           </Button>

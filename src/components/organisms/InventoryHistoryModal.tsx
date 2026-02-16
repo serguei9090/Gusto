@@ -221,7 +221,7 @@ export function InventoryHistoryModal({
         </div>
         <MobileFormFooter className="shrink-0">
           <Button
-            className="flex-1 h-12 text-lg font-bold sm:flex-none sm:h-9 sm:text-sm"
+            className="flex-1 h-12 text-lg sm:flex-none sm:h-9 sm:text-sm max-sm:font-bold"
             variant="outline"
             onClick={() => onOpenChange(false)}
           >

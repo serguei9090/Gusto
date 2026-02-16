@@ -284,7 +284,7 @@ export const UnitConfigModal = ({ isOpen, onClose }: UnitConfigModalProps) => {
 
         <MobileFormFooter className="shrink-0">
           <Button
-            className="flex-1 h-12 text-lg font-bold sm:flex-none sm:h-9 sm:text-sm"
+            className="w-full sm:w-auto h-12 sm:h-9 text-lg sm:text-sm max-sm:font-bold"
             variant="outline"
             onClick={onClose}
           >

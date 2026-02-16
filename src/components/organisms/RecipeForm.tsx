@@ -1182,14 +1182,14 @@ export const RecipeForm = ({
           variant="outline"
           onClick={onCancel}
           type="button"
-          className="flex-1 sm:flex-none h-12 sm:h-9 text-base sm:text-sm"
+          className="flex-1 sm:flex-none h-12 sm:h-9 text-lg sm:text-sm max-sm:font-bold"
         >
           {t("common.actions.cancel")}
         </Button>
         <Button
           type="submit"
           disabled={isLoading}
-          className="flex-1 sm:flex-none h-12 sm:h-9 text-base sm:text-sm"
+          className="flex-1 sm:flex-none h-12 sm:h-9 text-lg sm:text-sm max-sm:font-bold"
         >
           {initialData?.name ? "Update Recipe" : "Save Recipe"}
         </Button>

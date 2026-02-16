@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { MobileFormFooter } from "@/components/ui/mobile-form-footer";
 import type { Supplier } from "@/modules/core/suppliers/types";
 
 interface SupplierDetailModalProps {
@@ -160,15 +161,15 @@ export const SupplierDetailModal = ({
           </div>
         </div>
 
-        {/* Mobile Footer (visible on small screens) */}
-        <div className="sticky bottom-0 bg-background/95 backdrop-blur p-4 border-t flex gap-2 pb-safe md:hidden">
+        <MobileFormFooter className="shrink-0">
           <Button
-            className="flex-1 h-12 text-base font-semibold"
+            className="flex-1 h-12 text-lg sm:flex-none sm:h-9 sm:text-sm max-sm:font-bold"
+            variant="outline"
             onClick={onClose}
           >
             Close
           </Button>
-        </div>
+        </MobileFormFooter>
       </DialogContent>
     </Dialog>
   );
