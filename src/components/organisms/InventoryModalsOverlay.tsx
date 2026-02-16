@@ -1,4 +1,3 @@
-import { Package } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,9 +13,11 @@ import type {
 import type { InventoryTransactionInput } from "@/utils/validators";
 import { AssetForm } from "./AssetForm";
 import { IngredientForm } from "./IngredientForm";
+import { InventoryBreakdownModal } from "./InventoryBreakdownModal";
 import { InventoryHistoryModal } from "./InventoryHistoryModal";
 import { LowStockModal } from "./LowStockModal";
 import { TransactionModal } from "./TransactionModal";
+import { ValueBreakdownModal } from "./ValueBreakdownModal";
 
 interface InventoryModalsOverlayProps {
   // Add/Edit State
@@ -204,74 +205,21 @@ export const InventoryModalsOverlay = ({
       />
 
       {/* Breakdown Modals */}
-      <Dialog open={showTotalDetails} onOpenChange={setShowTotalDetails}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Inventory Breakdown</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-full">
-                  <Package className="h-4 w-4 text-blue-600" />
-                </div>
-                <span className="font-medium">Ingredients</span>
-              </div>
-              <span className="text-xl font-bold">{ingredientsCount}</span>
-            </div>
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-full">
-                  <Package className="h-4 w-4 text-purple-600" />
-                </div>
-                <span className="font-medium">Assets</span>
-              </div>
-              <span className="text-xl font-bold">{assetsCount}</span>
-            </div>
-            <div className="pt-4 border-t flex justify-between items-center px-4">
-              <span className="text-muted-foreground">Total Items</span>
-              <span className="text-2xl font-bold">{totalItems}</span>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <InventoryBreakdownModal
+        open={showTotalDetails}
+        onOpenChange={setShowTotalDetails}
+        ingredientsCount={ingredientsCount}
+        assetsCount={assetsCount}
+        totalItems={totalItems}
+      />
 
-      <Dialog open={showValueDetails} onOpenChange={setShowValueDetails}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Value Breakdown</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <span className="font-medium">Consumables</span>
-              <span className="font-bold">
-                $
-                {ingredientsValue.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <span className="font-medium">Assets/Equipment</span>
-              <span className="font-bold">
-                $
-                {assetsValue.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
-              </span>
-            </div>
-            <div className="pt-4 border-t flex justify-between items-center text-lg px-4">
-              <span className="font-semibold">Total Valuation</span>
-              <span className="font-bold text-primary">
-                $
-                {totalValue.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
-              </span>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ValueBreakdownModal
+        open={showValueDetails}
+        onOpenChange={setShowValueDetails}
+        ingredientsValue={ingredientsValue}
+        assetsValue={assetsValue}
+        totalValue={totalValue}
+      />
     </>
   );
 };
