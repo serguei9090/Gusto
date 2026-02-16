@@ -39,6 +39,10 @@
     "release:mobile:pro:debug": "cross-env VITE_APP_MODE=mobile-pro tauri android build --debug --config ./src/modules/pro/mobile/src-tauri/tauri.conf.json"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-checkbox": "^1.3.3",

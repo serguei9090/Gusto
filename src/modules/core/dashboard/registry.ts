@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { useSettingsStore } from "@/modules/core/settings/store/settings.store";
+import { useDashboardConfigStore } from "./store/dashboard-config.store";
 
 export interface DashboardWidget {
   id: string;
@@ -81,14 +82,45 @@ export function useDashboardWidgets() {
 
   const { modules } = useSettingsStore();
 
-  return useMemo(() => {
-    return allWidgets.filter((widget) => {
-      // If no moduleId is specified, always show it (it's core/global)
-      if (!widget.moduleId) return true;
+  const { preferences, initWidgetPreferences } = useDashboardConfigStore();
 
-      // Otherwise, respect the module visibility setting
-      // Default to visible (true) if not found in store
-      return modules[widget.moduleId] ?? true;
-    });
-  }, [allWidgets, modules]);
+  // Initialize preferences for new widgets
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only run when widgets change
+  useEffect(() => {
+    if (allWidgets.length > 0) {
+      initWidgetPreferences(
+        allWidgets.map((w) => ({ id: w.id, order: w.order })),
+      );
+    }
+  }, [allWidgets.length]);
+
+  return useMemo(() => {
+    return allWidgets
+      .filter((widget) => {
+        // 1. Module Visibility
+        if (widget.moduleId && !modules[widget.moduleId]) return false;
+
+        // 2. User Preference Visibility
+        const pref = preferences[widget.id];
+        if (pref && !pref.visible) return false;
+
+        return true;
+      })
+      .sort((a, b) => {
+        // Sort by user preference order, falling back to default order
+        const orderA = preferences[a.id]?.order ?? a.order;
+        const orderB = preferences[b.id]?.order ?? b.order;
+        return orderA - orderB;
+      });
+  }, [allWidgets, modules, preferences]);
+}
+
+// Export a hook to get ALL widgets (including hidden ones) for the manager
+export function useAllDashboardWidgets() {
+  const allWidgets = useSyncExternalStore(
+    subscribeFn,
+    getSnapshotFn,
+    getSnapshotFn,
+  );
+  return allWidgets;
 }
