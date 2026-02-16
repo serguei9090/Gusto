@@ -13,7 +13,9 @@ permissions:
   pull-requests: read
 
 tracker-id: daily-doc-updater
-engine: claude
+engine:
+  id: copilot
+  model: gpt-5.3-codex # Using a high-capability model supported by the environment ofered with my copilot api
 strict: true
 
 network:
