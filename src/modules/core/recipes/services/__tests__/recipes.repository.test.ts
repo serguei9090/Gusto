@@ -53,6 +53,30 @@ vi.mock("@/utils/costEngine", async (importOriginal) => {
   };
 });
 
+// Mock finance service to avoid Tauri invoke in tests
+vi.mock("@/modules/core/finance/services/finance.service", () => ({
+  financeService: {
+    calculateStandardCost: vi.fn(async () => ({
+      raw_materials: 2,
+      direct_labor: 3,
+      labor_taxes: 1,
+      prime_cost: 6,
+      variable_overhead: 2,
+      fixed_overhead: 2,
+      total_cost_of_goods: 10,
+      fully_loaded_cost: 10,
+    })),
+  },
+}));
+
+// Mock finance repository
+vi.mock("@/modules/core/finance/services/finance.repository", () => ({
+  financeRepository: {
+    saveRecipeFinancials: vi.fn(async () => undefined),
+    getRecipeFinancials: vi.fn(async () => ({})),
+  },
+}));
+
 describe("RecipesRepository", () => {
   let repository: RecipesRepository;
 
