@@ -1,5 +1,5 @@
 import { Package } from "lucide-react";
-import { InventoryPage } from "@/components/pages/InventoryPage/InventoryPage";
+import { InventoryPage } from "@/components/pages/InventoryPage";
 import type { ModuleDefinition } from "@/types/module";
 
 export { InventoryPage };

@@ -1,10 +1,22 @@
-import { DollarSign, Eye, Package } from "lucide-react";
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  ClipboardCheck,
+  DollarSign,
+  Eye,
+  Package,
+  Trash2,
+} from "lucide-react";
 
 import { useEffect, useState } from "react";
 import { InventoryActionBar } from "@/components/molecules/InventoryActionBar";
-import { StatCard } from "@/components/molecules/StatCard/StatCard";
+import { StatCard } from "@/components/molecules/StatCard";
 import { InventoryContentManager } from "@/components/organisms/InventoryContentManager";
 import { InventoryModalsOverlay } from "@/components/organisms/InventoryModalsOverlay";
+import {
+  QuickTransactionDrawer,
+  type TransactionMode,
+} from "@/components/organisms/QuickTransactionDrawer";
 import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useIngredientsStore } from "@/modules/core/ingredients/store/ingredients.store";
@@ -54,6 +66,12 @@ export const InventoryPage = () => {
   const [isLowStockOpen, setIsLowStockOpen] = useState(false);
   const [showTotalDetails, setShowTotalDetails] = useState(false);
   const [showValueDetails, setShowValueDetails] = useState(false);
+
+  // Quick Transaction State
+  const [quickTransactionOpen, setQuickTransactionOpen] = useState(false);
+  const [transactionMode, setTransactionMode] =
+    useState<TransactionMode>("usage");
+  const [isFabOpen, setIsFabOpen] = useState(false); // Mobile FAB Menu State
 
   // Modal Data State
   const [selectedItem, setSelectedItem] = useState<Ingredient | Asset | null>(
@@ -171,7 +189,11 @@ export const InventoryPage = () => {
           setAddModalTab(activeTab);
           setIsAddModalOpen(true);
         }}
-        onRecordTransaction={() => {
+        onRecordTransaction={(mode) => {
+          setTransactionMode(mode);
+          setQuickTransactionOpen(true);
+        }}
+        onLegacyTransaction={() => {
           setSelectedItem(null);
           setIsModalOpen(true);
         }}
@@ -241,6 +263,79 @@ export const InventoryPage = () => {
         assetsValue={assetsValue}
         totalValue={totalValue}
       />
+
+      <QuickTransactionDrawer
+        open={quickTransactionOpen}
+        onOpenChange={setQuickTransactionOpen}
+        mode={transactionMode}
+        onSuccess={() => {
+          fetchIngredients(); // Refresh stock
+          fetchAssets();
+        }}
+      />
+
+      {/* Mobile Speed Dial / FABs */}
+      <div className="fixed bottom-24 right-6 flex flex-col items-end gap-3 z-40 md:hidden">
+        {/* Secondary Actions (Visible when FAB is open) */}
+        <div
+          className={`flex flex-col gap-3 transition-all duration-200 ${isFabOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"}`}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              setTransactionMode("purchase");
+              setQuickTransactionOpen(true);
+              setIsFabOpen(false);
+            }}
+            className="h-12 w-12 rounded-full bg-green-600 text-white shadow-lg flex items-center justify-center"
+            aria-label="Log Purchase"
+          >
+            <ArrowUpFromLine className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTransactionMode("adjustment");
+              setQuickTransactionOpen(true);
+              setIsFabOpen(false);
+            }}
+            className="h-12 w-12 rounded-full bg-orange-600 text-white shadow-lg flex items-center justify-center"
+            aria-label="Quick Count"
+          >
+            <ClipboardCheck className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTransactionMode("waste");
+              setQuickTransactionOpen(true);
+              setIsFabOpen(false);
+            }}
+            className="h-12 w-12 rounded-full bg-red-600 text-white shadow-lg flex items-center justify-center"
+            aria-label="Log Waste"
+          >
+            <Trash2 className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Main Trigger FAB */}
+        <button
+          type="button"
+          className={`h-14 w-14 rounded-full shadow-lg flex items-center justify-center transition-colors ${
+            isFabOpen
+              ? "bg-muted-foreground text-white"
+              : "bg-primary text-primary-foreground"
+          }`}
+          onClick={() => setIsFabOpen(!isFabOpen)}
+          aria-label="Quick Actions"
+        >
+          {isFabOpen ? (
+            <ArrowDownToLine className="h-6 w-6 rotate-180 transition-transform" />
+          ) : (
+            <ArrowDownToLine className="h-6 w-6" />
+          )}
+        </button>
+      </div>
     </div>
   );
 };

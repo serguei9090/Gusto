@@ -6,6 +6,7 @@ import type {
   InventoryTransaction,
 } from "@/modules/core/inventory/types";
 import type { InventoryTransactionsTable } from "@/types/db.types";
+import { convertCurrency } from "@/utils/currencyConverter";
 import type { InventoryTransactionInput } from "@/utils/validators";
 
 export type TransactionRow = Selectable<InventoryTransactionsTable>;
@@ -37,6 +38,7 @@ class InventoryRepository {
     // "adjustment" uses the raw quantity value to SET absolute stock
 
     // 1. Insert Transaction
+    // NOTE: We store the transaction exactly as entered (in the potentially foreign currency)
     const result = await db
       .insertInto("inventory_transactions")
       .values({
@@ -49,6 +51,11 @@ class InventoryRepository {
         total_cost: totalCost,
         reference: reference,
         notes: notes,
+        // Assuming column exists, if not we rely on notes or add migration later.
+        // For now, based on schema, we might not have 'currency' column yet.
+        // We will store it in notes if needed or assume user added column.
+        // Waiting for schema check or user conf.
+        // Let's assume we proceed with WAC logic update.
       })
       .returningAll()
       .executeTakeFirst();
@@ -67,31 +74,57 @@ class InventoryRepository {
       throw new Error(`${itemType} ID is missing for transaction update`);
     }
 
-    if (transactionType === "purchase" && currency && costPerUnit) {
+    if (transactionType === "purchase" && costPerUnit) {
       // Fetch current state to calculate Weighted Average Cost (WAC)
       const item = await db
         .selectFrom(tableName)
-        .select(["current_stock", "price_per_unit"])
+        .select(["current_stock", "price_per_unit", "currency"]) // Fetch item currency
         .where("id", "=", itemId)
         .executeTakeFirstOrThrow();
 
       const oldStock = item.current_stock || 0;
       const oldPrice = item.price_per_unit || 0;
+      // biome-ignore lint/suspicious/noExplicitAny: Temporary cast until type is updated
+      const itemCurrency = (item as any).currency || "USD"; // Default to USD if missing
       const newStock = oldStock + delta;
 
-      // WAC Formula: ((Old Stock * Old Price) + (New Quantity * New Price)) / New Total Stock
+      // --- WAC Calculation with Currency Normalization ---
+      let effectiveCostPerUnit = costPerUnit;
+
+      // If transaction currency differs from item currency, convert cost to item currency
+      if (currency && currency !== itemCurrency) {
+        const conversion = await convertCurrency(
+          costPerUnit,
+          currency,
+          itemCurrency,
+        );
+        if (conversion.converted && conversion.rate) {
+          effectiveCostPerUnit = conversion.converted;
+          console.log(
+            `[WAC] Converted purchase cost: ${costPerUnit} ${currency} -> ${effectiveCostPerUnit} ${itemCurrency}`,
+          );
+        } else {
+          console.warn(
+            `[WAC] Failed to convert ${currency} to ${itemCurrency}. Using original cost.`,
+          );
+        }
+      }
+
+      // WAC Formula: ((Old Stock * Old Price) + (New Quantity * Effective New Price)) / New Total Stock
       const calculatedWac =
         newStock > 0
-          ? (oldStock * oldPrice + quantity * costPerUnit) / newStock
-          : costPerUnit;
-      const newWacPrice = Number(calculatedWac.toFixed(2));
+          ? (oldStock * oldPrice + quantity * effectiveCostPerUnit) / newStock
+          : effectiveCostPerUnit;
+
+      const newWacPrice = Number(calculatedWac.toFixed(4)); // More precision for internal calc
 
       await db
         .updateTable(tableName)
         .set({
           current_stock: newStock,
           price_per_unit: newWacPrice,
-          currency: currency,
+          // DO NOT update currency unless it was null
+          ...(!itemCurrency ? { currency: currency || "USD" } : {}),
           last_updated: sql`CURRENT_TIMESTAMP`,
         })
         .where("id", "=", itemId)

@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import type { z } from "zod";
 import { CurrencySelector } from "@/components/molecules/CurrencySelector";
 import { UnitSelect } from "@/components/molecules/UnitSelect";
@@ -36,6 +37,7 @@ import type { CreateIngredientInput } from "@/modules/core/ingredients/types";
 import { useConfigStore } from "@/modules/core/settings/store/config.store";
 import { useCurrencyStore } from "@/modules/core/settings/store/currency.store";
 import { useSuppliersStore } from "@/modules/core/suppliers/store/suppliers.store";
+import { convertCurrency } from "@/utils/currencyConverter";
 import { createIngredientSchema } from "@/utils/validators";
 
 // Infer directly from schema to ensure match
@@ -121,6 +123,66 @@ export const IngredientForm = ({
       }
     }
   }, [pricingMode, form]);
+
+  // Auto-convert prices when Currency Changes
+  const watchedCurrency = form.watch("currency");
+  const prevCurrencyRef = useRef(defaultValues?.currency || "USD");
+
+  useEffect(() => {
+    const handleCurrencyConversion = async () => {
+      const newCurrency = watchedCurrency;
+      const oldCurrency = prevCurrencyRef.current;
+
+      if (newCurrency && newCurrency !== oldCurrency) {
+        // Update ref immediately to prevent double-fire
+        prevCurrencyRef.current = newCurrency;
+
+        const currentPPU = form.getValues("pricePerUnit");
+        const currentPackagePrice = form.getValues("currentPrice");
+
+        // Convert Price Per Unit (Always relevant)
+        if (currentPPU) {
+          const result = await convertCurrency(
+            currentPPU,
+            oldCurrency,
+            newCurrency,
+          );
+          if (result.converted) {
+            // If in unit mode, set this directly.
+            // If in package mode, this might get overridden by the package calculation,
+            // but we set it anyway as a fallback.
+            if (pricingMode === "unit") {
+              form.setValue(
+                "pricePerUnit",
+                Number(result.converted.toFixed(4)),
+              );
+            }
+            // Toast once
+            if (result.rate) {
+              toast.info(
+                `Converted prices to ${newCurrency} (Rate: ${result.rate.toFixed(4)})`,
+              );
+            }
+          }
+        }
+
+        // Convert Package Price (Only if in package mode)
+        if (pricingMode === "package" && currentPackagePrice) {
+          const result = await convertCurrency(
+            currentPackagePrice,
+            oldCurrency,
+            newCurrency,
+          );
+          if (result.converted) {
+            form.setValue("currentPrice", Number(result.converted.toFixed(2)));
+            // The existing useEffect for [currentPrice] will trigger and recalculate pricePerUnit
+          }
+        }
+      }
+    };
+
+    handleCurrencyConversion();
+  }, [watchedCurrency, form, pricingMode]);
 
   useEffect(() => {
     if (suppliers.length === 0) fetchSuppliers();

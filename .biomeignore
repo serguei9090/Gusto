@@ -1,10 +1,1 @@
-src/index.css
-node_modules
-dist
-build
-src-tauri/target
-*.lock
-playwright-report/**
-test-results/**
-.agent
-.agents
+src/modules/pro
