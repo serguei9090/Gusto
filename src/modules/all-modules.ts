@@ -4,6 +4,7 @@ import type { ModuleDefinition } from "@/types/module";
 import { logger } from "@/utils/logger";
 import { calculatorsModule } from "./core/calculators";
 import { dashboardModule } from "./core/dashboard";
+import { financeModule } from "./core/finance";
 import { inventoryModule } from "./core/inventory";
 import { prepSheetsModule } from "./core/prep-sheets";
 import { recipesModule } from "./core/recipes";
@@ -30,6 +31,7 @@ export function registerModules() {
   registry.register(suppliersModule);
   registry.register(prepSheetsModule);
   registry.register(calculatorsModule);
+  registry.register(financeModule);
   registry.register(settingsModule);
 
   // Load Pro Folder Extensions

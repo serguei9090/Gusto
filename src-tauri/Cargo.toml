@@ -26,4 +26,6 @@ tauri-plugin-log = "2"
 tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 tauri-plugin-fs = "2"
 tauri-plugin-dialog = "2"
+rust_decimal = "1.34"
+rust_decimal_macros = "1.34"
 

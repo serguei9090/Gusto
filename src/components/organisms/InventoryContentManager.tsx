@@ -1,4 +1,4 @@
-import { AlertCircle, History } from "lucide-react";
+import { AlertCircle, History, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/atoms/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { DataCard, DataCardList } from "@/components/ui/data-card";
@@ -18,6 +18,7 @@ interface InventoryContentManagerProps {
     type: "consumables" | "assets",
   ) => void;
   openHistoryModal: (item: Ingredient | Asset) => void;
+  openDeleteModal: (item: Ingredient | Asset) => void;
   setSearchQuery: (query: string) => void;
 }
 
@@ -28,6 +29,7 @@ export const InventoryContentManager = ({
   filteredAssets,
   handleEditItem,
   openHistoryModal,
+  openDeleteModal,
   setSearchQuery,
 }: InventoryContentManagerProps) => {
   return (
@@ -70,17 +72,30 @@ export const InventoryContentManager = ({
                   }
                   onEdit={() => handleEditItem(ingredient, "consumables")}
                   actions={
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openHistoryModal(ingredient);
-                      }}
-                    >
-                      <History className="h-4 w-4" />
-                    </Button>
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openHistoryModal(ingredient);
+                        }}
+                      >
+                        <History className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive/80 hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteModal(ingredient);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
                   }
                   details={[
                     {
@@ -133,6 +148,7 @@ export const InventoryContentManager = ({
             ingredients={filteredIngredients}
             onEdit={(ing) => handleEditItem(ing, "consumables")}
             onViewHistory={openHistoryModal}
+            onDelete={openDeleteModal}
           />
         </div>
       </TabsContent>
@@ -158,17 +174,30 @@ export const InventoryContentManager = ({
                   }
                   onEdit={() => handleEditItem(asset, "assets")}
                   actions={
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openHistoryModal(asset);
-                      }}
-                    >
-                      <History className="h-4 w-4" />
-                    </Button>
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openHistoryModal(asset);
+                        }}
+                      >
+                        <History className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive/80 hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteModal(asset);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
                   }
                   details={[
                     {
@@ -231,6 +260,7 @@ export const InventoryContentManager = ({
             assets={filteredAssets}
             onEdit={(asset) => handleEditItem(asset, "assets")}
             onViewHistory={openHistoryModal}
+            onDelete={openDeleteModal}
           />
         </div>
       </TabsContent>

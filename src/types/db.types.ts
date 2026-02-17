@@ -61,6 +61,8 @@ export interface RecipesTable {
   allergens: string | null;
   dietary_restrictions: string | null;
   calories: number | null;
+  labor_steps: string | null; // JSON String
+  overheads: string | null; // JSON String
   is_base_recipe: number; // 1 or 0
   created_at: Generated<string>;
   updated_at: Generated<string>;
@@ -181,6 +183,76 @@ export interface ConfigurationItemsTable {
   is_active: number | null;
 }
 
+export interface LaborRatesTable {
+  id: Generated<number>;
+  name: string;
+  hourly_rate: number;
+  is_active: number;
+  created_at: Generated<string>;
+}
+
+export interface FixedExpensesTable {
+  id: Generated<number>;
+  name: string;
+  amount: number;
+  period: string;
+  is_active: number;
+}
+
+export interface VariableExpensesTable {
+  id: Generated<number>;
+  name: string;
+  rate: number;
+  type: string;
+  is_active: number;
+}
+
+export interface IncomeEntriesTable {
+  id: Generated<number>;
+  date: string;
+  amount: number;
+  description: string | null;
+  source: string;
+  recipe_id: number | null;
+  quantity: number;
+}
+
+export interface TaxRatesTable {
+  id: Generated<number>;
+  name: string;
+  rate: number;
+  type: string;
+  is_active: number;
+  created_at: Generated<string>;
+}
+
+export interface TaxMapsTable {
+  recipe_id: number;
+  tax_id: number;
+}
+
+export interface ExpenseLedgerTable {
+  id: Generated<number>;
+  date: string;
+  description: string;
+  amount: number;
+  category: string;
+  reference_number: string | null;
+  is_recurring: number;
+  frequency: string | null;
+  created_at: Generated<string>;
+}
+
+export interface RecipeFinancialsTable {
+  recipe_id: number;
+  labor_cost: number;
+  variable_overhead: number;
+  fixed_overhead: number;
+  prime_cost: number;
+  total_plate_cost: number;
+  last_calculated_at: Generated<string>;
+}
+
 export interface Database {
   ingredients: IngredientsTable;
   assets: AssetsTable;
@@ -194,4 +266,12 @@ export interface Database {
   app_settings: AppSettingsTable;
   recipe_versions: RecipeVersionsTable;
   configuration_items: ConfigurationItemsTable;
+  labor_rates: LaborRatesTable;
+  fixed_expenses: FixedExpensesTable;
+  variable_expenses: VariableExpensesTable;
+  income_entries: IncomeEntriesTable;
+  tax_rates: TaxRatesTable;
+  tax_maps: TaxMapsTable;
+  expense_ledger: ExpenseLedgerTable;
+  recipe_financials: RecipeFinancialsTable;
 }

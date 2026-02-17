@@ -36,11 +36,13 @@ export const useSettingsStore = create<SettingsState>()(
         suppliers: true,
         prepsheets: true,
         calculators: true,
+        finance: true,
       },
       moduleOrder: [
         "dashboard",
         "recipes",
         "inventory",
+        "finance",
         "suppliers",
         "prepsheets",
         "calculators",
@@ -75,11 +77,13 @@ export const useSettingsStore = create<SettingsState>()(
             suppliers: true,
             prepsheets: true,
             calculators: true,
+            finance: true,
           },
           moduleOrder: [
             "dashboard",
             "recipes",
             "inventory",
+            "finance",
             "suppliers",
             "prepsheets",
             "calculators",
@@ -88,7 +92,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "restaurant-settings-storage",
-      version: 2,
+      version: 3,
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as SettingsState;
         if (version < 1) {
@@ -110,6 +114,22 @@ export const useSettingsStore = create<SettingsState>()(
             state.moduleOrder = state.moduleOrder.filter(
               (id) => id.toLowerCase() !== "ingredients",
             );
+          }
+        }
+
+        if (version < 3) {
+          // Add finance module
+          if (state.modules && !state.modules.finance) {
+            state.modules.finance = true;
+          }
+          if (state.moduleOrder && !state.moduleOrder.includes("finance")) {
+            // Insert after inventory or at similar position
+            const invIdx = state.moduleOrder.indexOf("inventory");
+            if (invIdx !== -1) {
+              state.moduleOrder.splice(invIdx + 1, 0, "finance");
+            } else {
+              state.moduleOrder.push("finance");
+            }
           }
         }
         return state;

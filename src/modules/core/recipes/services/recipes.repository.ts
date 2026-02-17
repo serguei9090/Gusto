@@ -9,6 +9,9 @@ import type {
   UpdateRecipeInput,
 } from "@/types/ingredient.types";
 import type { Currency } from "@/utils/currency";
+import { financeRepository } from "../../finance/services/finance.repository";
+import { financeService } from "../../finance/services/finance.service";
+import type { StandardCostInput } from "../../finance/types";
 
 export type RecipeRow = Selectable<RecipesTable>;
 export interface JoinedRecipeIngredientRow {
@@ -27,12 +30,7 @@ export interface JoinedRecipeIngredientRow {
   isSubRecipe: number; // 1 or 0
 }
 
-import {
-  CircularReferenceError,
-  calculateProfitMargin,
-  calculateRecipeTotal,
-  calculateSuggestedPrice,
-} from "@/utils/costEngine";
+import { CircularReferenceError } from "@/utils/costEngine";
 
 export class RecipesRepository {
   async getAll(): Promise<Recipe[]> {
@@ -105,6 +103,8 @@ export class RecipesRepository {
       .where("ri.recipe_id", "=", id)
       .execute();
 
+    const financials = await financeRepository.getRecipeFinancials(id);
+
     return {
       ...recipe,
       ingredients: ingredients.map((ing) => ({
@@ -112,6 +112,7 @@ export class RecipesRepository {
         ingredientUnit: ing.ingredientUnit,
         isSubRecipe: ing.isSubRecipe === 1,
       })),
+      financials: financials || undefined,
     };
   }
 
@@ -138,6 +139,8 @@ export class RecipesRepository {
           ? JSON.stringify(data.dietaryRestrictions)
           : null,
         calories: data.calories || null,
+        labor_steps: data.laborSteps ? JSON.stringify(data.laborSteps) : "[]",
+        overheads: data.overheads ? JSON.stringify(data.overheads) : "{}",
       })
       .returningAll()
       .executeTakeFirstOrThrow();
@@ -202,6 +205,10 @@ export class RecipesRepository {
           ? JSON.stringify(data.dietaryRestrictions)
           : undefined,
         calories: data.calories,
+        labor_steps: data.laborSteps
+          ? JSON.stringify(data.laborSteps)
+          : undefined,
+        overheads: data.overheads ? JSON.stringify(data.overheads) : undefined,
         updated_at: sql`CURRENT_TIMESTAMP`,
       })
       .where("id", "=", id)
@@ -251,7 +258,48 @@ export class RecipesRepository {
     }
   }
 
+  /**
+   * Check if a recipe is used as a sub-recipe in any other recipe
+   */
+  async isUsedAsSubRecipe(id: number): Promise<boolean> {
+    const usage = await db
+      .selectFrom("recipe_ingredients")
+      .select("recipe_id")
+      .where("sub_recipe_id", "=", id)
+      .executeTakeFirst();
+    return !!usage;
+  }
+
   async delete(id: number): Promise<void> {
+    // 1. Nullify recipe_id in income_entries to keep historical sales records
+    await db
+      .updateTable("income_entries")
+      .set({ recipe_id: null })
+      .where("recipe_id", "=", id)
+      .execute();
+
+    // 2. Delete from recipe_ingredients (ingredients of this recipe)
+    await db
+      .deleteFrom("recipe_ingredients")
+      .where("recipe_id", "=", id)
+      .execute();
+
+    // 3. Delete from recipe_versions
+    await db
+      .deleteFrom("recipe_versions")
+      .where("recipe_id", "=", id)
+      .execute();
+
+    // 4. Delete from recipe_financials
+    await db
+      .deleteFrom("recipe_financials")
+      .where("recipe_id", "=", id)
+      .execute();
+
+    // 5. Delete from tax_maps
+    await db.deleteFrom("tax_maps").where("recipe_id", "=", id).execute();
+
+    // 6. Finally delete the recipe itself
     await db.deleteFrom("recipes").where("id", "=", id).execute();
   }
 
@@ -316,40 +364,51 @@ export class RecipesRepository {
     const recipe = await this.getById(recipeId);
     if (!recipe) return;
 
-    // 1. Calculate Cost
-    const { totalCost } = await calculateRecipeTotal(
-      recipe.ingredients.map((i) => ({
-        name: i.ingredientName,
+    // 1. Prepare Input for Rust Standard Cost Engine
+    const input: StandardCostInput = {
+      ingredients: recipe.ingredients.map((i) => ({
         quantity: i.quantity,
-        unit: i.unit,
-        currentPricePerUnit: i.currentPricePerUnit,
-        ingredientUnit: i.ingredientUnit as string,
-        currency: i.currency || "USD",
+        cost_per_unit: i.currentPricePerUnit,
       })),
-      recipe.wasteBufferPercentage || 0,
-      recipe.currency || "USD",
-    );
+      labor_steps: recipe.laborSteps || [],
+      overheads: recipe.overheads || {
+        variable_overhead_rate: 0,
+        fixed_overhead_buffer: 0,
+        labor_tax_rates: [],
+      },
+      waste_buffer_percent: (recipe.wasteBufferPercentage || 0) / 100,
+    };
 
-    // 2. Calculate Suggested Price
-    const suggestedPrice = calculateSuggestedPrice(
-      totalCost,
-      recipe.targetCostPercentage || 25,
-    );
+    // 2. Call Standard Financial Engine (Rust-based)
+    const breakdown = await financeService.calculateStandardCost(input);
 
-    // 3. Calculate Margin (use suggested price if selling price is empty)
-    const effectivePrice = recipe.sellingPrice || suggestedPrice;
-    const profitMargin = calculateProfitMargin(totalCost, effectivePrice);
+    // 3. Update core recipe fields
+    const profitMargin = recipe.sellingPrice
+      ? ((recipe.sellingPrice - breakdown.fully_loaded_cost) /
+          recipe.sellingPrice) *
+        100
+      : 0;
 
-    // 4. Update DB
     await db
       .updateTable("recipes")
       .set({
-        total_cost: totalCost,
+        total_cost: breakdown.fully_loaded_cost,
         profit_margin: profitMargin,
         updated_at: sql`CURRENT_TIMESTAMP`,
       })
       .where("id", "=", recipeId)
       .execute();
+
+    // 4. Store detailed financial snapshot in dedicated table
+    await financeRepository.saveRecipeFinancials({
+      recipeId,
+      laborCost: breakdown.direct_labor + breakdown.labor_taxes,
+      variableOverhead: breakdown.variable_overhead,
+      fixedOverhead: breakdown.fixed_overhead,
+      primeCost: breakdown.prime_cost,
+      totalPlateCost: breakdown.fully_loaded_cost,
+      lastCalculatedAt: new Date().toISOString(),
+    });
   }
 
   // --- Experiment Management ---
@@ -554,6 +613,8 @@ export class RecipesRepository {
         ? JSON.parse(row.dietary_restrictions)
         : [],
       calories: row.calories,
+      laborSteps: row.labor_steps ? JSON.parse(row.labor_steps) : [],
+      overheads: row.overheads ? JSON.parse(row.overheads) : undefined,
       isBaseRecipe: row.is_base_recipe === 1,
     };
   }

@@ -1,3 +1,4 @@
+import type { LaborStep, OverheadSettings } from "@/modules/core/finance/types";
 import type { Currency } from "@/utils/currency";
 // Ingredient Types
 // Ingredient Types
@@ -91,6 +92,8 @@ export interface Recipe {
   allergens?: string[];
   dietaryRestrictions?: string[];
   calories?: number | null;
+  laborSteps?: LaborStep[];
+  overheads?: OverheadSettings;
   isBaseRecipe?: boolean;
 }
 
@@ -109,6 +112,8 @@ export interface CreateRecipeInput {
   allergens?: string[];
   dietaryRestrictions?: string[];
   calories?: number | null;
+  laborSteps?: LaborStep[];
+  overheads?: OverheadSettings;
   isBaseRecipe?: boolean;
 }
 
@@ -134,7 +139,19 @@ export interface UpdateRecipeInput {
   allergens?: string[];
   dietaryRestrictions?: string[];
   calories?: number | null;
+  laborSteps?: LaborStep[];
+  overheads?: OverheadSettings;
   isBaseRecipe?: boolean;
+}
+
+export interface RecipeFinancials {
+  recipeId: number;
+  laborCost: number;
+  variableOverhead: number;
+  fixedOverhead: number;
+  primeCost: number;
+  totalPlateCost: number;
+  lastCalculatedAt: string;
 }
 
 export interface RecipeWithIngredients extends Recipe {
@@ -145,6 +162,7 @@ export interface RecipeWithIngredients extends Recipe {
     currency: string;
     isSubRecipe?: boolean;
   })[];
+  financials?: RecipeFinancials;
 }
 
 // Recipe Ingredient Types

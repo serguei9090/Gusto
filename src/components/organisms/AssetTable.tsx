@@ -1,4 +1,4 @@
-import { AlertCircle, Edit3, History } from "lucide-react";
+import { AlertCircle, Edit3, History, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/atoms/StatusBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,15 @@ interface AssetTableProps {
   readonly assets: Asset[];
   readonly onEdit: (asset: Asset) => void;
   readonly onViewHistory: (asset: Asset) => void;
+  readonly onDelete: (asset: Asset) => void;
 }
 
-export function AssetTable({ assets, onEdit, onViewHistory }: AssetTableProps) {
+export function AssetTable({
+  assets,
+  onEdit,
+  onViewHistory,
+  onDelete,
+}: AssetTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
@@ -120,6 +126,16 @@ export function AssetTable({ assets, onEdit, onViewHistory }: AssetTableProps) {
                     >
                       <History className="h-4 w-4" />
                       <span className="sr-only">History</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDelete(asset)}
+                      title="Delete"
+                      className="h-8 w-8 p-0 text-destructive/80 hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete</span>
                     </Button>
                   </TableCell>
                 </TableRow>

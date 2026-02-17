@@ -28,8 +28,8 @@ import {
 import { useRecipeStore } from "@/modules/core/recipes/store/recipes.store";
 import type { RecipeWithIngredients } from "@/types/ingredient.types";
 import { calculateSuggestedPrice } from "@/utils/costEngine";
+import { VersionDiffView } from "../VersionDiffView";
 import { RecipeOverview } from "./RecipeOverview";
-import { VersionDiffView } from "./VersionDiffView";
 
 interface RecipeHistoryProps {
   recipeId: number;

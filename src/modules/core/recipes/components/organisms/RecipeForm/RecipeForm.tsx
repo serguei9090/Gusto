@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { ChevronDown, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, ChevronDown, Search, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
 import { CurrencySelector } from "@/components/molecules/CurrencySelector";
 import { UnitSelect } from "@/components/molecules/UnitSelect";
@@ -34,6 +34,9 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "@/hooks/useTranslation";
+import { LaborStepsTable } from "@/modules/core/finance/components/molecules/LaborStepsTable";
+import { financeService } from "@/modules/core/finance/services/finance.service";
+import type { CostBreakdown } from "@/modules/core/finance/types";
 import { useIngredientsStore } from "@/modules/core/ingredients/store/ingredients.store";
 import type { Ingredient } from "@/modules/core/ingredients/types";
 import { useRecipeStore } from "@/modules/core/recipes/store/recipes.store";
@@ -104,18 +107,12 @@ export const RecipeForm = ({
     ing.name.toLowerCase().includes(componentSearch.toLowerCase()),
   );
 
-  // Load ingredients, recipes and currencies if empty
+  // Load ingredients, recipes and currencies on mount
   useEffect(() => {
-    if (allIngredients.length === 0) fetchIngredients();
-    if (allRecipes.length === 0) fetchRecipes();
+    fetchIngredients();
+    fetchRecipes();
     initializeCurrency();
-  }, [
-    allIngredients.length,
-    allRecipes.length,
-    fetchIngredients,
-    fetchRecipes,
-    initializeCurrency,
-  ]);
+  }, [fetchIngredients, fetchRecipes, initializeCurrency]);
 
   const {
     register,
@@ -132,6 +129,12 @@ export const RecipeForm = ({
       name: "",
       servings: 1,
       ingredients: [],
+      laborSteps: [],
+      overheads: {
+        variable_overhead_rate: 0,
+        fixed_overhead_buffer: 0,
+        labor_tax_rates: [],
+      },
       ...initialData,
     },
   });
@@ -153,10 +156,18 @@ export const RecipeForm = ({
     name: "ingredients",
   });
 
-  const watchedIngredients = watch("ingredients");
+  // Watch detailed changes in ingredients array to ensure re-renders
+  const watchedIngredients = useWatch({
+    control,
+    name: "ingredients",
+  });
   const watchedSellingPrice = watch("sellingPrice");
   const watchedTargetCost = watch("targetCostPercentage") || 25;
   const watchedWasteBuffer = watch("wasteBufferPercentage") || 0;
+  const watchedLaborSteps = watch("laborSteps") || [];
+  const watchedOverheads = watch("overheads");
+
+  const [standardCost, setStandardCost] = useState<CostBreakdown | null>(null);
 
   // Filter recipes based on current recipe type
   // Base recipes can only import other base recipes
@@ -226,18 +237,22 @@ export const RecipeForm = ({
     let isCancelled = false;
 
     const updateCosts = async () => {
-      const items = watchedIngredients.map((field) => {
-        if (field.isSubRecipe) {
-          return mapSubRecipeToItem(field, allRecipes);
-        }
-        return mapIngredientToItem(field, allIngredients);
-      });
+      const items = (watchedIngredients || []).map(
+        (field: RecipeFormData["ingredients"][0]) => {
+          if (field.isSubRecipe) {
+            return mapSubRecipeToItem(field, allRecipes);
+          }
+          return mapIngredientToItem(field, allIngredients);
+        },
+      );
 
       const result = await calculateRecipeTotal(
         items,
         watchedWasteBuffer,
         watchedCurrency,
       );
+
+      console.log("Cost Calculation Update:", { items, result });
 
       if (!isCancelled) {
         setCostSummary(result);
@@ -260,6 +275,53 @@ export const RecipeForm = ({
     mapSubRecipeToItem,
     mapIngredientToItem,
   ]);
+
+  // Calculate Standard Cost (Rust Engine)
+  useEffect(() => {
+    const calculateStandard = async () => {
+      // Actually, we should use the `costSummary` logic to get the real line items costs?
+      // For now, let's pass a simplified list to Rust to avoid re-implementing unit conversion there yet.
+      // We will pass 1 aggregate ingredient representing the Total Material Cost.
+
+      const materialCost = costSummary.totalCost; // Includes waste
+
+      const input = {
+        ingredients: [
+          {
+            quantity: 1,
+            cost_per_unit: materialCost,
+            yield_percent: 1,
+          },
+        ],
+        labor_steps: watchedLaborSteps.map((s) => ({
+          ...s,
+          // Ensure inputs are numbers
+          workers: Number(s.workers),
+          time_minutes: Number(s.time_minutes),
+          hourly_rate: Number(s.hourly_rate),
+        })),
+        overheads: {
+          variable_overhead_rate: Number(
+            watchedOverheads?.variable_overhead_rate || 0,
+          ),
+          fixed_overhead_buffer: Number(
+            watchedOverheads?.fixed_overhead_buffer || 0,
+          ),
+          labor_tax_rates: watchedOverheads?.labor_tax_rates?.map(Number) || [],
+        },
+        waste_buffer_percent: 0, // Already applied in materialCost
+      };
+
+      try {
+        const result = await financeService.calculateStandardCost(input);
+        setStandardCost(result);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    calculateStandard();
+  }, [costSummary.totalCost, watchedLaborSteps, watchedOverheads]);
 
   const { subtotal, wasteCost, totalCost } = costSummary;
 
@@ -312,7 +374,15 @@ export const RecipeForm = ({
   };
 
   const submitHandler = handleSubmit((data) => {
-    onSubmit(data);
+    // Logic: If user didn't set a manual selling price, use the calculated suggested price
+    const finalSellingPrice =
+      data.sellingPrice ||
+      (suggestedPrice > 0 ? Number(suggestedPrice.toFixed(2)) : 0);
+
+    onSubmit({
+      ...data,
+      sellingPrice: finalSellingPrice,
+    });
   });
 
   const getMarginColor = (margin: number) => {
@@ -348,6 +418,19 @@ export const RecipeForm = ({
             <CardDescription>{t("recipes.recipeDetailsDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {costSummary.errors && costSummary.errors.length > 0 && (
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive p-3 rounded-lg text-sm flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-semibold">Calculation Errors</p>
+                  <ul className="list-disc list-inside text-xs opacity-90">
+                    {costSummary.errors.map((err) => (
+                      <li key={err}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
             {/* Recipe Type Selector */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
@@ -547,6 +630,12 @@ export const RecipeForm = ({
                               Sub-Recipe
                             </span>
                           )}
+                          {!watchedIngredients[index]?.price && (
+                            <div className="flex items-center gap-1 text-xs text-amber-600 font-medium">
+                              <AlertTriangle className="h-3 w-3" />
+                              Zero Price
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="p-4 align-middle">
@@ -653,6 +742,121 @@ export const RecipeForm = ({
                       className="min-h-[150px]"
                     />
                   </div>
+                </CardContent>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </Card>
+
+        {/* Financials - Labor & Overhead */}
+        <Card>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="financials" className="border-0">
+              <CardHeader className="pb-0">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex flex-col items-start text-left gap-1">
+                    <CardTitle className="flex items-center gap-2">
+                      Advanced Financials (Standard Costing)
+                      {standardCost && (
+                        <span className="text-sm font-normal text-muted-foreground ml-2">
+                          Prime: {getCurrencySymbol(watchedCurrency)}
+                          {standardCost.prime_cost.toFixed(2)}
+                        </span>
+                      )}
+                    </CardTitle>
+                    <CardDescription>
+                      Configure labor steps and overheads for accurate pricing
+                    </CardDescription>
+                  </div>
+                </AccordionTrigger>
+              </CardHeader>
+              <AccordionContent>
+                <CardContent className="space-y-6 pt-4">
+                  <div className="space-y-4">
+                    <Label>Direct Labor Steps</Label>
+                    <LaborStepsTable
+                      steps={watchedLaborSteps}
+                      onChange={(steps) => setValue("laborSteps", steps)}
+                      currencySymbol={getCurrencySymbol(watchedCurrency)}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                    <div className="space-y-2">
+                      <Label>Variable Overhead Rate (%)</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          {...register("overheads.variable_overhead_rate", {
+                            valueAsNumber: true,
+                          })}
+                        />
+                        <span className="text-muted-foreground text-sm">
+                          % of Labor
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Standard for Gas, Water, Electricity
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Labor Taxes (Social Security etc)</Label>
+                      {/* Simplified for now - can extend to list */}
+                      <div className="p-2 border rounded text-sm text-muted-foreground bg-muted">
+                        Detailed Tax configuration available in Finance Module
+                        settings.
+                      </div>
+                    </div>
+                  </div>
+
+                  {standardCost && (
+                    <div className="mt-4 p-4 bg-muted/30 rounded-lg space-y-2 border">
+                      <h4 className="font-semibold text-sm">
+                        True Cost Breakdown (Fully Loaded)
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>Raw Materials:</div>
+                        <div className="text-right">
+                          {getCurrencySymbol(watchedCurrency)}
+                          {standardCost.raw_materials.toFixed(2)}
+                        </div>
+
+                        <div>Direct Labor:</div>
+                        <div className="text-right">
+                          {getCurrencySymbol(watchedCurrency)}
+                          {standardCost.direct_labor.toFixed(2)}
+                        </div>
+
+                        <div>Labor Taxes:</div>
+                        <div className="text-right">
+                          {getCurrencySymbol(watchedCurrency)}
+                          {standardCost.labor_taxes.toFixed(2)}
+                        </div>
+
+                        <div className="font-medium">Prime Cost:</div>
+                        <div className="text-right font-medium">
+                          {getCurrencySymbol(watchedCurrency)}
+                          {standardCost.prime_cost.toFixed(2)}
+                        </div>
+
+                        <div>Var. Overhead:</div>
+                        <div className="text-right">
+                          {getCurrencySymbol(watchedCurrency)}
+                          {standardCost.variable_overhead.toFixed(2)}
+                        </div>
+
+                        <div className="font-bold border-t pt-1 mt-1">
+                          TOTAL COST:
+                        </div>
+                        <div className="text-right font-bold border-t pt-1 mt-1">
+                          {getCurrencySymbol(watchedCurrency)}
+                          {standardCost.fully_loaded_cost.toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </AccordionContent>
             </AccordionItem>

@@ -16,7 +16,7 @@ import { formatCurrencyAmount } from "@/utils/currencyConverter";
 interface RecipeTableProps {
   recipes: Recipe[];
   onEdit: (recipe: Recipe) => void;
-  onDelete: (id: number) => void;
+  onDelete: (recipe: Recipe) => void;
   onView: (recipe: Recipe) => void;
 }
 
@@ -173,7 +173,7 @@ export const RecipeTable = ({
                     variant="ghost"
                     size="icon"
                     className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                    onClick={() => onDelete(recipe.id)}
+                    onClick={() => onDelete(recipe)}
                     title="Delete"
                   >
                     <Trash2 className="h-4 w-4" />

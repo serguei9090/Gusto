@@ -6,14 +6,8 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BulkRollbackDialog } from "@/components/organisms/BulkRollbackDialog";
-import { RecipeDetailModal } from "@/components/organisms/RecipeDetailModal";
-import {
-  RecipeForm,
-  type RecipeFormData,
-} from "@/components/organisms/RecipeForm";
-import { RecipeTable } from "@/components/organisms/RecipeTable";
 import { Button } from "@/components/ui/button";
 import { DataCard, DataCardList } from "@/components/ui/data-card";
 import {
@@ -25,6 +19,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/hooks/useTranslation";
+import { RecipeDeleteDialog } from "@/modules/core/recipes/components/molecules/RecipeDeleteDialog";
+import { RecipeDetailModal } from "@/modules/core/recipes/components/organisms/RecipeDetailModal";
+import {
+  RecipeForm,
+  type RecipeFormData,
+} from "@/modules/core/recipes/components/organisms/RecipeForm";
+import { RecipeTable } from "@/modules/core/recipes/components/organisms/RecipeTable";
 import { useRecipeStore } from "@/modules/core/recipes/store/recipes.store";
 import type { Recipe, UpdateRecipeInput } from "@/types/ingredient.types";
 
@@ -46,7 +47,13 @@ export const RecipesPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [viewingRecipeId, setViewingRecipeId] = useState<number | null>(null);
   const [editingRecipeId, setEditingRecipeId] = useState<number | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
+  const [isDeletingUsageWarning, setIsDeletingUsageWarning] = useState(false);
   const selectedRecipe = useRecipeStore((state) => state.selectedRecipe);
+  const isRecipeUsedAsSubRecipe = useRecipeStore(
+    (state) => state.isRecipeUsedAsSubRecipe,
+  );
 
   const handleCloseForm = useCallback(() => {
     setIsFormOpen(false);
@@ -98,6 +105,36 @@ export const RecipesPage = () => {
     }
   };
 
+  // Memoize initialData to prevent form resets
+  const formInitialData = useMemo(() => {
+    if (!editingRecipeId || !selectedRecipe) return undefined;
+
+    return {
+      name: selectedRecipe.name,
+      servings: selectedRecipe.servings,
+      currency: selectedRecipe.currency,
+      category: selectedRecipe.category || undefined,
+      description: selectedRecipe.description || undefined,
+      prepTimeMinutes: selectedRecipe.prepTimeMinutes || undefined,
+      cookingInstructions: selectedRecipe.cookingInstructions || undefined,
+      sellingPrice: selectedRecipe.sellingPrice || undefined,
+      targetCostPercentage: selectedRecipe.targetCostPercentage || undefined,
+      wasteBufferPercentage: selectedRecipe.wasteBufferPercentage || undefined,
+      ingredients: selectedRecipe.ingredients.map((ing) => ({
+        ingredientId: ing.ingredientId,
+        quantity: ing.quantity,
+        unit: ing.unit,
+        name: ing.ingredientName,
+        price: ing.currentPricePerUnit,
+        ingredientUnit: ing.ingredientUnit,
+        subRecipeId: ing.subRecipeId,
+        isSubRecipe: !!ing.subRecipeId,
+      })),
+      laborSteps: selectedRecipe.laborSteps,
+      overheads: selectedRecipe.overheads,
+    } as Partial<RecipeFormData>;
+  }, [editingRecipeId, selectedRecipe]);
+
   const handleEdit = async (recipe: Recipe) => {
     setEditingRecipeId(recipe.id);
     setIsFormOpen(true);
@@ -105,9 +142,21 @@ export const RecipesPage = () => {
     await fetchFullRecipe(recipe.id);
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm("Are you sure you want to delete this recipe?")) {
-      await deleteRecipe(id);
+  const handleDelete = async (recipe: Recipe) => {
+    const isUsed = await isRecipeUsedAsSubRecipe(recipe.id);
+    setRecipeToDelete(recipe);
+    setIsDeletingUsageWarning(isUsed);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!recipeToDelete) return;
+    try {
+      await deleteRecipe(recipeToDelete.id);
+      setIsDeleteDialogOpen(false);
+      setRecipeToDelete(null);
+    } catch (err) {
+      console.error("Delete failed:", err);
     }
   };
 
@@ -156,7 +205,7 @@ export const RecipesPage = () => {
               subtitle={recipe.category || "General"}
               onClick={() => setViewingRecipeId(recipe.id)}
               onEdit={() => handleEdit(recipe)}
-              onDelete={() => handleDelete(recipe.id)}
+              onDelete={() => handleDelete(recipe)}
               details={[
                 {
                   label: "Servings",
@@ -251,36 +300,7 @@ export const RecipesPage = () => {
               <RecipeForm
                 onSubmit={handleCreateOrUpdate}
                 recipeId={editingRecipeId || undefined}
-                initialData={
-                  editingRecipeId && selectedRecipe
-                    ? ({
-                        name: selectedRecipe.name,
-                        servings: selectedRecipe.servings,
-                        currency: selectedRecipe.currency,
-                        category: selectedRecipe.category || undefined,
-                        description: selectedRecipe.description || undefined,
-                        prepTimeMinutes:
-                          selectedRecipe.prepTimeMinutes || undefined,
-                        cookingInstructions:
-                          selectedRecipe.cookingInstructions || undefined,
-                        sellingPrice: selectedRecipe.sellingPrice || undefined,
-                        targetCostPercentage:
-                          selectedRecipe.targetCostPercentage || undefined,
-                        wasteBufferPercentage:
-                          selectedRecipe.wasteBufferPercentage || undefined,
-                        ingredients: selectedRecipe.ingredients.map((ing) => ({
-                          ingredientId: ing.ingredientId,
-                          quantity: ing.quantity,
-                          unit: ing.unit,
-                          name: ing.ingredientName,
-                          price: ing.currentPricePerUnit,
-                          ingredientUnit: ing.ingredientUnit,
-                          subRecipeId: ing.subRecipeId,
-                          isSubRecipe: !!ing.subRecipeId,
-                        })),
-                      } as Partial<RecipeFormData>)
-                    : undefined
-                }
+                initialData={formInitialData}
                 onCancel={handleCloseForm}
                 isLoading={isLoading}
               />
@@ -288,6 +308,15 @@ export const RecipesPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <RecipeDeleteDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        recipe={recipeToDelete}
+        isUsageWarning={isDeletingUsageWarning}
+        onConfirm={confirmDelete}
+        isLoading={isLoading}
+      />
 
       {viewingRecipeId && (
         <RecipeDetailModal

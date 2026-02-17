@@ -5,6 +5,7 @@ import type {
   Ingredient,
   InventoryTransaction,
 } from "@/modules/core/inventory/types";
+import { recipesRepository } from "@/modules/core/recipes/services/recipes.repository";
 import type { InventoryTransactionsTable } from "@/types/db.types";
 import { convertCurrency } from "@/utils/currencyConverter";
 import type { InventoryTransactionInput } from "@/utils/validators";
@@ -78,7 +79,7 @@ class InventoryRepository {
       // Fetch current state to calculate Weighted Average Cost (WAC)
       const item = await db
         .selectFrom(tableName)
-        .select(["current_stock", "price_per_unit", "currency"]) // Fetch item currency
+        .select(["name", "current_stock", "price_per_unit", "currency"]) // Fetch item currency
         .where("id", "=", itemId)
         .executeTakeFirstOrThrow();
 
@@ -129,6 +130,19 @@ class InventoryRepository {
         })
         .where("id", "=", itemId)
         .execute();
+
+      // Trigger automatic recalculation if price changes > 5%
+      if (itemType === "ingredient") {
+        const priceDifference = Math.abs(newWacPrice - oldPrice);
+        const percentageChange = oldPrice > 0 ? priceDifference / oldPrice : 1;
+
+        if (percentageChange >= 0.05) {
+          console.log(
+            `[Finance] Price for ${item.name} changed by ${(percentageChange * 100).toFixed(2)}%. Triggering recipe recalculations...`,
+          );
+          this.triggerRecipeRecalculation(itemId);
+        }
+      }
     } else if (transactionType === "adjustment") {
       // Adjustment overwrites the current stock with the counted value
       await db
@@ -263,6 +277,27 @@ class InventoryRepository {
           notes: row.notes,
         }) as unknown as Ingredient,
     );
+  }
+
+  /**
+   * Identifies all recipes using a specific ingredient and triggers their cost recalculation.
+   */
+  async triggerRecipeRecalculation(ingredientId: number) {
+    const affectedRecipes = await db
+      .selectFrom("recipe_ingredients")
+      .select("recipe_id")
+      .where("ingredient_id", "=", ingredientId)
+      .execute();
+
+    for (const row of affectedRecipes) {
+      // Recalculate using the new high-precision Rust engine
+      recipesRepository.recalculateCosts(row.recipe_id).catch((err) => {
+        console.error(
+          `[Finance] Failed to recalculate costs for recipe ${row.recipe_id}:`,
+          err,
+        );
+      });
+    }
   }
 }
 

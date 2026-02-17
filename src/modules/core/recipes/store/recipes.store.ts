@@ -41,6 +41,7 @@ interface RecipeStore {
   ) => Promise<Recipe>;
   applyExperimentToParent: (experimentId: number) => Promise<void>;
   bulkRollback: (date: string, reason?: string) => Promise<number>;
+  isRecipeUsedAsSubRecipe: (id: number) => Promise<boolean>;
 }
 
 export const useRecipeStore = createModuleStore<RecipeStore>(
@@ -257,6 +258,9 @@ export const useRecipeStore = createModuleStore<RecipeStore>(
         });
         throw error;
       }
+    },
+    isRecipeUsedAsSubRecipe: async (id: number) => {
+      return await recipesRepository.isUsedAsSubRecipe(id);
     },
   }),
 );

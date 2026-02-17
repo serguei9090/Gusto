@@ -1,4 +1,5 @@
 import { migrationRegistry } from "./migrationRegistry";
+import { initAccountancyMigration } from "./migrations/20260217_init_accountancy";
 
 /**
  * Register all core database migrations.
@@ -608,4 +609,6 @@ export function registerCoreMigrations() {
       console.log("✅ Migration 20260215_fix_transaction_schema completed");
     },
   });
+
+  migrationRegistry.register(initAccountancyMigration);
 }

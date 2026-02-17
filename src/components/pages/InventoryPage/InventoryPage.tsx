@@ -10,6 +10,7 @@ import {
 
 import { useEffect, useState } from "react";
 import { InventoryActionBar } from "@/components/molecules/InventoryActionBar";
+import { InventoryDeleteDialog } from "@/components/molecules/InventoryDeleteDialog";
 import { StatCard } from "@/components/molecules/StatCard";
 import { InventoryContentManager } from "@/components/organisms/InventoryContentManager";
 import { InventoryModalsOverlay } from "@/components/organisms/InventoryModalsOverlay";
@@ -36,6 +37,7 @@ export const InventoryPage = () => {
     fetchIngredients,
     createIngredient,
     updateIngredient,
+    deleteIngredient,
     isLoading: loadingIng,
   } = useIngredientsStore();
   const {
@@ -43,6 +45,7 @@ export const InventoryPage = () => {
     fetchAssets,
     createAsset,
     updateAsset,
+    deleteAsset,
     isLoading: loadingAsset,
   } = useAssetsStore();
   const {
@@ -91,6 +94,36 @@ export const InventoryPage = () => {
   const [ingredientsValue, setIngredientsValue] = useState(0);
   const [assetsValue, setAssetsValue] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
+
+  // Delete Modal State
+  const [deleteItem, setDeleteItem] = useState<Ingredient | Asset | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleDelete = async () => {
+    if (!deleteItem) return;
+
+    try {
+      if ("minStockLevel" in deleteItem && "assetType" in deleteItem) {
+        // It's an Asset
+        await deleteAsset(deleteItem.id);
+      } else {
+        // It's an Ingredient
+        await deleteIngredient(deleteItem.id);
+      }
+      setIsDeleteModalOpen(false);
+      setDeleteItem(null);
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : "Failed to delete item");
+      return; // Don't close modal if error
+    }
+  };
+
+  const openDeleteModal = (item: Ingredient | Asset) => {
+    setDeleteItem(item);
+    setDeleteError(null);
+    setIsDeleteModalOpen(true);
+  };
 
   useEffect(() => {
     fetchIngredients();
@@ -212,7 +245,17 @@ export const InventoryPage = () => {
         filteredAssets={filteredAssets}
         handleEditItem={handleEditItem}
         openHistoryModal={openHistoryModal}
+        openDeleteModal={openDeleteModal}
         setSearchQuery={setSearchQuery}
+      />
+
+      <InventoryDeleteDialog
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        item={deleteItem}
+        onConfirm={handleDelete}
+        isLoading={loadingIng || loadingAsset}
+        error={deleteError}
       />
 
       <InventoryModalsOverlay

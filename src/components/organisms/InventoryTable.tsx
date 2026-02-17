@@ -1,4 +1,4 @@
-import { AlertCircle, Edit3, History } from "lucide-react";
+import { AlertCircle, Edit3, History, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/components/atoms/StatusBadge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,12 +16,14 @@ interface InventoryTableProps {
   readonly ingredients: Ingredient[];
   readonly onEdit: (ingredient: Ingredient) => void;
   readonly onViewHistory: (ingredient: Ingredient) => void;
+  readonly onDelete: (ingredient: Ingredient) => void;
 }
 
 export function InventoryTable({
   ingredients,
   onEdit,
   onViewHistory,
+  onDelete,
 }: InventoryTableProps) {
   return (
     <div className="rounded-md border">
@@ -121,6 +123,16 @@ export function InventoryTable({
                     >
                       <History className="h-4 w-4" />
                       <span className="sr-only">History</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onDelete(ingredient)}
+                      title="Delete"
+                      className="h-8 w-8 p-0 text-destructive/80 hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete</span>
                     </Button>
                   </TableCell>
                 </TableRow>

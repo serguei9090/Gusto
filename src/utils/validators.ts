@@ -128,9 +128,29 @@ export const recipeIngredientFormSchema = z.object({
   isSubRecipe: z.boolean().optional().default(false),
 });
 
+export const laborStepSchema = z.object({
+  name: z.string().min(1, "Description required"),
+  workers: z.number().min(1, "At least 1 worker"),
+  time_minutes: z.number().min(0),
+  hourly_rate: z.number().min(0),
+  is_production: z.boolean().default(true),
+});
+
+export const overheadSettingsSchema = z.object({
+  variable_overhead_rate: z.number().min(0).default(0),
+  fixed_overhead_buffer: z.number().min(0).default(0),
+  labor_tax_rates: z.array(z.number()).default([]),
+});
+
 export const recipeFormSchema = createRecipeSchema
   .extend({
     ingredients: z.array(recipeIngredientFormSchema).default([]),
+    laborSteps: z.array(laborStepSchema).optional().default([]),
+    overheads: overheadSettingsSchema.optional().default({
+      variable_overhead_rate: 0,
+      fixed_overhead_buffer: 0,
+      labor_tax_rates: [],
+    }),
   })
   .refine((data) => data.ingredients.length > 0, {
     message: "At least one ingredient is required",

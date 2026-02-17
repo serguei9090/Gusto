@@ -156,6 +156,18 @@ export class IngredientsRepository {
   }
 
   async delete(id: number): Promise<boolean> {
+    // Check if ingredient is used in any recipes
+    const usageCount = await db
+      .selectFrom("recipe_ingredients")
+      .select((eb) => eb.fn.count("id").as("count"))
+      .where("ingredient_id", "=", id)
+      .executeTakeFirst();
+
+    const count = Number(usageCount?.count || 0);
+    if (count > 0) {
+      throw new Error(`Cannot delete ingredient: Used in ${count} recipes.`);
+    }
+
     const result = await db
       .deleteFrom("ingredients")
       .where("id", "=", id)

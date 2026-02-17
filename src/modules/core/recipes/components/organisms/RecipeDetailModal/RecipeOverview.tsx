@@ -10,6 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CostBreakdownCard } from "@/modules/core/finance/components/organisms/CostBreakdownCard";
+import type { CostBreakdown } from "@/modules/core/finance/types";
 import type { RecipeWithIngredients } from "@/types/ingredient.types";
 
 interface RecipeOverviewProps {
@@ -174,6 +176,36 @@ export const RecipeOverview = ({ recipe }: RecipeOverviewProps) => {
           </Card>
         )}
       </div>
+
+      {/* Financial Breakdown (Optional) */}
+      {recipe.financials && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold border-b pb-2">
+            Financial Breakdown
+          </h3>
+          <CostBreakdownCard
+            breakdown={
+              {
+                raw_materials:
+                  (recipe.totalCost || 0) -
+                  (recipe.financials.laborCost +
+                    recipe.financials.variableOverhead +
+                    recipe.financials.fixedOverhead),
+                direct_labor: recipe.financials.laborCost,
+                labor_taxes: 0,
+                prime_cost: recipe.financials.primeCost,
+                variable_overhead: recipe.financials.variableOverhead,
+                fixed_overhead: recipe.financials.fixedOverhead,
+                total_cost_of_goods:
+                  recipe.financials.primeCost +
+                  recipe.financials.variableOverhead,
+                fully_loaded_cost: recipe.financials.totalPlateCost,
+              } as CostBreakdown
+            }
+            currency={recipe.currency}
+          />
+        </div>
+      )}
 
       {/* Ingredients Table */}
       <div className="space-y-4">
