@@ -1,8 +1,8 @@
 # Gusto - Project Wiki
 
-**Version:** 1.0.5  
+**Version:** 1.0.6  
 **Tech Stack:** Tauri v2 + React 19 + TypeScript + Kysely + SQLite  
-**Last Updated:** 2026-02-15
+**Last Updated:** 2026-02-18
 
 ---
 
@@ -95,6 +95,48 @@ The project uses a modular design to separate base functionality from profession
 - Financial health overview.
 - Urgent reorder alerts.
 - Top performing recipes by margin.
+
+### 5. Finance Module (NEW)
+**Location:** `src/modules/core/finance`
+
+**Overview:** Comprehensive financial management system for restaurant operations, supporting both Prime Cost (operational) and Full Costing (pricing) financial models.
+
+**Key Features:**
+
+#### Labor Rates Management
+- Track hourly labor rates by role (Chef, Prep Cook, etc.)
+- Associate labor costs with recipe preparation steps
+- Component: `LaborRatesSettings.tsx`
+
+#### Fixed Expenses Tracking
+- Manage fixed monthly and yearly expenses (Rent, Insurance, Utilities, etc.)
+- Support for different billing periods (Monthly, Yearly)
+- Component: `FixedExpensesTable.tsx`
+
+#### Variable Expenses Management
+- Track variable expenses (Percentage of Sales, Fixed Amount per unit)
+- Examples: Delivery fees, Credit card processing, Packaging costs
+- Component: `VariableExpensesTable.tsx`
+
+#### Financial Calculations
+- **Cost Breakdown Structure:**
+  - Raw Materials (RM)
+  - Direct Labor (DL)
+  - Labor Taxes
+  - Prime Cost (RM + DL)
+  - Variable Overhead (VO)
+  - Fixed Overhead (FO)
+  - Total Cost of Goods (TCOG)
+  - Fully Loaded Cost
+- Supports legacy cost format for backward compatibility
+- Backend: `src-tauri/src/financial/mod.rs`
+
+#### Database Schema
+New tables added via migrations:
+- `labor_rates`: Role-based hourly labor rates
+- `fixed_expenses`: Monthly/yearly operational expenses
+- `variable_expenses`: Sales-dependent expenses
+- `income_entries`: Daily income tracking
 
 ---
 
@@ -210,6 +252,49 @@ CREATE TABLE prep_sheets (
 );
 ```
 
+#### `labor_rates` (Finance Module)
+```sql
+CREATE TABLE IF NOT EXISTS labor_rates (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  hourly_rate TEXT NOT NULL, -- Decimal
+  is_active BOOLEAN DEFAULT 1
+);
+```
+
+#### `fixed_expenses` (Finance Module)
+```sql
+CREATE TABLE IF NOT EXISTS fixed_expenses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  amount TEXT NOT NULL, -- Decimal
+  period TEXT DEFAULT 'Monthly', -- Monthly, Yearly
+  is_active BOOLEAN DEFAULT 1
+);
+```
+
+#### `variable_expenses` (Finance Module)
+```sql
+CREATE TABLE IF NOT EXISTS variable_expenses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  rate TEXT NOT NULL, -- Decimal
+  type TEXT DEFAULT 'PercentOfSales', -- PercentOfSales, FixedAmount
+  is_active BOOLEAN DEFAULT 1
+);
+```
+
+#### `income_entries` (Finance Module)
+```sql
+CREATE TABLE IF NOT EXISTS income_entries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT NOT NULL, -- YYYY-MM-DD
+  amount TEXT NOT NULL, -- Decimal
+  description TEXT,
+  source TEXT DEFAULT 'Sales'
+);
+```
+
 ---
 
 ## Testing Infrastructure
@@ -317,6 +402,16 @@ bun run tauri:dev
 5. **Assemble full page:** `src/components/pages/[FeaturePage]/[FeaturePage].tsx`
 6. **Register Module:** Update `src/modules/core/[feature]/index.ts` and `src/modules/all-modules.ts`
 7. **Write tests:** Unit tests in `src/modules/core/[feature]/__tests__/`, E2E in `e2e/`
+
+### New UI Components (v1.0.6)
+
+The following Shadcn/UI components were added to support the Finance module:
+
+- **Calendar** (`src/components/ui/calendar.tsx`): Date picker for financial reporting periods
+- **Popover** (`src/components/ui/popover.tsx`): Floating UI container for dropdowns and tooltips
+- **Progress** (`src/components/ui/progress.tsx`): Progress bar for tracking financial metrics and data loading states
+
+These components extend the existing Shadcn/UI library and follow the same design patterns and accessibility standards.
 
 ---
 
