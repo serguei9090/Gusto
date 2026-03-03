@@ -1,4 +1,9 @@
 # Gusto - Restaurant Manager
+## This is a personal learning project created for educational purposes and to explore different code concepts with ai concepts. 
+
+* **Status:** Personal sandbox / Portfolio piece.
+* **License:** This project is open-source and available for public educational use under the MIT License.
+* **Purpose:** Academic research and technical skill development.
 
 [![GitHub Release](https://img.shields.io/github/v/release/serguei9090/Gusto?style=flat-square&color=blue)](https://github.com/serguei9090/Gusto/releases)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/serguei9090/Gusto/ci.yml?branch=main&style=flat-square)](https://github.com/serguei9090/Gusto/actions/workflows/ci.yml)
